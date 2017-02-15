@@ -8,6 +8,14 @@
         <tree string="Payment Transaction">
             <field name="name"/>
             <field name="capture_payment"/>
+            <field name="payment_method_id"/>
+            <field name="external_id"/>
+            <field name="capture_payment"/>
+            <field name="url"/>
+            <field name="amount"/>
+            <field name="sale_id"/>
+            <field name="invoice_id"/>
+            <field name="state"/>
         </tree>
     </field>
 </record>
@@ -23,6 +31,17 @@
                         <field name="name"/>
                     </h1>
                 </div>
+                <group>
+                    <field name="payment_method_id"/>
+                    <field name="external_id"/>
+                    <field name="capture_payment"/>
+                    <field name="url"/>
+                    <field name="amount"/>
+                    <field name="sale_id"/>
+                    <field name="invoice_id"/>
+                    <field name="state"/>
+                </group>
+                <field name="data" colspan="4"/>
             </sheet>
         </form>
     </field>

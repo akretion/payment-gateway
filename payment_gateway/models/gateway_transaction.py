@@ -4,6 +4,7 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from openerp import api, fields, models
+import openerp.addons.decimal_precision as dp
 
 
 class GatewayTransaction(models.Model):
@@ -23,9 +24,25 @@ class GatewayTransaction(models.Model):
         selection="_selection_capture_payment",
         required=True)
     url = fields.Char()
+    amount = fields.Float(dp=dp.get_precision('Account'))
     sale_id = fields.Many2one(
         'sale.order',
         'Sale')
     invoice_id = fields.Many2one(
         'account.invoice',
         'Invoice')
+    state = fields.Selection([
+        ('to_capture', 'To Capture'),
+        ('cancel', 'Cancel'),
+        ('fail', 'Fail'),
+        ('sucess', 'Sucess'),
+        ],
+        )
+    data = fields.Text()
+
+    @api.multi
+    def capture(self):
+        for record in self:
+            if record.state != 'to_capture':
+                provider = env[record.payment_method_id.provider]
+                provider.capture(record)

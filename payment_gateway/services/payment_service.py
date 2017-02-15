@@ -14,8 +14,9 @@ class PaymentService(models.AbstractModel):
 
     def _get_account(self):
         keychain = self.env['keychain.account']
+        namespace = (self._name).replace('payment.service.', '')
         return keychain.suspend_security().retrieve([
-            ('namespace', '=', self._name)
+            ('namespace', '=', namespace)
             ])[0]
 
     def _prepare_provider_transaction(self, record, **kwargs):
@@ -24,8 +25,25 @@ class PaymentService(models.AbstractModel):
     def _create_provider_transaction(self, record, **kwargs):
         raise NotImplemented
 
-    def _create_odoo_transaction(self, record, **kwargs):
-        raise NotImplemented
+    def _prepare_odoo_transaction(self, record, transaction):
+        method = record.payment_method_id
+        res = {'payment_method_id': method.id}
+        if record._name == 'sale.order':
+            res.update({
+                'sale_id': record.id,
+                'name': record.name,
+                'capture_payment': method.capture_payment,
+	})
+        elif record._name == 'account.invoice':
+            res['invoice_id'] = record.id
+        return res
+
+    def _get_amount_to_capture(self, transaction):
+        if transaction.invoice_id:
+            # TODO
+            pass
+        elif transaction.sale_id:
+            return transaction.sale_id.residual
 
     @api.model
     def generate(self, record, **kwargs):
@@ -37,6 +55,7 @@ class PaymentService(models.AbstractModel):
         return self.env['gateway.transaction'].create(vals)
 
     @api.model
-    def capture(self, transaction, amount):
+    def capture(self, transaction):
         """Capture the transaction in the backend"""
-        raise NotImplemented
+        amount = self._get_amount_to_capture(transaction)
+        return self._capture(transaction, amount)

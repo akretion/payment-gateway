@@ -4,6 +4,7 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from openerp import models
+import json
 
 
 class PaymentService(models.Model):
@@ -16,24 +17,36 @@ class PaymentService(models.Model):
         stripe.api_key = account.get_password()
         return stripe
 
-    def _prepare_provider_transaction(self, record):
+    def _prepare_provider_transaction(self, record, token=None):
         description = "%s|%s" % (
             record.name,
             record.partner_id.email)
         capture = record.payment_method_id.capture_payment == 'immediately'
         return {
-            'currency': record.currency_id.code,
-            'source': record.stripe_token,
+            'currency': record.currency_id.name,
+            'source': token,
             'description': description,
             'capture': capture,
+            'amount': int(record.residual * 100),
             }
 
     def _create_provider_transaction(self, data):
         stripe = self._get_connection()
-        return stripe.Charge.create(data)
+        return stripe.Charge.create(**data)
 
     def _prepare_odoo_transaction(self, cart, transaction):
-        return {}
+        res = super(PaymentService, self).\
+            _prepare_odoo_transaction(cart, transaction)
+        res.update({
+            'amount': transaction['amount'],
+            'external_id': transaction['id'],
+            'data': json.dumps(transaction),
+        })
+        return res
 
-    def capture(self, transaction, amount):
-        pass
+    def _capture(self, transaction, amount):
+        stripe = self._get_connection()
+        charge = stripe.Charge.retrieve(transaction.external_id)
+        result = charge.capture()
+        # TODO process result
+        return True
