@@ -13,6 +13,7 @@
             <field name="capture_payment"/>
             <field name="url"/>
             <field name="amount"/>
+            <field name="currency_id"/>
             <field name="sale_id"/>
             <field name="invoice_id"/>
             <field name="state"/>
@@ -35,7 +36,7 @@
                     <field name="payment_method_id"/>
                     <field name="external_id"/>
                     <field name="capture_payment"/>
-                    <field name="url"/>
+                    <field name="url" widget="url"/>
                     <field name="amount"/>
                     <field name="sale_id"/>
                     <field name="invoice_id"/>

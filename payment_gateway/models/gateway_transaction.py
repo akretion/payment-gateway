@@ -25,6 +25,9 @@ class GatewayTransaction(models.Model):
         required=True)
     url = fields.Char()
     amount = fields.Float(dp=dp.get_precision('Account'))
+    currency_id = fields.Many2one(
+        'res.currency',
+        'Currency')
     sale_id = fields.Many2one(
         'sale.order',
         'Sale')
@@ -32,10 +35,11 @@ class GatewayTransaction(models.Model):
         'account.invoice',
         'Invoice')
     state = fields.Selection([
+        ('draft', 'Draft'),
         ('to_capture', 'To Capture'),
         ('cancel', 'Cancel'),
         ('fail', 'Fail'),
-        ('sucess', 'Sucess'),
+        ('success', 'Success'),
         ],
         )
     data = fields.Text()

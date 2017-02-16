@@ -13,6 +13,10 @@ class SaleOrder(models.Model):
         'gateway.transaction',
         'sale_id',
         'Transaction')
+    current_transaction_id = fields.Many2one(
+        'gateway.transaction',
+        'Current Transaction',
+        compute='_compute_current_transaction')
 
     @api.multi
     def capture_transaction(self):
@@ -20,3 +24,11 @@ class SaleOrder(models.Model):
             for transaction in sale.transaction_ids:
                 if transaction.state == 'to_capture':
                     transaction.capture(sale.residual)
+
+    @api.multi
+    def _compute_current_transaction(self):
+        for record in self:
+            if record.transaction_ids:
+                record.current_transaction_id = record.transaction_ids[-1]
+            else:
+                record.current_transaction_id = None

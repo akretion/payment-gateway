@@ -31,6 +31,7 @@ class PaymentService(models.AbstractModel):
         if record._name == 'sale.order':
             res.update({
                 'sale_id': record.id,
+                'currency_id': record.currency_id.id,
                 'name': record.name,
                 'capture_payment': method.capture_payment,
 	})

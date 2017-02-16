@@ -4,8 +4,8 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 {
-    "name": "Payment Gateway",
-    "summary": "Payment Gateway alternative for odoo",
+    "name": "Paypal Payment Gateway",
+    "summary": "Paypal Payment Gateway alternative for odoo",
     "version": "8.0.1.0.0",
     "category": "Payment",
     "website": "www.akretion.com",
@@ -18,13 +18,9 @@
         "bin": [],
     },
     "depends": [
-        "sale_payment_method",
-        "keychain",
-        "base_suspend_security",
+        "payment_gateway",
     ],
     "data": [
-        "views/payment_method_view.xml",
-        "views/gateway_transaction_view.xml",
     ],
     "demo": [
     ],

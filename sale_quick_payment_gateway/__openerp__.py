@@ -3,11 +3,12 @@
 # @author Sébastien BEAU <sebastien.beau@akretion.com>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
+
 {
-    "name": "Payment Gateway",
-    "summary": "Payment Gateway alternative for odoo",
-    "version": "8.0.1.0.0",
-    "category": "Payment",
+    "name": "Sale Quick Payment Gateway",
+    "summary": "Sale Quick Payement Gateway",
+    "version": " 10.0.1.0.0",
+    "category": "Uncategorized",
     "website": "www.akretion.com",
     "author": " Akretion",
     "license": "AGPL-3",
@@ -18,13 +19,12 @@
         "bin": [],
     },
     "depends": [
-        "sale_payment_method",
-        "keychain",
-        "base_suspend_security",
+        "sale_quick_payment",
+        "payment_gateway",
     ],
     "data": [
-        "views/payment_method_view.xml",
-        "views/gateway_transaction_view.xml",
+        "wizard/pay_sale_order_view.xml",
+        "views/sale_order_view.xml",
     ],
     "demo": [
     ],
