@@ -6,6 +6,7 @@
 from openerp import models
 import paypalrestsdk
 import json
+from openerp.exceptions import Warning as UserError
 
 
 def create_profile(paypal):
@@ -40,7 +41,8 @@ class PaymentService(models.Model):
         params['client_secret'] = account.get_password()
         return paypalrestsdk.Api(params)
 
-    def _prepare_provider_transaction(self, record):
+    def _prepare_provider_transaction(
+            self, record, return_url=None, cancel_url=None):
         description = "%s|%s" % (
             record.name,
             record.partner_id.email)
@@ -51,8 +53,8 @@ class PaymentService(models.Model):
             "intent": "sale",
             "payer": {"payment_method": "paypal"},
             "redirect_urls" : {
-                "return_url": "https://todo",
-                "cancel_url": "https://cancel",
+                "return_url": return_url,
+                "cancel_url": cancel_url,
                 },
             "transactions": [{
             	"amount": {
@@ -75,7 +77,7 @@ class PaymentService(models.Model):
     def _prepare_odoo_transaction(self, cart, transaction):
         res = super(PaymentService, self).\
             _prepare_odoo_transaction(cart, transaction)
-        url = [l for l  in transaction['links'] if l['method']=='REDIRECT'][0]
+        url = [l for l in transaction['links'] if l['method']=='REDIRECT'][0]
         res.update({
             'amount': transaction['transactions'][0]['amount']['total'],
             'external_id': transaction['id'],
@@ -84,5 +86,8 @@ class PaymentService(models.Model):
         })
         return res
 
-    def capture(self, transaction, amount):
-        pass
+    def _capture(self, transaction, amount, payer_id=None, payment_id=None):
+        paypal = self._get_connection()
+        # TODO ensure that external_id and payment_id are the same
+        payment = paypalrestsdk.Payment.find(transaction.external_id, api=paypal)
+        return payment.execute({"payer_id": payer_id})

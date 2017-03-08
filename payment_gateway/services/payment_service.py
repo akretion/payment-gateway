@@ -56,7 +56,7 @@ class PaymentService(models.AbstractModel):
         return self.env['gateway.transaction'].create(vals)
 
     @api.model
-    def capture(self, transaction):
+    def capture(self, transaction, **kwargs):
         """Capture the transaction in the backend"""
         amount = self._get_amount_to_capture(transaction)
-        return self._capture(transaction, amount)
+        return self._capture(transaction, amount, **kwargs)
