@@ -16,7 +16,9 @@ from openerp.tools.translate import _
 class PaymentMethod(models.Model):
     _inherit = 'payment.method'
 
-    @api.model
+    provider = fields.Selection(selection="_selection_provider")
+    capture_payment = fields.Selection(selection='_selection_capture_payment')
+
     def _selection_capture_payment(self):
         return [
             ('immediately', _('Immediately')),
@@ -24,5 +26,6 @@ class PaymentMethod(models.Model):
             ('picking_confirm', _('At Picking Confirmation')),
             ]
 
-    provider = fields.Selection([])
-    capture_payment = fields.Selection(selection='_selection_capture_payment')
+    def _selection_provider(self):
+        return [(p, p.replace('payment.service.', '').capitalize())
+                for p in self.env['payment.service']._get_all_provider()]

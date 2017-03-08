@@ -12,6 +12,13 @@ class PaymentService(models.AbstractModel):
     _name = 'payment.service'
     _description = 'Payment Service'
 
+    def _get_all_provider(self):
+        provider = []
+        for model in self.env.registry.keys():
+            if 'payment.service' in model and 'payment.service' != model:
+                provider.append(model)
+        return provider
+
     def _get_account(self):
         keychain = self.env['keychain.account']
         namespace = (self._name).replace('payment.service.', '')
