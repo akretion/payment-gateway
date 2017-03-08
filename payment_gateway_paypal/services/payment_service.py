@@ -34,12 +34,15 @@ def create_profile(paypal):
 class PaymentService(models.Model):
     _inherit = 'payment.service'
     _name = 'payment.service.paypal'
+    _allowed_capture_method = ['immediately']
 
     def _get_connection(self):
         account = self._get_account()
         params = account.get_data()
+        experience_profile = params.pop("experience_profile_id", None)
         params['client_secret'] = account.get_password()
-        return paypalrestsdk.Api(params)
+        #create_profile(paypal)
+        return paypalrestsdk.Api(params), experience_profile
 
     def _prepare_provider_transaction(
             self, record, return_url=None, cancel_url=None):
@@ -49,7 +52,6 @@ class PaymentService(models.Model):
         capture = record.payment_method_id.capture_payment == 'immediately'
         address = record.partner_shipping_id
         return {
-            "experience_profile_id": "XP-X46Z-A86H-DRY2-H8EN",
             "intent": "sale",
             "payer": {"payment_method": "paypal"},
             "redirect_urls" : {
@@ -66,8 +68,9 @@ class PaymentService(models.Model):
 	 }
 
     def _create_provider_transaction(self, data):
-        paypal = self._get_connection()
-        #create_profile(paypal)
+        # TODO paypal lib is not perfect, we should wrap it in a class
+        paypal, experience_profile = self._get_connection()
+        data["experience_profile_id"] = experience_profile
         payment = paypalrestsdk.Payment(data, api=paypal)
         if not payment.create():
             # TODO improve manage error

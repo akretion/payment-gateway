@@ -29,3 +29,21 @@ class PaymentMethod(models.Model):
     def _selection_provider(self):
         return [(p, p.replace('payment.service.', '').capitalize())
                 for p in self.env['payment.service']._get_all_provider()]
+
+    @api.onchange('provider')
+    def onchange_provider(self):
+        self.capture_payment = \
+            self.env[self.provider]._allowed_capture_method[0]
+
+    # TODO we should be able to apply domain on selection field
+    @api.onchange('capture_payment')
+    def onchange_capture(self):
+        if self.provider:
+            provider = self.env[self.provider]
+            if self.capture_payment not in provider._allowed_capture_method:
+                self.capture_payment = provider._allowed_capture_method[0]
+                return {'warning': {
+                    'title': _('Incorrect Value'),
+                    'message': _('This method is not compatible with '
+                                 'the provider selected'),
+                    }}

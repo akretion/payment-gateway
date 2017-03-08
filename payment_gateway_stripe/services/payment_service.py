@@ -5,17 +5,19 @@
 
 from openerp import models
 import json
+try:
+    import stripe
+except ImportError:
+    _logger.debug('Can not import stripe')
 
 
 class PaymentService(models.Model):
     _inherit = 'payment.service'
     _name = 'payment.service.stripe'
+    _allowed_capture_method = ['immediately']
 
-    def _get_connection(self):
-        account = self._get_account()
-        import stripe
-        stripe.api_key = account.get_password()
-        return stripe
+    def _get_api_key(self):
+        return account.get_password()
 
     def _prepare_provider_transaction(self, record, token=None):
         description = "%s|%s" % (
@@ -31,7 +33,7 @@ class PaymentService(models.Model):
             }
 
     def _create_provider_transaction(self, data):
-        stripe = self._get_connection()
+        data['api_key'] = self._get_api_key()
         return stripe.Charge.create(**data)
 
     def _prepare_odoo_transaction(self, cart, transaction):
@@ -45,8 +47,10 @@ class PaymentService(models.Model):
         return res
 
     def _capture(self, transaction, amount):
-        stripe = self._get_connection()
-        charge = stripe.Charge.retrieve(transaction.external_id)
+        api = self._get_connection()
+        charge = stripe.Charge.retrieve(
+            transaction.external_id,
+            api_key=self._get_api_key())
         result = charge.capture()
         # TODO process result
         return True
