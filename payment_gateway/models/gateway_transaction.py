@@ -38,8 +38,8 @@ class GatewayTransaction(models.Model):
         ('draft', 'Draft'),
         ('to_capture', 'To Capture'),
         ('cancel', 'Cancel'),
-        ('fail', 'Fail'),
-        ('success', 'Success'),
+        ('failed', 'Failed'),
+        ('succeeded', 'Succeeded'),
         ],
         )
     data = fields.Text()

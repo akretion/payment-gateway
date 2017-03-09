@@ -4,7 +4,10 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from openerp import models
+from openerp.exceptions import Warning as UserError
+from openerp.tools.translate import _
 import json
+
 try:
     import stripe
 except ImportError:
@@ -16,13 +19,45 @@ class PaymentService(models.Model):
     _name = 'payment.service.stripe'
     _allowed_capture_method = ['immediately']
 
+    def _get_error_message(self, code):
+        return {
+            'invalid_number':
+                _("The card number is not a valid credit card number."),
+            'invalid_expiry_month':
+                _("The card's expiration month is invalid."),
+            'invalid_expiry_year':
+                _("The card's expiration year is invalid."),
+            'invalid_cvc':
+                _("The card's security code is invalid."),
+            'invalid_swipe_data':
+                _("The card's swipe data is invalid."),
+            'incorrect_number':
+                _("The card number is incorrect."),
+            'expired_card':
+                _("The card has expired."),
+            'incorrect_cvc':
+                _("The card's security code is incorrect."),
+            'incorrect_zip':
+                _("The card's zip code failed validation."),
+            'card_declined':
+                _("The card was declined."),
+            'missing':
+                _("There is no card on a customer that is being charged."),
+            'processing_error':
+                _("An error occurred while processing the card."),
+        }[code]
+
     def _get_api_key(self):
+        account = self._get_account()
         return account.get_password()
 
     def _prepare_provider_transaction(self, record, token=None):
         description = "%s|%s" % (
             record.name,
             record.partner_id.email)
+        # For now capture is always true as only the policy 'immedialtely' is
+        # available in the configuration but it will be easier to implement
+        # the logic of defeared capture
         capture = record.payment_method_id.capture_payment == 'immediately'
         return {
             'currency': record.currency_id.name,
@@ -34,23 +69,22 @@ class PaymentService(models.Model):
 
     def _create_provider_transaction(self, data):
         data['api_key'] = self._get_api_key()
-        return stripe.Charge.create(**data)
+        try:
+            return stripe.Charge.create(**data)
+        except stripe.error.CardError as e:
+            raise UserError(self._get_error_message(e.code))
 
     def _prepare_odoo_transaction(self, cart, transaction):
         res = super(PaymentService, self).\
             _prepare_odoo_transaction(cart, transaction)
+        if transaction['status'] == 'pending':
+            state = 'to_capture'
+        else:
+            state = transaction['status']
         res.update({
             'amount': transaction['amount'],
             'external_id': transaction['id'],
+            'state': state,
             'data': json.dumps(transaction),
         })
         return res
-
-    def _capture(self, transaction, amount):
-        api = self._get_connection()
-        charge = stripe.Charge.retrieve(
-            transaction.external_id,
-            api_key=self._get_api_key())
-        result = charge.capture()
-        # TODO process result
-        return True
