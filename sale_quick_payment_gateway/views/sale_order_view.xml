@@ -8,7 +8,7 @@
     <field name="inherit_id" ref="sale_payment_method.sale_order_view_form" />
     <field name="arch" type="xml">
         <notebook position="inside">
-			<page name="payment" string="Payment">
+            <page name="payment" string="Payment">
                 <group name="payments" string="Generated Payments" colspan="4">
                     <field name="payment_ids" nolabel="1"
                            domain="[
@@ -38,8 +38,8 @@
                             <field name="state"/>
                         </tree>
                     </field>
-				</group>
-			</page>
+                </group>
+            </page>
         </notebook>
     </field>
 </record>

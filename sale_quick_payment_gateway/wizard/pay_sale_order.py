@@ -20,7 +20,6 @@ class PaySaleOrder(models.Model):
         order.payment_method_id = self.payment_method_id
         provider = self.env[self.payment_method_id.provider]
         provider.generate(order)
-        import pdb; pdb.set_trace()
 
     @api.multi
     def pay_sale_order(self):

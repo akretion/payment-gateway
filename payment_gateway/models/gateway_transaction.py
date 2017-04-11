@@ -48,5 +48,5 @@ class GatewayTransaction(models.Model):
     def capture(self):
         for record in self:
             if record.state != 'to_capture':
-                provider = env[record.payment_method_id.provider]
+                provider = self.env[record.payment_method_id.provider]
                 provider.capture(record)
