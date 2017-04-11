@@ -14,7 +14,7 @@
     "application": False,
     "installable": True,
     "external_dependencies": {
-        "python": [],
+        "python": ['stripe'],
         "bin": [],
     },
     "depends": [
