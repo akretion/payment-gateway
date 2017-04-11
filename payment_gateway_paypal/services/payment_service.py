@@ -4,31 +4,39 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from openerp import models
-import paypalrestsdk
 import json
 from openerp.exceptions import Warning as UserError
+import logging
+_logger = logging.getLogger(__name__)
+
+try:
+    import paypalrestsdk
+except ImportError:
+    _logger.debug('Can not `import paypalrestsdk` library')
 
 
+# TODO FIXME
 def create_profile(paypal):
     web_profile = paypalrestsdk.WebProfile({
         "name": 'Adaptoo 2',
         "presentation": {
             "brand_name": "Adaptoo Paypal",
-            "logo_image": "http://www.adaptoo.com/skin/frontend/adaptoo/default/images/logo.gif",
+            "logo_image": ("http://www.adaptoo.com/skin/frontend/"
+                           "adaptoo/default/images/logo.gif"),
             "locale_code": "FR"
-        },
+            },
         "input_fields": {
             "no_shipping": 1,
             "address_override": 1
-        },
+            },
         "flow_config": {
             "user_action": "commit"
-        }
-    }, api=paypal)
+            }
+        }, api=paypal)
     if web_profile.create():
-        print "Web Profile[%s] created successfully" % (web_profile.id)
+        _logger.info("Web Profile[%s] created successfully", web_profile.id)
     else:
-        print web_profile.error
+        _logger.error('%s', web_profile.error)
 
 
 class PaymentService(models.Model):
@@ -41,7 +49,7 @@ class PaymentService(models.Model):
         params = account.get_data()
         experience_profile = params.pop("experience_profile_id", None)
         params['client_secret'] = account.get_password()
-        #create_profile(paypal)
+        # create_profile(paypal)
         return paypalrestsdk.Api(params), experience_profile
 
     def _prepare_provider_transaction(
@@ -49,23 +57,21 @@ class PaymentService(models.Model):
         description = "%s|%s" % (
             record.name,
             record.partner_id.email)
-        capture = record.payment_method_id.capture_payment == 'immediately'
-        address = record.partner_shipping_id
         return {
             "intent": "sale",
             "payer": {"payment_method": "paypal"},
-            "redirect_urls" : {
+            "redirect_urls": {
                 "return_url": return_url,
                 "cancel_url": cancel_url,
                 },
             "transactions": [{
-            	"amount": {
+                "amount": {
                     "total": record.residual,
                     "currency": record.currency_id.name,
-                     },
+                    },
                 "description": description,
-            }],
-	 }
+                }],
+            }
 
     def _create_provider_transaction(self, data):
         # TODO paypal lib is not perfect, we should wrap it in a class
@@ -80,7 +86,7 @@ class PaymentService(models.Model):
     def _prepare_odoo_transaction(self, cart, transaction):
         res = super(PaymentService, self).\
             _prepare_odoo_transaction(cart, transaction)
-        url = [l for l in transaction['links'] if l['method']=='REDIRECT'][0]
+        url = [l for l in transaction['links'] if l['method'] == 'REDIRECT'][0]
         res.update({
             'amount': transaction['transactions'][0]['amount']['total'],
             'external_id': transaction['id'],
@@ -92,5 +98,6 @@ class PaymentService(models.Model):
     def _capture(self, transaction, amount, payer_id=None, payment_id=None):
         paypal = self._get_connection()
         # TODO ensure that external_id and payment_id are the same
-        payment = paypalrestsdk.Payment.find(transaction.external_id, api=paypal)
+        payment = paypalrestsdk.Payment.find(
+            transaction.external_id, api=paypal)
         return payment.execute({"payer_id": payer_id})

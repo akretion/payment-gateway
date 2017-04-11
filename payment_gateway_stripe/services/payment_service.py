@@ -7,6 +7,8 @@ from openerp import models
 from openerp.exceptions import Warning as UserError
 from openerp.tools.translate import _
 import json
+import logging
+_logger = logging.getLogger(__name__)
 
 try:
     import stripe

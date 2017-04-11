@@ -10,7 +10,6 @@
             <field name="capture_payment"/>
             <field name="payment_method_id"/>
             <field name="external_id"/>
-            <field name="capture_payment"/>
             <field name="url"/>
             <field name="amount"/>
             <field name="currency_id"/>

@@ -41,7 +41,7 @@ class PaymentService(models.AbstractModel):
                 'currency_id': record.currency_id.id,
                 'name': record.name,
                 'capture_payment': method.capture_payment,
-	})
+            })
         elif record._name == 'account.invoice':
             res['invoice_id'] = record.id
         return res

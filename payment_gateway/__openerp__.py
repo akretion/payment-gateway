@@ -25,6 +25,7 @@
     "data": [
         "views/payment_method_view.xml",
         "views/gateway_transaction_view.xml",
+        "security/ir.model.access.csv",
     ],
     "demo": [
     ],

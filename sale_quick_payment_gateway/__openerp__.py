@@ -7,7 +7,7 @@
 {
     "name": "Sale Quick Payment Gateway",
     "summary": "Sale Quick Payement Gateway",
-    "version": " 10.0.1.0.0",
+    "version": "8.0.1.0.0",
     "category": "Uncategorized",
     "website": "www.akretion.com",
     "author": " Akretion",
