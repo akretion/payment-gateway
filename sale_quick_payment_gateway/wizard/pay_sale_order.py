@@ -6,7 +6,7 @@
 from openerp import api, fields, models
 
 
-class PaySaleOrder(models.Model):
+class PaySaleOrder(models.AbstractModel):
     _inherit = 'pay.sale.order'
 
     journal_id = fields.Many2one(related='payment_method_id.journal_id')
