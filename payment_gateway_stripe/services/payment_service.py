@@ -77,7 +77,7 @@ class PaymentService(models.Model):
             'amount': data['amount'],
             'currency': data['currency'],
             'three_d_secure': {'card': data['source']},
-            'redirect': {'return_url': 'http://adaptoo-site.vd/'},
+            'redirect': data['return_url'],
             'api_key': data['api_key'],
         }
 
