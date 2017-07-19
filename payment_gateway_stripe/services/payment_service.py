@@ -53,7 +53,7 @@ class PaymentService(models.Model):
         account = self._get_account()
         return account.get_password()
 
-    def _prepare_provider_transaction(self, record, token=None):
+    def _prepare_provider_transaction(self, record, source=None):
         description = "%s|%s" % (
             record.name,
             record.partner_id.email)
@@ -63,16 +63,33 @@ class PaymentService(models.Model):
         capture = record.payment_method_id.capture_payment == 'immediately'
         return {
             'currency': record.currency_id.name,
-            'source': token,
+            'source': source,
             'description': description,
             'capture': capture,
             'amount': int(record.residual * 100),
             }
+    def _need_three_d_secure(self, data, source):
+        return source['card']['three_d_secure'] != 'not_supported'
+
+    def _prepare_source(self, data):
+        return {
+            'type': 'three_d_secure',
+            'amount': data['amount'],
+            'currency': data['currency'],
+            'three_d_secure': {'card': data['source']},
+            'redirect': {'return_url': 'http://adaptoo-site.vd/'},
+            'api_key': data['api_key'],
+        }
 
     def _create_provider_transaction(self, data):
         data['api_key'] = self._get_api_key()
+        source = stripe.Source.retrieve(
+            data['source'], api_key=data['api_key'])
         try:
-            return stripe.Charge.create(**data)
+            if self._need_three_d_secure(data, source):
+                return stripe.Source.create(**self._prepare_source(data))
+            else:
+                return stripe.Charge.create(**data)
         except stripe.error.CardError as e:
             raise UserError(self._get_error_message(e.code))
 
@@ -89,4 +106,6 @@ class PaymentService(models.Model):
             'state': state,
             'data': json.dumps(transaction),
         })
+        if transaction.get('redirect', {}).get('url'):
+            res['url'] = transaction['redirect']['url']
         return res
