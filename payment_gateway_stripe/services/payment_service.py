@@ -53,7 +53,7 @@ class PaymentService(models.Model):
         account = self._get_account()
         return account.get_password()
 
-    def _prepare_provider_transaction(self, record, source=None):
+    def _prepare_provider_transaction(self, record, source=None, return_url=None):
         description = "%s|%s" % (
             record.name,
             record.partner_id.email)
@@ -64,6 +64,7 @@ class PaymentService(models.Model):
         return {
             'currency': record.currency_id.name,
             'source': source,
+            'return_url': return_url,
             'description': description,
             'capture': capture,
             'amount': int(record.residual * 100),
@@ -101,7 +102,7 @@ class PaymentService(models.Model):
         else:
             state = transaction['status']
         res.update({
-            'amount': transaction['amount'],
+            'amount': transaction['amount']/100.,
             'external_id': transaction['id'],
             'state': state,
             'data': json.dumps(transaction),
