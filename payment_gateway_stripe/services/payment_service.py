@@ -78,7 +78,7 @@ class PaymentService(models.Model):
             'amount': data['amount'],
             'currency': data['currency'],
             'three_d_secure': {'card': data['source']},
-            'redirect': data['return_url'],
+            'redirect': {'return_url': data['return_url']},
             'api_key': data['api_key'],
         }
 
