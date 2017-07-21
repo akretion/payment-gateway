@@ -96,7 +96,7 @@ class PaymentService(models.Model):
         return res
 
     def _capture(self, transaction, amount, payer_id=None, payment_id=None):
-        paypal = self._get_connection()
+        paypal, experience_profile = self._get_connection()
         # TODO ensure that external_id and payment_id are the same
         payment = paypalrestsdk.Payment.find(
             transaction.external_id, api=paypal)
