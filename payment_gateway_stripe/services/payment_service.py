@@ -53,7 +53,8 @@ class PaymentService(models.Model):
         account = self._get_account()
         return account.get_password()
 
-    def _prepare_provider_transaction(self, record, source=None, return_url=None):
+    def _prepare_provider_transaction(
+            self, record, source=None, return_url=None):
         description = "%s|%s" % (
             record.name,
             record.partner_id.email)
@@ -69,6 +70,7 @@ class PaymentService(models.Model):
             'capture': capture,
             'amount': int(record.residual * 100),
             }
+
     def _need_three_d_secure(self, data, source):
         return source['card']['three_d_secure'] != 'not_supported'
 

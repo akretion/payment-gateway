@@ -6,6 +6,7 @@
 from openerp import models
 import json
 from openerp.exceptions import Warning as UserError
+from openerp.tools.translate import _
 import logging
 _logger = logging.getLogger(__name__)
 
@@ -92,12 +93,17 @@ class PaymentService(models.Model):
             'external_id': transaction['id'],
             'data': json.dumps(transaction),
             'url': url['href'],
+            'state': 'pending',
         })
         return res
 
-    def _capture(self, transaction, amount, payer_id=None, payment_id=None):
+    def _capture(self, transaction, amount):
         paypal, experience_profile = self._get_connection()
-        # TODO ensure that external_id and payment_id are the same
         payment = paypalrestsdk.Payment.find(
             transaction.external_id, api=paypal)
-        return payment.execute({"payer_id": payer_id})
+        if payment['payer'].get('payer_info'):
+            return payment.execute({
+                'payer_id': payment['payer']['payer_info']['payer_id']})
+        else:
+            raise UserError(
+                _('The transaction have been abandonned by the customer'))
