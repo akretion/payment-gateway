@@ -6,16 +6,39 @@
     <field name="model">gateway.transaction</field>
     <field name="arch" type="xml">
         <tree string="Payment Transaction">
+            <field name="create_date"/>
             <field name="name"/>
             <field name="capture_payment"/>
             <field name="payment_method_id"/>
             <field name="external_id"/>
-            <field name="url"/>
             <field name="amount"/>
             <field name="currency_id"/>
             <field name="sale_id"/>
             <field name="invoice_id"/>
+            <button
+                name="capture"
+                class="oe_highlight"
+                type="object"
+                string="Capture"
+                states="pending,to_capture"/>
+            <button
+                name="capture"
+                class="oe_highlight"
+                type="object"
+                string="Retry"
+                states="failed"/>
+            <button
+                name="cancel"
+                type="object"
+                string="Cancel"
+                states="draft,pending,to_capture"/>
+            <button
+                name="set_back_to_capture"
+                type="object"
+                string="Reset"
+                states="cancel"/>
             <field name="state"/>
+            <field name="date_processing"/>
         </tree>
     </field>
 </record>
@@ -24,6 +47,32 @@
     <field name="model">gateway.transaction</field>
     <field name="arch" type="xml">
         <form string="Payment Transaction">
+            <header>
+                <button
+                    name="capture"
+                    type="object"
+                    string="Capture"
+                    icon="gtk-jump-to"
+                    states="pending,to_capture"/>
+                <button
+                    name="capture"
+                    type="object"
+                    string="Retry"
+                    icon="gtk-refresh"
+                    states="failed"/>
+                <button
+                    name="cancel"
+                    type="object"
+                    string="Cancel"
+                    icon="gtk-cancel"
+                    states="draft,pending,to_capture"/>
+                <button
+                    name="set_back_to_capture"
+                    type="object"
+                    string="Reset"
+                    icon="gtk-undo"
+                    states="cancel"/>
+            </header>
             <sheet>
                 <div class="oe_title">
                     <label for="name" class="oe_edit_only"/>

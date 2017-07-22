@@ -5,13 +5,13 @@
 
 from openerp import api, fields, models
 import openerp.addons.decimal_precision as dp
-from openerp.exceptions import Warning as UserError
-from openerp.tools.translate import _
+from datetime import datetime
 
 
 class GatewayTransaction(models.Model):
     _name = 'gateway.transaction'
     _description = 'Gateway Transaction'
+    _order = 'create_date desc'
 
     @api.model
     def _selection_capture_payment(self):
@@ -56,6 +56,7 @@ class GatewayTransaction(models.Model):
         )
     data = fields.Text()
     error = fields.Text()
+    date_processing = fields.Datetime('Processing Date')
 
     def _get_amount_to_capture(self):
         if self.invoice_id:
@@ -63,6 +64,14 @@ class GatewayTransaction(models.Model):
             pass
         elif self.sale_id:
             return self.sale_id.residual
+
+    @api.multi
+    def cancel(self):
+        return self.write({'state': 'cancel'})
+
+    @api.multi
+    def set_back_to_capture(self):
+        return self.write({'state': 'to_capture'})
 
     @api.multi
     def capture(self, raise_error=True):
@@ -73,18 +82,18 @@ class GatewayTransaction(models.Model):
         else:
             amount = self._get_amount_to_capture()
             provider = self.env[self.payment_method_id.provider]
+            vals = {}
             try:
                 provider._capture(self, amount)
-                self.state = 'succeeded'
-                return True
+                vals = {
+                    'state': 'succeeded',
+                    'date_processing': datetime.now(),
+                    }
             except Exception, e:
-                if raise_error:
-                    raise UserError(
-                        _('Fail to capture the transaction: %s'),
-                        e)
-                else:
-                    self.write({
-                        'state': 'failed',
-                        'error': str(e),
-                        })
-                return False
+                vals = {
+                    'state': 'failed',
+                    'error': str(e),
+                    'date_processing': datetime.now(),
+                    }
+            self.write(vals)
+        return vals['state'] == 'succeeded'

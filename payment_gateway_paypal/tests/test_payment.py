@@ -9,7 +9,6 @@ from .paypal_mock import (
     PaypalPaymentPending,
     REDIRECT_URL)
 from openerp.tests.common import TransactionCase
-from openerp.exceptions import Warning as UserError
 import paypalrestsdk
 
 
@@ -78,7 +77,7 @@ class PaypalCase(PaypalCommonCase):
             transaction = self.sale.transaction_ids
             transaction.capture()
 
-    def test_failing_execute_transaction_no_raise(self):
+    def test_failing_execute_transaction(self):
         with paypal_mock(PaypalPaymentPending):
             self.env['payment.service.paypal'].generate(
                 self.sale, **REDIRECT_URL)
@@ -86,11 +85,3 @@ class PaypalCase(PaypalCommonCase):
             transaction.capture(raise_error=False)
             self.assertEqual(transaction.state, 'failed')
             self.assertNotEqual(transaction.error, '')
-
-    def test_failing_execute_transaction(self):
-        with paypal_mock(PaypalPaymentPending):
-            self.env['payment.service.paypal'].generate(
-                self.sale, **REDIRECT_URL)
-            transaction = self.sale.transaction_ids
-            with self.assertRaises(UserError):
-                transaction.capture()

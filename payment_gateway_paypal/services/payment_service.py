@@ -101,7 +101,7 @@ class PaymentService(models.Model):
         paypal, experience_profile = self._get_connection()
         payment = paypalrestsdk.Payment.find(
             transaction.external_id, api=paypal)
-        if payment['payer'].get('payer_info'):
+        if payment.to_dict()['payer'].get('payer_info'):
             return payment.execute({
                 'payer_id': payment['payer']['payer_info']['payer_id']})
         else:
