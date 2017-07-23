@@ -22,7 +22,7 @@ class PaymentService(models.AbstractModel):
     def _get_account(self):
         keychain = self.env['keychain.account']
         namespace = (self._name).replace('payment.service.', '')
-        return keychain.suspend_security().retrieve([
+        return keychain.sudo().retrieve([
             ('namespace', '=', namespace)
             ])[0]
 
@@ -46,13 +46,6 @@ class PaymentService(models.AbstractModel):
             res['invoice_id'] = record.id
         return res
 
-    def _get_amount_to_capture(self, transaction):
-        if transaction.invoice_id:
-            # TODO
-            pass
-        elif transaction.sale_id:
-            return transaction.sale_id.residual
-
     @api.model
     def generate(self, record, **kwargs):
         """Generate the transaction in the provider backend
@@ -61,9 +54,3 @@ class PaymentService(models.AbstractModel):
         transaction = self._create_provider_transaction(data)
         vals = self._prepare_odoo_transaction(record, transaction)
         return self.env['gateway.transaction'].create(vals)
-
-    @api.model
-    def capture(self, transaction, **kwargs):
-        """Capture the transaction in the backend"""
-        amount = self._get_amount_to_capture(transaction)
-        return self._capture(transaction, amount, **kwargs)
