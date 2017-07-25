@@ -85,9 +85,18 @@ class PaymentService(models.Model):
             raise UserError(payment.error)
         return payment.to_dict()
 
+    def get_transaction_state(self, transaction):
+        if transaction.state == 'pending':
+            paypal, experience_profile = self._get_connection()
+            payment = paypalrestsdk.Payment.find(
+                transaction.external_id, api=paypal)
+            if payment.to_dict()['payer'].get('payer_info'):
+                return 'to_capture'
+        return transaction.state
+
     def _prepare_odoo_transaction(self, cart, transaction, **kwargs):
         res = super(PaymentService, self).\
-            _prepare_odoo_transaction(cart, transaction)
+            _prepare_odoo_transaction(cart, transaction, **kwargs)
         url = [l for l in transaction['links'] if l['method'] == 'REDIRECT'][0]
         res.update({
             'amount': transaction['transactions'][0]['amount']['total'],
@@ -98,13 +107,19 @@ class PaymentService(models.Model):
         })
         return res
 
-    def _capture(self, transaction, amount):
+    def capture(self, transaction, amount):
         paypal, experience_profile = self._get_connection()
         payment = paypalrestsdk.Payment.find(
             transaction.external_id, api=paypal)
-        if payment.to_dict()['payer'].get('payer_info'):
-            return payment.execute({
-                'payer_id': payment['payer']['payer_info']['payer_id']})
+        payer_id = payment.to_dict()['payer']\
+            .get('payer_info', {}).get('payer_id')
+        if payer_id:
+            if payment.execute({'payer_id': payer_id}):
+                transaction.write({'state': 'succeeded'})
+            else:
+                transaction.write({
+                    'state': 'failed',
+                    'error': payment.error,
+                    })
         else:
-            raise UserError(
-                _('The transaction have been abandonned by the customer'))
+            transaction.write({'state': 'abandonned'})
