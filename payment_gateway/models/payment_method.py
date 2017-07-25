@@ -23,8 +23,8 @@ class PaymentMethod(models.Model):
         return [
             ('immediately', _('Immediately')),
             # TODO implement me
-            #('order_confirm', _('At Order Confirmation')),
-            #('picking_confirm', _('At Picking Confirmation')),
+            # ('order_confirm', _('At Order Confirmation')),
+            # ('picking_confirm', _('At Picking Confirmation')),
             ]
 
     def _selection_provider(self):

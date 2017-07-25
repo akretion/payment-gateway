@@ -108,7 +108,7 @@ class StripeCase(StripeCommonCase, StripeScenario):
         return transaction, json.loads(transaction.data)
 
     def _check_captured(self, transaction, expected_state='succeeded',
-                      expected_risk_level='normal'):
+                        expected_risk_level='normal'):
         self.assertEqual(transaction.state, expected_state)
         charge = json.loads(transaction.data)
         self.assertEqual(self.sale.amount_total, transaction.amount)
