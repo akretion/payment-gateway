@@ -42,6 +42,7 @@ class GatewayTransaction(models.Model):
         ('to_capture', 'To Capture'),
         ('cancel', 'Cancel'),
         ('failed', 'Failed'),
+        ('abandoned', 'Abandoned'),
         ('succeeded', 'Succeeded'),
         ], help=(
             "State of the transaction :\n"
@@ -52,11 +53,23 @@ class GatewayTransaction(models.Model):
             " to get your money\n"
             "- Cancel: You have decided to cancel this transaction\n"
             "- Failed: The Transaction failed, no money was captured\n"
+            "- Abandoned: The Customer didn't fill the payment information\n"
             "- Succeeded: The money is here, life is beautiful\n")
         )
     data = fields.Text()
     error = fields.Text()
     date_processing = fields.Datetime('Processing Date')
+    risk_level = fields.Selection([
+        ('unknown', 'Unknown'),
+        ('normal', 'Normal'),
+        ('elevated', 'Elevated'),
+        ('highest', 'Highest'),
+        ], default='unknown')
+
+    @property
+    def _provider(self):
+        self.ensure_one()
+        return self.env[self.payment_method_id.provider]
 
     def _get_amount_to_capture(self):
         if self.invoice_id:
@@ -74,17 +87,17 @@ class GatewayTransaction(models.Model):
         return self.write({'state': 'to_capture'})
 
     @api.multi
-    def capture(self, raise_error=True):
-        """Capture one transaction in the backend"""
+    def capture(self):
+        """Capture one transaction in the backend
+        Only one transaction can be captured to avoid rollback issue"""
         self.ensure_one()
         if self.state == 'succeeded':
             pass
         else:
             amount = self._get_amount_to_capture()
-            provider = self.env[self.payment_method_id.provider]
             vals = {}
             try:
-                provider._capture(self, amount)
+                self._provider.capture(self, amount)
                 vals = {
                     'state': 'succeeded',
                     'date_processing': datetime.now(),
@@ -97,3 +110,9 @@ class GatewayTransaction(models.Model):
                     }
             self.write(vals)
         return vals['state'] == 'succeeded'
+
+    @api.multi
+    def check_state(self):
+        for record in self:
+            if record.state == 'pending':
+                record.state = record._provider.get_transaction_state(record)

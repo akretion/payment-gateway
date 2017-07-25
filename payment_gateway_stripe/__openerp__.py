@@ -21,6 +21,7 @@
         "payment_gateway",
     ],
     "data": [
+        "data/payment_method_data.xml",
     ],
     "demo": [
     ],

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data noupdate="1">
+
+<record id="payment_method_stripe" model="payment.method">
+    <field name="name">Stripe</field>
+    <field name="provider">payment.service.stripe</field>
+    <field name="capture_payment">immediately</field>
+</record>
+
+    </data>
+</openerp>
