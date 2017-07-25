@@ -84,7 +84,7 @@ class PaymentService(models.Model):
             raise UserError(payment.error)
         return payment.to_dict()
 
-    def _prepare_odoo_transaction(self, cart, transaction):
+    def _prepare_odoo_transaction(self, cart, transaction, **kwargs):
         res = super(PaymentService, self).\
             _prepare_odoo_transaction(cart, transaction)
         url = [l for l in transaction['links'] if l['method'] == 'REDIRECT'][0]
