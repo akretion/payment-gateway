@@ -26,8 +26,6 @@ class PaymentService(models.AbstractModel):
             ('namespace', '=', namespace)
             ])[0]
 
-        raise NotImplemented
-
     def create_provider_transaction(self, record, **kwargs):
         raise NotImplemented
 
