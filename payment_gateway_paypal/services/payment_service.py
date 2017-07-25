@@ -6,7 +6,6 @@
 from openerp import models
 import json
 from openerp.exceptions import Warning as UserError
-from openerp.tools.translate import _
 import logging
 _logger = logging.getLogger(__name__)
 
