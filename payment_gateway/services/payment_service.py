@@ -26,10 +26,9 @@ class PaymentService(models.AbstractModel):
             ('namespace', '=', namespace)
             ])[0]
 
-    def _prepare_provider_transaction(self, record, **kwargs):
         raise NotImplemented
 
-    def _create_provider_transaction(self, record, **kwargs):
+    def create_provider_transaction(self, record, **kwargs):
         raise NotImplemented
 
     def _prepare_odoo_transaction(self, record, transaction, **kwargs):
@@ -50,8 +49,7 @@ class PaymentService(models.AbstractModel):
     def generate(self, record, **kwargs):
         """Generate the transaction in the provider backend
         and create the transaction in odoo"""
-        data = self._prepare_provider_transaction(record, **kwargs)
-        transaction = self._create_provider_transaction(data)
+        transaction = self.create_provider_transaction(record, **kwargs)
         vals = self._prepare_odoo_transaction(record, transaction, **kwargs)
         return self.env['gateway.transaction'].create(vals)
 

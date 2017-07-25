@@ -62,8 +62,7 @@ class PaymentService(models.Model):
         account = self._get_account()
         return account.get_password()
 
-    def _prepare_provider_transaction(
-            self, record, source=None, return_url=None, **kwargs):
+    def _prepare_charge(self, record, source=None, **kwargs):
         description = "%s|%s" % (
             record.name,
             record.partner_id.email)
@@ -74,34 +73,34 @@ class PaymentService(models.Model):
         return {
             'currency': record.currency_id.name,
             'source': source,
-            'return_url': return_url,
             'description': description,
             'capture': capture,
             'amount': int(record.residual * 100),
+            'api_key': self._api_key,
             }
 
-    def _need_three_d_secure(self, data, source):
-        return source['card']['three_d_secure'] != 'not_supported'
+    def _need_three_d_secure(self, record, source_data):
+        return source_data['card']['three_d_secure'] != 'not_supported'
 
-    def _prepare_source(self, data):
+    def _prepare_source(self, record, source=None, return_url=None, **kwargs):
         return {
             'type': 'three_d_secure',
-            'amount': data['amount'],
-            'currency': data['currency'],
-            'three_d_secure': {'card': data['source']},
-            'redirect': {'return_url': data['return_url']},
+            'amount': int(record.residual * 100),
+            'currency': record.currency_id.name,
+            'three_d_secure': {'card': source},
+            'redirect': {'return_url': return_url},
+            'api_key': self._api_key,
         }
 
-    def _create_provider_transaction(self, data):
-        source = stripe.Source.retrieve(data['source'], api_key=self._api_key)
+    def create_provider_transaction(self, record, source=None, **kwargs):
+        source_data = stripe.Source.retrieve(source, api_key=self._api_key)
         try:
-            if self._need_three_d_secure(data, source):
+            if self._need_three_d_secure(record, source_data):
                 return stripe.Source.create(
-                    api_key=self._api_key,
-                    **self._prepare_source(data))
+                    **self._prepare_source(record, source=source, **kwargs))
             else:
-                data.pop('return_url')
-                return stripe.Charge.create(api_key=self._api_key, **data)
+                return stripe.Charge.create(
+                    **self._prepare_charge(record, source=source, **kwargs))
         except stripe.error.CardError as e:
             raise UserError(self._get_error_message(e.code))
 
@@ -116,6 +115,9 @@ class PaymentService(models.Model):
         })
         if transaction.get('redirect', {}).get('url'):
             res['url'] = transaction['redirect']['url']
+        risk_level = transaction.get('outcome', {}).get('risk_level')
+        if risk_level:
+            res['risk_level'] = risk_level
         return res
 
     def get_transaction_state(self, transaction):
