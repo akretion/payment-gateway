@@ -31,9 +31,9 @@ class PaypalCommonCase(TransactionCase):
             'payment_gateway_paypal.payment_method_paypal')
         self.sale.write({'payment_method_id': self.payment_method.id})
 
-    def _check_payment_create_sale_order(self):
+    def _check_payment_create_sale_order(self, redirect_url):
         paypalrestsdk.Payment.assert_called_with({
-            'redirect_urls': REDIRECT_URL,
+            'redirect_urls': redirect_url,
             'experience_profile_id': "LX-39DK-DI4IH-EOD3-KDO0",
             'intent': 'sale',
             'payer': {
@@ -68,7 +68,7 @@ class PaypalCase(PaypalCommonCase):
         with paypal_mock(PaypalPaymentSuccess):
             self.env['payment.service.paypal'].generate(
                 self.sale, **REDIRECT_URL)
-            self._check_payment_create_sale_order()
+            self._check_payment_create_sale_order(REDIRECT_URL)
 
     def test_execute_transaction(self):
         with paypal_mock(PaypalPaymentSuccess):
