@@ -82,6 +82,6 @@ class PaypalCase(PaypalCommonCase):
             self.env['payment.service.paypal'].generate(
                 self.sale, **REDIRECT_URL)
             transaction = self.sale.transaction_ids
-            transaction.capture(raise_error=False)
+            transaction.capture()
             self.assertEqual(transaction.state, 'failed')
             self.assertNotEqual(transaction.error, '')

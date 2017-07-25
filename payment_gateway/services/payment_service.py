@@ -26,15 +26,18 @@ class PaymentService(models.AbstractModel):
             ('namespace', '=', namespace)
             ])[0]
 
-    def _prepare_provider_transaction(self, record, **kwargs):
         raise NotImplemented
 
-    def _create_provider_transaction(self, record, **kwargs):
+    def create_provider_transaction(self, record, **kwargs):
         raise NotImplemented
 
-    def _prepare_odoo_transaction(self, record, transaction):
+    def _prepare_odoo_transaction(self, record, transaction, **kwargs):
         method = record.payment_method_id
-        res = {'payment_method_id': method.id}
+        res = {
+            'payment_method_id': method.id,
+            'redirect_cancel_url': kwargs.get('redirect_cancel_url'),
+            'redirect_success_url': kwargs.get('redirect_success_url'),
+            }
         if record._name == 'sale.order':
             res.update({
                 'sale_id': record.id,
@@ -50,7 +53,14 @@ class PaymentService(models.AbstractModel):
     def generate(self, record, **kwargs):
         """Generate the transaction in the provider backend
         and create the transaction in odoo"""
-        data = self._prepare_provider_transaction(record, **kwargs)
-        transaction = self._create_provider_transaction(data)
-        vals = self._prepare_odoo_transaction(record, transaction)
+        transaction = self.create_provider_transaction(record, **kwargs)
+        vals = self._prepare_odoo_transaction(record, transaction, **kwargs)
         return self.env['gateway.transaction'].create(vals)
+
+    @api.model
+    def get_transaction_state(self, transaction):
+        raise NotImplemented
+
+    @api.model
+    def capture(self, transaction, amount):
+        raise NotImplemented

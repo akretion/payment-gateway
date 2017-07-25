@@ -53,8 +53,8 @@ class PaymentService(models.Model):
         # create_profile(paypal)
         return paypalrestsdk.Api(params), experience_profile
 
-    def _prepare_provider_transaction(
-            self, record, return_url=None, cancel_url=None):
+    def _prepare_transaction(
+            self, record, return_url=None, cancel_url=None, **kwargs):
         description = "%s|%s" % (
             record.name,
             record.partner_id.email)
@@ -74,7 +74,8 @@ class PaymentService(models.Model):
                 }],
             }
 
-    def _create_provider_transaction(self, data):
+    def create_provider_transaction(self, record, **kwargs):
+        data = self._prepare_transaction(record, **kwargs)
         # TODO paypal lib is not perfect, we should wrap it in a class
         paypal, experience_profile = self._get_connection()
         data["experience_profile_id"] = experience_profile
@@ -84,7 +85,7 @@ class PaymentService(models.Model):
             raise UserError(payment.error)
         return payment.to_dict()
 
-    def _prepare_odoo_transaction(self, cart, transaction):
+    def _prepare_odoo_transaction(self, cart, transaction, **kwargs):
         res = super(PaymentService, self).\
             _prepare_odoo_transaction(cart, transaction)
         url = [l for l in transaction['links'] if l['method'] == 'REDIRECT'][0]

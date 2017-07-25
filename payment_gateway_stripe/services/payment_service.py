@@ -15,6 +15,14 @@ try:
 except ImportError:
     _logger.debug('Can not import stripe')
 
+MAP_SOURCE_STATE = {
+    'canceled': 'cancel',
+    'chargeable': 'to_capture',
+    'consumed': 'succeeded',
+    'failed': 'failed',
+    'pending': 'pending',
+    'succeeded': 'succeeded'}
+
 
 class PaymentService(models.Model):
     _inherit = 'payment.service'
@@ -49,12 +57,12 @@ class PaymentService(models.Model):
                 _("An error occurred while processing the card."),
         }[code]
 
-    def _get_api_key(self):
+    @property
+    def _api_key(self):
         account = self._get_account()
         return account.get_password()
 
-    def _prepare_provider_transaction(
-            self, record, source=None, return_url=None):
+    def _prepare_charge(self, record, source=None, **kwargs):
         description = "%s|%s" % (
             record.name,
             record.partner_id.email)
@@ -65,50 +73,83 @@ class PaymentService(models.Model):
         return {
             'currency': record.currency_id.name,
             'source': source,
-            'return_url': return_url,
             'description': description,
             'capture': capture,
             'amount': int(record.residual * 100),
+            'api_key': self._api_key,
             }
 
-    def _need_three_d_secure(self, data, source):
-        return source['card']['three_d_secure'] != 'not_supported'
+    def _need_three_d_secure(self, record, source_data):
+        return source_data['card']['three_d_secure'] != 'not_supported'
 
-    def _prepare_source(self, data):
+    def _prepare_source(self, record, source=None, return_url=None, **kwargs):
         return {
             'type': 'three_d_secure',
-            'amount': data['amount'],
-            'currency': data['currency'],
-            'three_d_secure': {'card': data['source']},
-            'redirect': {'return_url': data['return_url']},
-            'api_key': data['api_key'],
+            'amount': int(record.residual * 100),
+            'currency': record.currency_id.name,
+            'three_d_secure': {'card': source},
+            'redirect': {'return_url': return_url},
+            'api_key': self._api_key,
         }
 
-    def _create_provider_transaction(self, data):
-        data['api_key'] = self._get_api_key()
-        source = stripe.Source.retrieve(
-            data['source'], api_key=data['api_key'])
+    def create_provider_transaction(self, record, source=None, **kwargs):
+        source_data = stripe.Source.retrieve(source, api_key=self._api_key)
+        three_d_secure = self._need_three_d_secure(record, source_data)
         try:
-            if self._need_three_d_secure(data, source):
-                return stripe.Source.create(**self._prepare_source(data))
-            else:
-                return stripe.Charge.create(**data)
+            if three_d_secure:
+                res = stripe.Source.create(
+                    **self._prepare_source(record, source=source, **kwargs))
+                if res['status'] == 'chargeable':
+                    # 3D secure have been not activated or not ready
+                    # for this customer
+                    three_d_secure = False
+                else:
+                    return res
+            if not three_d_secure:
+                return stripe.Charge.create(
+                    **self._prepare_charge(record, source=source, **kwargs))
         except stripe.error.CardError as e:
             raise UserError(self._get_error_message(e.code))
 
-    def _prepare_odoo_transaction(self, cart, transaction):
+    def _prepare_odoo_transaction(self, cart, transaction, **kwargs):
         res = super(PaymentService, self).\
-            _prepare_odoo_transaction(cart, transaction)
-        if transaction['status'] == 'pending':
-            state = 'to_capture'
-        else:
-            state = transaction['status']
+            _prepare_odoo_transaction(cart, transaction, **kwargs)
         res.update({
             'amount': transaction['amount']/100.,
             'external_id': transaction['id'],
-            'state': state,
+            'state': MAP_SOURCE_STATE[transaction['status']],
             'data': json.dumps(transaction),
         })
         if transaction.get('redirect', {}).get('url'):
             res['url'] = transaction['redirect']['url']
+        risk_level = transaction.get('outcome', {}).get('risk_level')
+        if risk_level:
+            res['risk_level'] = risk_level
         return res
+
+    def get_transaction_state(self, transaction):
+        source = stripe.Source.retrieve(
+            transaction.external_id, api_key=self._api_key)
+        return MAP_SOURCE_STATE[source['status']]
+
+    def _prepare_odoo_transaction_from_charge(self, charge):
+        return {
+            'amount': charge['amount']/100.,
+            'external_id': charge['id'],
+            'state': MAP_SOURCE_STATE[charge['status']],
+            'risk_level': charge.get('outcome', {}).get('risk_level'),
+            'data': json.dumps(charge),
+        }
+
+    def capture(self, transaction, amount):
+        if transaction.external_id.startswith('src_'):
+            # Transaction is a source convert it to a charge
+            charge = stripe.Charge.create(
+                currency=transaction.currency_id.name,
+                source=transaction.external_id,
+                description=transaction.name,
+                capture=True,
+                amount=int(amount * 100),
+                api_key=self._api_key)
+            vals = self._prepare_odoo_transaction_from_charge(charge)
+            transaction.write(vals)
