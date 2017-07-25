@@ -3,6 +3,7 @@
 # @author Sébastien BEAU <sebastien.beau@akretion.com>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
+from openerp.exceptions import Warning as UserError
 from openerp.tests.common import TransactionCase
 import os
 import unittest
@@ -46,39 +47,7 @@ class StripeCommonCase(TransactionCase):
         requests.post(url, {'PaRes': 'success' if success else 'failure'})
 
 
-class StripeCase(StripeCommonCase):
-
-    def _create_transaction(self, card):
-        source = self._get_source(card)
-        transaction = self.env['payment.service.stripe'].generate(
-            self.sale,
-            source=source['id'],
-            return_url='https://IwillBeBack.vd')
-        return transaction, json.loads(transaction.data)
-
-    def _test_capture(self, transaction, expected_state='succeeded',
-                      expected_risk_level='normal'):
-        transaction.capture()
-        self.assertEqual(transaction.state, expected_state)
-        charge = json.loads(transaction.data)
-        self.assertEqual(self.sale.amount_total, transaction.amount)
-        self.assertEqual(charge['amount'], int(transaction.amount*100))
-        self.assertEqual(transaction.risk_level, expected_risk_level)
-
-    def _test_3d(self, card, success=True):
-        transaction, source = self._create_transaction(card)
-        self.assertEqual(transaction.state, 'pending')
-        self._fill_3d_secure(source, success=success)
-        transaction.check_state()
-        expected_state = 'to_capture' if success else 'failed'
-        self.assertEqual(transaction.state, expected_state)
-        if success:
-            self._test_capture(transaction)
-
-    def _test_card(self, card, **kwargs):
-        transaction, source = self._create_transaction(card)
-        self.assertEqual(transaction.state, 'to_capture')
-        self._test_capture(transaction, **kwargs)
+class StripeScenario(object):
 
     def test_create_transaction_3d_required_failed(self):
         self._test_3d('4000000000003063', success=False)
@@ -109,11 +78,11 @@ class StripeCase(StripeCommonCase):
         self._test_card('4000002500000003')
 
     def test_create_transaction_risk_highest(self):
-        # TODO it will be better to set risk to highest
-        self._test_card(
-            '4100000000000019',
-            expected_state='failed',
-            expected_risk_level='unknown')
+        with self.assertRaises(UserError):
+            self._test_card(
+                '4100000000000019',
+                expected_state='failed',
+                expected_risk_level='unknown')
 
     def test_create_transaction_risk_elevated(self):
         self._test_card(
@@ -121,7 +90,41 @@ class StripeCase(StripeCommonCase):
             expected_risk_level='elevated')
 
     def test_create_transaction_expired_card(self):
-        self._test_card(
-            '4000000000000069',
-            expected_state='failed',
-            expected_risk_level='unknown')
+        with self.assertRaises(UserError):
+            self._test_card(
+                '4000000000000069',
+                expected_state='failed',
+                expected_risk_level='unknown')
+
+
+class StripeCase(StripeCommonCase, StripeScenario):
+
+    def _create_transaction(self, card):
+        source = self._get_source(card)
+        transaction = self.env['payment.service.stripe'].generate(
+            self.sale,
+            source=source['id'],
+            return_url='https://IwillBeBack.vd')
+        return transaction, json.loads(transaction.data)
+
+    def _check_captured(self, transaction, expected_state='succeeded',
+                      expected_risk_level='normal'):
+        self.assertEqual(transaction.state, expected_state)
+        charge = json.loads(transaction.data)
+        self.assertEqual(self.sale.amount_total, transaction.amount)
+        self.assertEqual(charge['amount'], int(transaction.amount*100))
+        self.assertEqual(transaction.risk_level, expected_risk_level)
+
+    def _test_3d(self, card, success=True):
+        transaction, source = self._create_transaction(card)
+        self.assertEqual(transaction.state, 'pending')
+        self._fill_3d_secure(source, success=success)
+        transaction.check_state()
+        if success:
+            self._check_captured(transaction)
+        else:
+            self.assertEqual(transaction.state, 'failed')
+
+    def _test_card(self, card, **kwargs):
+        transaction, source = self._create_transaction(card)
+        self._check_captured(transaction, **kwargs)

@@ -94,11 +94,18 @@ class PaymentService(models.Model):
 
     def create_provider_transaction(self, record, source=None, **kwargs):
         source_data = stripe.Source.retrieve(source, api_key=self._api_key)
+        three_d_secure = self._need_three_d_secure(record, source_data)
         try:
-            if self._need_three_d_secure(record, source_data):
-                return stripe.Source.create(
+            if three_d_secure:
+                res = stripe.Source.create(
                     **self._prepare_source(record, source=source, **kwargs))
-            else:
+                if res['status'] == 'chargeable':
+                    # 3D secure have been not activated or not ready
+                    # for this customer
+                    three_d_secure = False
+                else:
+                    return res
+            if not three_d_secure:
                 return stripe.Charge.create(
                     **self._prepare_charge(record, source=source, **kwargs))
         except stripe.error.CardError as e:

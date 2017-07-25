@@ -65,6 +65,8 @@ class GatewayTransaction(models.Model):
         ('elevated', 'Elevated'),
         ('highest', 'Highest'),
         ], default='unknown')
+    redirect_cancel_url = fields.Char()
+    redirect_success_url = fields.Char()
 
     @property
     def _provider(self):
@@ -85,6 +87,23 @@ class GatewayTransaction(models.Model):
     @api.multi
     def set_back_to_capture(self):
         return self.write({'state': 'to_capture'})
+
+    @api.multi
+    def write(self, vals):
+        super(GatewayTransaction, self).write(vals)
+        if vals['state'] == 'to_capture':
+            for record in self:
+                if record.capture_payment == 'immediately':
+                    record.capture()
+        return True
+
+    @api.model
+    def create(self, vals):
+        transaction = super(GatewayTransaction, self).create(vals)
+        if vals['state'] == 'to_capture':
+            if transaction.capture_payment == 'immediately':
+                transaction.capture()
+        return transaction
 
     @api.multi
     def capture(self):
@@ -115,4 +134,5 @@ class GatewayTransaction(models.Model):
     def check_state(self):
         for record in self:
             if record.state == 'pending':
-                record.state = record._provider.get_transaction_state(record)
+                record.write({
+                    'state': record._provider.get_transaction_state(record)})

@@ -33,7 +33,11 @@ class PaymentService(models.AbstractModel):
 
     def _prepare_odoo_transaction(self, record, transaction, **kwargs):
         method = record.payment_method_id
-        res = {'payment_method_id': method.id}
+        res = {
+            'payment_method_id': method.id,
+            'redirect_cancel_url': kwargs.get('redirect_cancel_url'),
+            'redirect_success_url': kwargs.get('redirect_success_url'),
+            }
         if record._name == 'sale.order':
             res.update({
                 'sale_id': record.id,
