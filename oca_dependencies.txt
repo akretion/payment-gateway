@@ -1,3 +1,4 @@
-sale-workflow
-server-tools
-ak-odoo-incubator https://github.com/akretion/ak-odoo-incubator.git 8.0
+sale-workflow https://github.com/OCA/sale-workflow.git 10.0
+server-tools https://github.com/OCA/server-tools.git 10.0 
+ak-odoo-incubator https://github.com/akretion/ak-odoo-incubator.git 10.0
+bank-payment https://github.com/OCA/bank-payment.git 10.0 
