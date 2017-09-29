@@ -13,8 +13,8 @@ from openerp.tools.translate import _
 # oca/bank-payment/account_payment_sale
 
 
-class PaymentMethod(models.Model):
-    _inherit = 'payment.method'
+class AccountPaymentMode(models.Model):
+    _inherit = 'account.payment.mode'
 
     provider = fields.Selection(selection="_selection_provider")
     capture_payment = fields.Selection(selection='_selection_capture_payment')
