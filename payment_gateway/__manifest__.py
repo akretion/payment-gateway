@@ -24,7 +24,7 @@
         "base_suspend_security",
     ],
     "data": [
-        "views/payment_method_view.xml",
+        "views/account_payment_mode_view.xml",
         "views/gateway_transaction_view.xml",
         "security/ir.model.access.csv",
     ],
