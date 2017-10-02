@@ -6,13 +6,13 @@
 {
     "name": "Stripe Payment Gateway",
     "summary": "Stripe Payment Gateway alternative for odoo",
-    "version": "8.0.1.0.0",
+    "version": "10.0.1.0.0",
     "category": "Payment",
     "website": "www.akretion.com",
     "author": " Akretion",
     "license": "AGPL-3",
     "application": False,
-    'installable': False,
+    'installable': True,
     "external_dependencies": {
         "python": ['stripe'],
         "bin": [],
