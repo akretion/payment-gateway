@@ -3,8 +3,9 @@
 # @author Sébastien BEAU <sebastien.beau@akretion.com>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-from openerp import api, fields, models
-import openerp.addons.decimal_precision as dp
+from odoo import api, fields, models
+import odoo.addons.decimal_precision as dp
+
 from datetime import datetime
 
 
@@ -15,11 +16,11 @@ class GatewayTransaction(models.Model):
 
     @api.model
     def _selection_capture_payment(self):
-        return self.env['payment.method']._selection_capture_payment()
+        return self.env['account.payment.mode']._selection_capture_payment()
 
     name = fields.Char()
-    payment_method_id = fields.Many2one(
-        'payment.method',
+    payment_mode_id = fields.Many2one(
+        'account.payment.mode',
         'Gateway')
     external_id = fields.Char()
     capture_payment = fields.Selection(
@@ -71,7 +72,7 @@ class GatewayTransaction(models.Model):
     @property
     def _provider(self):
         self.ensure_one()
-        return self.env[self.payment_method_id.provider]
+        return self.env[self.payment_mode_id.provider]
 
     def _get_amount_to_capture(self):
         if self.invoice_id:

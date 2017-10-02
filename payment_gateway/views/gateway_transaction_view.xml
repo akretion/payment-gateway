@@ -1,139 +1,135 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<openerp>
-    <data>
-
-<record id="gateway_transaction_view_tree" model="ir.ui.view">
-    <field name="model">gateway.transaction</field>
-    <field name="arch" type="xml">
-        <tree string="Payment Transaction">
-            <field name="create_date"/>
-            <field name="name"/>
-            <field name="capture_payment"/>
-            <field name="payment_method_id"/>
-            <field name="external_id"/>
-            <field name="amount"/>
-            <field name="currency_id"/>
-            <field name="sale_id"/>
-            <field name="invoice_id"/>
-            <button
-                name="capture"
-                class="oe_highlight"
-                type="object"
-                string="Capture"
-                states="pending,to_capture"/>
-            <button
-                name="capture"
-                class="oe_highlight"
-                type="object"
-                string="Retry"
-                states="failed"/>
-            <button
-                name="cancel"
-                type="object"
-                string="Cancel"
-                states="draft,pending,to_capture"/>
-            <button
-                name="set_back_to_capture"
-                type="object"
-                string="Reset"
-                states="cancel"/>
-            <field name="state"/>
-            <field name="date_processing"/>
-        </tree>
-    </field>
-</record>
-
-<record id="gateway_transaction_view_form" model="ir.ui.view">
-    <field name="model">gateway.transaction</field>
-    <field name="arch" type="xml">
-        <form string="Payment Transaction">
-            <header>
+<odoo>
+    <record id="gateway_transaction_view_tree" model="ir.ui.view">
+        <field name="model">gateway.transaction</field>
+        <field name="arch" type="xml">
+            <tree string="Payment Transaction">
+                <field name="create_date"/>
+                <field name="name"/>
+                <field name="capture_payment"/>
+                <field name="payment_mode_id"/>
+                <field name="external_id"/>
+                <field name="amount"/>
+                <field name="currency_id"/>
+                <field name="sale_id"/>
+                <field name="invoice_id"/>
                 <button
                     name="capture"
+                    class="oe_highlight"
                     type="object"
                     string="Capture"
-                    icon="gtk-jump-to"
                     states="pending,to_capture"/>
                 <button
                     name="capture"
+                    class="oe_highlight"
                     type="object"
                     string="Retry"
-                    icon="gtk-refresh"
                     states="failed"/>
                 <button
                     name="cancel"
                     type="object"
                     string="Cancel"
-                    icon="gtk-cancel"
                     states="draft,pending,to_capture"/>
                 <button
                     name="set_back_to_capture"
                     type="object"
                     string="Reset"
-                    icon="gtk-undo"
                     states="cancel"/>
-            </header>
-            <sheet>
-                <div class="oe_title">
-                    <label for="name" class="oe_edit_only"/>
-                    <h1>
-                        <field name="name"/>
-                    </h1>
-                </div>
-                <group>
-                    <field name="payment_method_id"/>
-                    <field name="external_id"/>
-                    <field name="capture_payment"/>
-                    <field name="url" widget="url"/>
-                    <field name="amount"/>
-                    <field name="sale_id"/>
-                    <field name="invoice_id"/>
-                    <field name="state"/>
-                </group>
-                <field name="data" colspan="4"/>
-            </sheet>
-        </form>
-    </field>
-</record>
+                <field name="state"/>
+                <field name="date_processing"/>
+            </tree>
+        </field>
+    </record>
 
-<record id="gateway_transaction_view_search" model="ir.ui.view">
-    <field name="model">gateway.transaction</field>
-    <field name="arch" type="xml">
-        <search string="Payment Transaction">
-            <field name="name"/>
-        </search>
-    </field>
-</record>
+    <record id="gateway_transaction_view_form" model="ir.ui.view">
+        <field name="model">gateway.transaction</field>
+        <field name="arch" type="xml">
+            <form string="Payment Transaction">
+                <header>
+                    <button
+                        name="capture"
+                        type="object"
+                        string="Capture"
+                        icon="gtk-jump-to"
+                        states="pending,to_capture"/>
+                    <button
+                        name="capture"
+                        type="object"
+                        string="Retry"
+                        icon="gtk-refresh"
+                        states="failed"/>
+                    <button
+                        name="cancel"
+                        type="object"
+                        string="Cancel"
+                        icon="gtk-cancel"
+                        states="draft,pending,to_capture"/>
+                    <button
+                        name="set_back_to_capture"
+                        type="object"
+                        string="Reset"
+                        icon="gtk-undo"
+                        states="cancel"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <field name="payment_mode_id"/>
+                        <field name="external_id"/>
+                        <field name="capture_payment"/>
+                        <field name="url" widget="url"/>
+                        <field name="amount"/>
+                        <field name="sale_id"/>
+                        <field name="invoice_id"/>
+                        <field name="state"/>
+                    </group>
+                    <field name="data" colspan="4"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
 
-<record model="ir.actions.act_window" id="act_open_gateway_transaction_view">
-    <field name="name">Transaction</field>
-    <field name="type">ir.actions.act_window</field>
-    <field name="res_model">gateway.transaction</field>
-    <field name="view_type">form</field>
-    <field name="view_mode">tree,form</field>
-    <field name="search_view_id" ref="gateway_transaction_view_search"/>
-    <field name="domain">[]</field>
-    <field name="context">{}</field>
-</record>
+    <record id="gateway_transaction_view_search" model="ir.ui.view">
+        <field name="model">gateway.transaction</field>
+        <field name="arch" type="xml">
+            <search string="Payment Transaction">
+                <field name="name"/>
+            </search>
+        </field>
+    </record>
 
-<record model="ir.actions.act_window.view" id="act_open_gateway_transaction_view_form">
-    <field name="act_window_id" ref="act_open_gateway_transaction_view"/>
-    <field name="sequence" eval="20"/>
-    <field name="view_mode">form</field>
-    <field name="view_id" ref="gateway_transaction_view_form"/>
-</record>
+    <record model="ir.actions.act_window" id="act_open_gateway_transaction_view">
+        <field name="name">Transaction</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">gateway.transaction</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="gateway_transaction_view_search"/>
+        <field name="domain">[]</field>
+        <field name="context">{}</field>
+    </record>
 
-<record model="ir.actions.act_window.view" id="act_open_gateway_transaction_view_tree">
-    <field name="act_window_id" ref="act_open_gateway_transaction_view"/>
-    <field name="sequence" eval="10"/>
-    <field name="view_mode">tree</field>
-    <field name="view_id" ref="gateway_transaction_view_tree"/>
-</record>
+    <record model="ir.actions.act_window.view" id="act_open_gateway_transaction_view_form">
+        <field name="act_window_id" ref="act_open_gateway_transaction_view"/>
+        <field name="sequence" eval="20"/>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="gateway_transaction_view_form"/>
+    </record>
 
-<menuitem id="menu_gateway_transaction"
-    parent="base.menu_sale_config_sales"
-    sequence="60"
-    action="act_open_gateway_transaction_view"/>
+    <record model="ir.actions.act_window.view" id="act_open_gateway_transaction_view_tree">
+        <field name="act_window_id" ref="act_open_gateway_transaction_view"/>
+        <field name="sequence" eval="10"/>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="gateway_transaction_view_tree"/>
+    </record>
 
-    </data>
-</openerp>
+    <menuitem id="menu_gateway_transaction"
+        parent="sales_team.menu_sale_config"
+        sequence="60"
+        action="act_open_gateway_transaction_view"/>
+</odoo>

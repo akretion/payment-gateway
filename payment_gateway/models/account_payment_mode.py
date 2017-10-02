@@ -3,8 +3,8 @@
 # @author Sébastien BEAU <sebastien.beau@akretion.com>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-from openerp import api, fields, models
-from openerp.tools.translate import _
+from odoo import api, fields, models
+from odoo.tools.translate import _
 
 
 # Note on V9 and V10 the sale.payment.method is replaced by
@@ -13,8 +13,8 @@ from openerp.tools.translate import _
 # oca/bank-payment/account_payment_sale
 
 
-class PaymentMethod(models.Model):
-    _inherit = 'payment.method'
+class AccountPaymentMode(models.Model):
+    _inherit = 'account.payment.mode'
 
     provider = fields.Selection(selection="_selection_provider")
     capture_payment = fields.Selection(selection='_selection_capture_payment')

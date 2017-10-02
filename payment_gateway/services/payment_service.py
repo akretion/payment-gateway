@@ -3,7 +3,7 @@
 # @author Sébastien BEAU <sebastien.beau@akretion.com>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-from openerp import api, models
+from odoo import api, models
 
 
 # It will be better to have a class that is more abstract than the AbtractModel
@@ -30,9 +30,9 @@ class PaymentService(models.AbstractModel):
         raise NotImplemented
 
     def _prepare_odoo_transaction(self, record, transaction, **kwargs):
-        method = record.payment_method_id
+        mode = record.payment_mode_id
         res = {
-            'payment_method_id': method.id,
+            'payment_mode_id': mode.id,
             'redirect_cancel_url': kwargs.get('redirect_cancel_url'),
             'redirect_success_url': kwargs.get('redirect_success_url'),
             }
@@ -41,7 +41,7 @@ class PaymentService(models.AbstractModel):
                 'sale_id': record.id,
                 'currency_id': record.currency_id.id,
                 'name': record.name,
-                'capture_payment': method.capture_payment,
+                'capture_payment': mode.capture_payment,
             })
         elif record._name == 'account.invoice':
             res['invoice_id'] = record.id
