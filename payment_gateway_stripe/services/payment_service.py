@@ -3,9 +3,9 @@
 # @author Sébastien BEAU <sebastien.beau@akretion.com>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-from openerp import models
-from openerp.exceptions import Warning as UserError
-from openerp.tools.translate import _
+from odoo import models
+from odoo.exceptions import Warning as UserError
+from odoo.tools.translate import _
 import json
 import logging
 _logger = logging.getLogger(__name__)
@@ -69,7 +69,7 @@ class PaymentService(models.Model):
         # For now capture is always true as only the policy 'immedialtely' is
         # available in the configuration but it will be easier to implement
         # the logic of defeared capture
-        capture = record.payment_method_id.capture_payment == 'immediately'
+        capture = record.payment_mode_id.capture_payment == 'immediately'
         return {
             'currency': record.currency_id.name,
             'source': source,
