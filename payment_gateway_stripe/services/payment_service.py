@@ -70,12 +70,27 @@ class PaymentService(models.Model):
         # available in the configuration but it will be easier to implement
         # the logic of defeared capture
         capture = record.payment_mode_id.capture_payment == 'immediately'
+
+        # TODO - the field "residual" missed in object "sale.order". On 8.0
+        # version it was create on module payment_sale_method
+        # https://github.com/OCA/sale-workflow/blob/8.0/sale_payment_method/
+        # sale.py#L53 there is PR on migration to 9.0 where the field was
+        # create in module sale_payment
+        # https://github.com/OCA/sale-workflow/pull/403/
+        # files#diff-c002243b01cfec667dfb7e6dac0c77d4R34
+        # For now we check which models is and put the value
+        amount_residual = 0.0
+        if record._name == 'sale.order':
+            amount_residual = int(record.amount_total * 100)
+        elif record._name == 'account.invoice':
+            amount_residual = int(record.residual * 100)
+
         return {
             'currency': record.currency_id.name,
             'source': source,
             'description': description,
             'capture': capture,
-            'amount': int(record.residual * 100),
+            'amount': amount_residual,
             'api_key': self._api_key,
             }
 
@@ -83,9 +98,22 @@ class PaymentService(models.Model):
         return source_data['card']['three_d_secure'] != 'not_supported'
 
     def _prepare_source(self, record, source=None, return_url=None, **kwargs):
+        # TODO - the field "residual" missed in object "sale.order". On 8.0
+        # version it was create on module payment_sale_method
+        # https://github.com/OCA/sale-workflow/blob/8.0/sale_payment_method/
+        # sale.py#L53 there is PR on migration to 9.0 where the field was
+        # create in module sale_payment
+        # https://github.com/OCA/sale-workflow/pull/403/
+        # files#diff-c002243b01cfec667dfb7e6dac0c77d4R34
+        # For now we check which models is and put the value
+        amount_residual = 0.0
+        if record._name == 'sale.order':
+            amount_residual = int(record.amount_total * 100)
+        elif record._name == 'account.invoice':
+            amount_residual = int(record.residual * 100)
         return {
             'type': 'three_d_secure',
-            'amount': int(record.residual * 100),
+            'amount': amount_residual,
             'currency': record.currency_id.name,
             'three_d_secure': {'card': source},
             'redirect': {'return_url': return_url},

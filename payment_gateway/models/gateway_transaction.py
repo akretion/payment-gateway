@@ -79,7 +79,14 @@ class GatewayTransaction(models.Model):
             # TODO
             pass
         elif self.sale_id:
-            return self.sale_id.residual
+            # TODO - the field "residual" missed in object "sale.order". On 8.0
+            # version it was create on module payment_sale_method
+            # https://github.com/OCA/sale-workflow/blob/8.0/sale_payment_method/
+            # sale.py#L53 there is PR on migration to 9.0 where the field was
+            # create in module sale_payment
+            # https://github.com/OCA/sale-workflow/pull/403/
+            # files#diff-c002243b01cfec667dfb7e6dac0c77d4R34
+            return self.sale_id.amount_total
 
     @api.multi
     def cancel(self):
