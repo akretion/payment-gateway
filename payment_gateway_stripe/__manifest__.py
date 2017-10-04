@@ -22,6 +22,7 @@
     ],
     "data": [
         "data/account_payment_mode_data.xml",
+        "security/ir.model.access.csv",
     ],
     "demo": [
     ],
