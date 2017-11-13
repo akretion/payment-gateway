@@ -57,7 +57,6 @@ class PaymentService(models.Model):
                 _("An error occurred while processing the card."),
         }[code]
 
-    @property
     def _api_key(self):
         account = self._get_account()
         return account.get_password()
@@ -91,7 +90,7 @@ class PaymentService(models.Model):
             'description': description,
             'capture': capture,
             'amount': amount_residual,
-            'api_key': self._api_key,
+            'api_key': self_.api_key(),
             }
 
     def _need_three_d_secure(self, record, source_data):

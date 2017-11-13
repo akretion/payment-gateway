@@ -69,9 +69,7 @@ class GatewayTransaction(models.Model):
     redirect_cancel_url = fields.Char()
     redirect_success_url = fields.Char()
 
-    @property
     def _provider(self):
-        self.ensure_one()
         return self.env[self.payment_mode_id.provider]
 
     def _get_amount_to_capture(self):
@@ -124,7 +122,7 @@ class GatewayTransaction(models.Model):
             amount = self._get_amount_to_capture()
             vals = {}
             try:
-                self._provider.capture(self, amount)
+                self._provider().capture(self, amount)
                 vals = {
                     'state': 'succeeded',
                     'date_processing': datetime.now(),
@@ -143,4 +141,4 @@ class GatewayTransaction(models.Model):
         for record in self:
             if record.state == 'pending':
                 record.write({
-                    'state': record._provider.get_transaction_state(record)})
+                    'state': record._provider().get_transaction_state(record)})
