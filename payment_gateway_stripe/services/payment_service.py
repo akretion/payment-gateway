@@ -90,7 +90,7 @@ class PaymentService(models.Model):
             'description': description,
             'capture': capture,
             'amount': amount_residual,
-            'api_key': self_.api_key(),
+            'api_key': self._api_key(),
             }
 
     def _need_three_d_secure(self, record, source_data):
@@ -116,11 +116,11 @@ class PaymentService(models.Model):
             'currency': record.currency_id.name,
             'three_d_secure': {'card': source},
             'redirect': {'return_url': return_url},
-            'api_key': self._api_key,
+            'api_key': self._api_key(),
         }
 
     def create_provider_transaction(self, record, source=None, **kwargs):
-        source_data = stripe.Source.retrieve(source, api_key=self._api_key)
+        source_data = stripe.Source.retrieve(source, api_key=self._api_key())
         three_d_secure = self._need_three_d_secure(record, source_data)
         try:
             if three_d_secure:
@@ -156,7 +156,7 @@ class PaymentService(models.Model):
 
     def get_transaction_state(self, transaction):
         source = stripe.Source.retrieve(
-            transaction.external_id, api_key=self._api_key)
+            transaction.external_id, api_key=self._api_key())
         return MAP_SOURCE_STATE[source['status']]
 
     def _prepare_odoo_transaction_from_charge(self, charge):
@@ -177,6 +177,6 @@ class PaymentService(models.Model):
                 description=transaction.name,
                 capture=True,
                 amount=int(amount * 100),
-                api_key=self._api_key)
+                api_key=self._api_key())
             vals = self._prepare_odoo_transaction_from_charge(charge)
             transaction.write(vals)
