@@ -1,3 +1,4 @@
 sale-workflow https://github.com/OCA/sale-workflow.git 10.0
-server-tools https://github.com/OCA/server-tools.git 10.0 
-bank-payment https://github.com/OCA/bank-payment.git 10.0 
+server-tools https://github.com/OCA/server-tools.git 10.0
+bank-payment https://github.com/OCA/bank-payment.git 10.0
+bank-statement-reconcile
