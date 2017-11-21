@@ -1,3 +1,4 @@
 sale-workflow
 server-tools
 ak-odoo-incubator https://github.com/akretion/ak-odoo-incubator.git 8.0
+bank-statement-reconcile https://github.com/akretion/bank-statement-reconcile 8.0-move-import-backport
