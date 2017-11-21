@@ -4,11 +4,13 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from openerp import fields, models
+from openerp.tools.translate import _
+from openerp.addons.account_move_base_import.models.account_move import \
+    ErrorTooManyPartner
 
 
 class AccountMoveCompletionRule(models.Model):
     _inherit = 'account.move.completion.rule'
-
 
     function_to_call = fields.Selection(
         selection_add=[
