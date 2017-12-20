@@ -45,7 +45,8 @@ class PaypalCommonCase(TransactionCase):
                     'total': 2947.5,
                     },
                 'description':
-                    u'SO002|wealthyandsons@yourcompany.example.com'},
+                    u'SO002|wealthyandsons@yourcompany.example.com',
+                'invoice_number': u'SO002'}
             ]}, api="123")
 
         transaction = self.sale.transaction_ids

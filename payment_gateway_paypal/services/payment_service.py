@@ -70,6 +70,7 @@ class PaymentService(models.Model):
                     "currency": record.currency_id.name,
                     },
                 "description": description,
+                "invoice_number": record.name,
                 }],
             }
 
@@ -114,7 +115,10 @@ class PaymentService(models.Model):
             .get('payer_info', {}).get('payer_id')
         if payer_id:
             if payment.execute({'payer_id': payer_id}):
-                transaction.write({'state': 'succeeded'})
+                transaction.write({
+                    'state': 'succeeded',
+                    'data': json.dumps(payment.to_dict())
+                    })
             else:
                 transaction.write({
                     'state': 'failed',
