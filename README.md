@@ -6,11 +6,12 @@
 # Payment Gateway
 
 Alternative implementation of payment gateway for odoo
+It replace the payment module and it's dependency : https://github.com/odoo/odoo/tree/11.0/addons/payment
+
 Note : this module are still moving a lot
 
-
 ## Why?
-Because I need something that work well for Shopinvader project and I think we should use existing python library instead of redevelopping the code inside Odoo (less maintenance and more feature)
+Because I need something that work well for Shopinvader (https://github.com/akretion/odoo-shopinvader/) project and I think we should use existing python library instead of redevelopping the code inside Odoo (less maintenance and more feature)
 
 - Stripe gateway depend on the official Stripe lib : https://github.com/stripe/stripe-python
 - Paypal gateway depend on the official Paypal lib : https://github.com/paypal/PayPal-Python-SDK
@@ -21,5 +22,7 @@ Because I need something that work well for Shopinvader project and I think we s
 - Add documentation
 - Maybe one day be able to be merge with Odoo gateway...
 
+
 ## Integration with Odoo website
-- We do not plan to work on the integration with Odoo Website as we developpe a better alternative ;) Shopinvader
+We do not plan to work on the integration with Odoo Website as we developpe a better alternative ;) Shopinvader https://github.com/akretion/odoo-shopinvader/
+So if you want to use this module with the Odoo E-commerce solution you will need to develop the missing part
