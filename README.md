@@ -12,8 +12,8 @@ Note : this module are still moving a lot
 ## Why?
 Because I need something that work well for Shopinvader project and I think we should use existing python library instead of redevelopping the code inside Odoo (less maintenance and more feature)
 
-Stripe gateway depend on the official Stripe lib : https://github.com/stripe/stripe-python
-Paypal gateway depend on the official Paypal lib : https://github.com/paypal/PayPal-Python-SDK
+- Stripe gateway depend on the official Stripe lib : https://github.com/stripe/stripe-python
+- Paypal gateway depend on the official Paypal lib : https://github.com/paypal/PayPal-Python-SDK
 
 ## Roadmap
 - Refactor service class to use component : https://github.com/OCA/connector/tree/10.0/component
