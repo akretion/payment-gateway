@@ -69,9 +69,7 @@ class GatewayTransaction(models.Model):
     redirect_cancel_url = fields.Char()
     redirect_success_url = fields.Char()
 
-    @property
     def _provider(self):
-        self.ensure_one()
         return self.env[self.payment_mode_id.provider]
 
     def _get_amount_to_capture(self):
@@ -79,7 +77,14 @@ class GatewayTransaction(models.Model):
             # TODO
             pass
         elif self.sale_id:
-            return self.sale_id.residual
+            # TODO - the field "residual" missed in object "sale.order". On 8.0
+            # version it was create on module payment_sale_method
+            # https://github.com/OCA/sale-workflow/blob/8.0/sale_payment_method/
+            # sale.py#L53 there is PR on migration to 9.0 where the field was
+            # create in module sale_payment
+            # https://github.com/OCA/sale-workflow/pull/403/
+            # files#diff-c002243b01cfec667dfb7e6dac0c77d4R34
+            return self.sale_id.amount_total
 
     @api.multi
     def cancel(self):
@@ -117,7 +122,7 @@ class GatewayTransaction(models.Model):
             amount = self._get_amount_to_capture()
             vals = {}
             try:
-                self._provider.capture(self, amount)
+                self._provider().capture(self, amount)
                 vals = {
                     'state': 'succeeded',
                     'date_processing': datetime.now(),
@@ -136,4 +141,4 @@ class GatewayTransaction(models.Model):
         for record in self:
             if record.state == 'pending':
                 record.write({
-                    'state': record._provider.get_transaction_state(record)})
+                    'state': record._provider().get_transaction_state(record)})

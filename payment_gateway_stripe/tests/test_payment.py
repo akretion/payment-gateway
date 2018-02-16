@@ -3,8 +3,8 @@
 # @author Sébastien BEAU <sebastien.beau@akretion.com>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-from openerp.exceptions import Warning as UserError
-from openerp.tests.common import TransactionCase
+from odoo.exceptions import Warning as UserError
+from odoo.tests.common import TransactionCase
 import os
 import unittest
 import stripe
@@ -27,9 +27,9 @@ class StripeCommonCase(TransactionCase):
             'technical_name': 'stripe',
             'data': "{}"})
         self.sale = self.env.ref('sale.sale_order_2')
-        self.payment_method = self.env.ref(
-            'payment_gateway_stripe.payment_method_stripe')
-        self.sale.write({'payment_method_id': self.payment_method.id})
+        self.account_payment_mode = self.env.ref(
+            'payment_gateway_stripe.account_payment_mode_stripe')
+        self.sale.write({'payment_mode_id': self.account_payment_mode.id})
 
     def _get_source(self, card):
         return stripe.Source.create(
