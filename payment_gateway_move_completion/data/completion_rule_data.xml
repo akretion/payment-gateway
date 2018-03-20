@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<openerp>
-<data noupdate="1">
+<odoo noupdate="1">
 
     <record id="bank_statement_completion_rule_4" model="account.move.completion.rule">
          <field name="name">Match from Gateway Transaction using transaction ID</field>
@@ -8,5 +7,4 @@
          <field name="function_to_call">get_from_transaction_id_and_gateway_transaction</field>
      </record>
 
-</data>
-</openerp>
+</odoo>
