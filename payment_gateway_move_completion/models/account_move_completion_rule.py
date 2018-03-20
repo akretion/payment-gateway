@@ -3,8 +3,7 @@
 # @author Sébastien BEAU <sebastien.beau@akretion.com>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-from openerp import fields, models
-from openerp.tools.translate import _
+from odoo import _, fields, models
 from openerp.addons.account_move_base_import.models.account_move import \
     ErrorTooManyPartner
 
