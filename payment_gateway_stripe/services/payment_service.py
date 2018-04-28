@@ -6,6 +6,7 @@
 from odoo import models
 from odoo.exceptions import Warning as UserError
 from odoo.tools.translate import _
+from odoo.tools.float_utils import float_round
 from odoo.addons.component.core import Component
 import json
 import logging
@@ -24,12 +25,31 @@ MAP_SOURCE_STATE = {
     'pending': 'pending',
     'succeeded': 'succeeded'}
 
+ # zero decimal currency https://stripe.com/docs/currencies#zero-decimal
+ZERO_DECIMAL_CURRENCIES = [
+    u'BIF', u'CLP', u'DJF', u'GNF', u'JPY', u'KMF', u'KRW', u'MGA',
+    u'PYG', u'RWF', u'VND', u'VUV', u'XAF', u'XOF', u'XPF',
+]
+
 
 class PaymentService(Component):
     _inherit = 'payment.service'
     _name = 'payment.service.stripe'
     _usage = 'stripe'
     _allowed_capture_method = ['immediately']
+
+    def _api_key(self):
+        account = self._get_account()
+        return account._get_password()
+
+    def _get_formatted_amount(self):
+        amount = self.collection._get_amount_to_capture()
+        if self.collection.currency_id.name in ZERO_DECIMAL_CURRENCIES:
+            return int(amount)
+        else:
+            return int(float_round(amount*100, 0))
+
+    # Code for generating the transaction on stripe and the transaction on odoo
 
     def _get_error_message(self, code):
         return {
@@ -59,75 +79,45 @@ class PaymentService(Component):
                 _("An error occurred while processing the card."),
         }[code]
 
-    def _api_key(self):
-        account = self._get_account()
-        return account._get_password()
-
-    def _prepare_charge(self, record, source=None, **kwargs):
-        description = "%s|%s" % (
-            record.name,
-            record.partner_id.email)
+    def _prepare_charge(self, source=None, **kwargs):
+        transaction = self.collection
+        description = "|".join(
+            transaction.id,
+            transaction.name,
+            transaction.partner_id.email)
         # For now capture is always true as only the policy 'immedialtely' is
         # available in the configuration but it will be easier to implement
         # the logic of defeared capture
-        capture = record.payment_mode_id.capture_payment == 'immediately'
-
-        # TODO - the field "residual" missed in object "sale.order". On 8.0
-        # version it was create on module payment_sale_method
-        # https://github.com/OCA/sale-workflow/blob/8.0/sale_payment_method/
-        # sale.py#L53 there is PR on migration to 9.0 where the field was
-        # create in module sale_payment
-        # https://github.com/OCA/sale-workflow/pull/403/
-        # files#diff-c002243b01cfec667dfb7e6dac0c77d4R34
-        # For now we check which models is and put the value
-        amount_residual = 0.0
-        if record._name == 'sale.order':
-            amount_residual = int(record.amount_total * 100)
-        elif record._name == 'account.invoice':
-            amount_residual = int(record.residual * 100)
-
+        capture = transaction.capture_payment == 'immediately'
         return {
-            'currency': record.currency_id.name,
+            'currency': transaction.currency_id.name,
             'source': source,
             'description': description,
             'capture': capture,
-            'amount': amount_residual,
+            'amount': self._get_formatted_amount(),
             'api_key': self._api_key(),
             }
 
-    def _need_three_d_secure(self, record, source_data):
+    def _need_three_d_secure(self, source_data):
         return source_data['card']['three_d_secure'] != 'not_supported'
 
-    def _prepare_source(self, record, source=None, return_url=None, **kwargs):
-        # TODO - the field "residual" missed in object "sale.order". On 8.0
-        # version it was create on module payment_sale_method
-        # https://github.com/OCA/sale-workflow/blob/8.0/sale_payment_method/
-        # sale.py#L53 there is PR on migration to 9.0 where the field was
-        # create in module sale_payment
-        # https://github.com/OCA/sale-workflow/pull/403/
-        # files#diff-c002243b01cfec667dfb7e6dac0c77d4R34
-        # For now we check which models is and put the value
-        amount_residual = 0.0
-        if record._name == 'sale.order':
-            amount_residual = int(record.amount_total * 100)
-        elif record._name == 'account.invoice':
-            amount_residual = int(record.residual * 100)
+    def _prepare_source(self, source=None, return_url=None, **kwargs):
         return {
             'type': 'three_d_secure',
-            'amount': amount_residual,
-            'currency': record.currency_id.name,
+            'amount': self._get_formatted_amount(),
+            'currency': self.collection.currency_id.name,
             'three_d_secure': {'card': source},
             'redirect': {'return_url': return_url},
             'api_key': self._api_key(),
         }
 
-    def create_provider_transaction(self, record, source=None, **kwargs):
+    def _create_provider_transaction(self, source=None, **kwargs):
         source_data = stripe.Source.retrieve(source, api_key=self._api_key())
-        three_d_secure = self._need_three_d_secure(record, source_data)
+        three_d_secure = self._need_three_d_secure(source_data)
         try:
             if three_d_secure:
                 res = stripe.Source.create(
-                    **self._prepare_source(record, source=source, **kwargs))
+                    **self._prepare_source(source=source, **kwargs))
                 if res['status'] == 'chargeable':
                     # 3D secure have been not activated or not ready
                     # for this customer
@@ -136,13 +126,13 @@ class PaymentService(Component):
                     return res
             if not three_d_secure:
                 return stripe.Charge.create(
-                    **self._prepare_charge(record, source=source, **kwargs))
+                    **self._prepare_charge(source=source, **kwargs))
         except stripe.error.CardError as e:
             raise UserError(self._get_error_message(e.code))
 
-    def _prepare_odoo_transaction(self, cart, transaction, **kwargs):
+    def _prepare_odoo_transaction(self, transaction, **kwargs):
         res = super(PaymentService, self).\
-            _prepare_odoo_transaction(cart, transaction, **kwargs)
+            _prepare_odoo_transaction(transaction, **kwargs)
         res.update({
             'amount': transaction['amount']/100.,
             'external_id': transaction['id'],
@@ -156,10 +146,14 @@ class PaymentService(Component):
             res['risk_level'] = risk_level
         return res
 
+    # code for getting the state of the current transaction
+
     def get_transaction_state(self):
         source = stripe.Source.retrieve(
             self.collection.external_id, api_key=self._api_key())
         return MAP_SOURCE_STATE[source['status']]
+
+    # Code for capturing the transaction
 
     def _prepare_odoo_transaction_from_charge(self, charge):
         return {
@@ -170,7 +164,7 @@ class PaymentService(Component):
             'data': json.dumps(charge),
         }
 
-    def capture(self, amount):
+    def capture(self):
         transaction = self.collection
         if transaction.external_id.startswith('src_'):
             # Transaction is a source convert it to a charge
@@ -179,7 +173,7 @@ class PaymentService(Component):
                 source=transaction.external_id,
                 description=transaction.name,
                 capture=True,
-                amount=int(amount * 100),
+                amount=self._get_formatted_amount(),
                 api_key=self._api_key())
             vals = self._prepare_odoo_transaction_from_charge(charge)
             transaction.write(vals)

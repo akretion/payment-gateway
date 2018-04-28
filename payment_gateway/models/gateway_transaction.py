@@ -43,12 +43,16 @@ class GatewayTransaction(models.Model):
     currency_id = fields.Many2one(
         'res.currency',
         'Currency')
-    sale_id = fields.Many2one(
-        'sale.order',
-        'Sale')
-    invoice_id = fields.Many2one(
-        'account.invoice',
-        'Invoice')
+    origin_id = fields.Reference(
+        selection=[
+            ('sale.order', 'Sale Order'),
+            ('account.invoice', 'Account Invoice'),
+            ])
+    res_model = fields.Char(compute='_compute_origin')
+    res_id = fields.Integer(compute='_compute_origin')
+    partner_id = fields.Many2one(
+        'res.partner',
+        'Partner')
     state = fields.Selection([
         ('draft', 'Draft (Not requested to the bank)'),
         ('pending', 'Pending (Waiting Feedback from bank)'),
@@ -81,19 +85,18 @@ class GatewayTransaction(models.Model):
     redirect_cancel_url = fields.Char()
     redirect_success_url = fields.Char()
 
+    @api.depends('origin_id')
+    def _compute_origin(self):
+        for record in self:
+            record.res_id = record.origin_id.id
+            record.res_model = record.origin_id._name
+
     def _get_amount_to_capture(self):
-        if self.invoice_id:
-            # TODO
-            pass
-        elif self.sale_id:
-            # TODO - the field "residual" missed in object "sale.order". On 8.0
-            # version it was create on module payment_sale_method
-            # https://github.com/OCA/sale-workflow/blob/8.0/sale_payment_method/
-            # sale.py#L53 there is PR on migration to 9.0 where the field was
-            # create in module sale_payment
-            # https://github.com/OCA/sale-workflow/pull/403/
-            # files#diff-c002243b01cfec667dfb7e6dac0c77d4R34
-            return self.sale_id.amount_total
+        origin = self.origin_id
+        if origin._name == 'account.invoice':
+            return origin.residual
+        elif origin._name == 'sale.order':
+            return origin.amount_total
 
     @api.multi
     def cancel(self):
@@ -112,22 +115,28 @@ class GatewayTransaction(models.Model):
                     record.capture()
         return True
 
-    @api.model
-    def create(self, vals):
-        transaction = super(GatewayTransaction, self).create(vals)
-        if vals['state'] == 'to_capture':
-            if transaction.capture_payment == 'immediately':
-                transaction.capture()
-        return transaction
+    def _prepare_transaction(self, origin, **kwargs):
+        mode = origin.payment_mode_id
+        return {
+            'name': origin.name,
+            'payment_mode_id': mode.id,
+            'capture_payment': mode.capture_payment,
+            'redirect_cancel_url': kwargs.get('redirect_cancel_url'),
+            'redirect_success_url': kwargs.get('redirect_success_url'),
+            'currency_id': origin.currency_id.id,
+            'origin_id': '%s,%s' % (origin._name, origin.id),
+            'partner_id': origin.partner_id.id,
+            }
 
     @api.model
-    def generate(self, usage, record, **kwargs):
+    def generate(self, usage, origin, **kwargs):
         """Generate the transaction in the provider backend
         and create the transaction in odoo"""
-        with self._get_provider(usage) as provider:
-            transaction = provider.create_provider_transaction(record, **kwargs)
-            vals = provider._prepare_odoo_transaction(record, transaction, **kwargs)
-        return self.create(vals)
+        vals = self._prepare_transaction(origin)
+        transaction = self.create(vals)
+        with transaction._get_provider(usage) as provider:
+            provider.generate(**kwargs)
+        return transaction
 
     @api.multi
     def capture(self):
@@ -137,11 +146,10 @@ class GatewayTransaction(models.Model):
         if self.state == 'succeeded':
             pass
         else:
-            amount = self._get_amount_to_capture()
             vals = {}
             try:
                 with self._get_provider() as provider:
-                    provider.capture(amount)
+                    provider.capture()
                 vals = {
                     'state': 'succeeded',
                     'date_processing': datetime.now(),
