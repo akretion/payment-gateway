@@ -4,20 +4,13 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from odoo import api, models
+from odoo.addons.component.core import AbstractComponent
 
-
-# It will be better to have a class that is more abstract than the AbtractModel
-# Indeed I just use this here in order to use the inheritance feature
-class PaymentService(models.AbstractModel):
+class PaymentService(AbstractComponent):
     _name = 'payment.service'
     _description = 'Payment Service'
-
-    def _get_all_provider(self):
-        provider = []
-        for model in self.env.registry.keys():
-            if 'payment.service' in model and 'payment.service' != model:
-                provider.append(model)
-        return provider
+    _collection = 'gateway.transaction'
+    _allowed_capture_method = None
 
     def _get_account(self):
         keychain = self.env['keychain.account']
@@ -48,17 +41,9 @@ class PaymentService(models.AbstractModel):
         return res
 
     @api.model
-    def generate(self, record, **kwargs):
-        """Generate the transaction in the provider backend
-        and create the transaction in odoo"""
-        transaction = self.create_provider_transaction(record, **kwargs)
-        vals = self._prepare_odoo_transaction(record, transaction, **kwargs)
-        return self.env['gateway.transaction'].create(vals)
-
-    @api.model
-    def get_transaction_state(self, transaction):
+    def get_transaction_state(self):
         raise NotImplemented
 
     @api.model
-    def capture(self, transaction, amount):
+    def capture(self, amount):
         raise NotImplemented

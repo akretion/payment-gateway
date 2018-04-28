@@ -3,16 +3,28 @@
 # @author Sébastien BEAU <sebastien.beau@akretion.com>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
+from contextlib import contextmanager
+from datetime import datetime
 from odoo import api, fields, models
 import odoo.addons.decimal_precision as dp
-
-from datetime import datetime
+from odoo.addons.component.core import WorkContext
 
 
 class GatewayTransaction(models.Model):
     _name = 'gateway.transaction'
     _description = 'Gateway Transaction'
     _order = 'create_date desc'
+
+    @contextmanager
+    @api.multi
+    def _get_provider(self, usage=None):
+        if not usage:
+            if self:
+                usage = self.payment_mode_id.provider
+            else:
+                raise UserError('Usage is missing')
+        work = WorkContext(model_name=self._name, collection=self)
+        yield work.component(usage=usage)
 
     @api.model
     def _selection_capture_payment(self):
@@ -69,9 +81,6 @@ class GatewayTransaction(models.Model):
     redirect_cancel_url = fields.Char()
     redirect_success_url = fields.Char()
 
-    def _provider(self):
-        return self.env[self.payment_mode_id.provider]
-
     def _get_amount_to_capture(self):
         if self.invoice_id:
             # TODO
@@ -111,6 +120,15 @@ class GatewayTransaction(models.Model):
                 transaction.capture()
         return transaction
 
+    @api.model
+    def generate(self, usage, record, **kwargs):
+        """Generate the transaction in the provider backend
+        and create the transaction in odoo"""
+        with self._get_provider(usage) as provider:
+            transaction = provider.create_provider_transaction(record, **kwargs)
+            vals = provider._prepare_odoo_transaction(record, transaction, **kwargs)
+        return self.create(vals)
+
     @api.multi
     def capture(self):
         """Capture one transaction in the backend
@@ -122,7 +140,8 @@ class GatewayTransaction(models.Model):
             amount = self._get_amount_to_capture()
             vals = {}
             try:
-                self._provider().capture(self, amount)
+                with self._get_provider() as provider:
+                    provider.capture(amount)
                 vals = {
                     'state': 'succeeded',
                     'date_processing': datetime.now(),
@@ -140,5 +159,5 @@ class GatewayTransaction(models.Model):
     def check_state(self):
         for record in self:
             if record.state == 'pending':
-                record.write({
-                    'state': record._provider().get_transaction_state(record)})
+                with record._get_provider() as provider:
+                    record.write({'state': provider.get_transaction_state()})

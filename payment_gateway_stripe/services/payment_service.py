@@ -6,6 +6,7 @@
 from odoo import models
 from odoo.exceptions import Warning as UserError
 from odoo.tools.translate import _
+from odoo.addons.component.core import Component
 import json
 import logging
 _logger = logging.getLogger(__name__)
@@ -24,9 +25,10 @@ MAP_SOURCE_STATE = {
     'succeeded': 'succeeded'}
 
 
-class PaymentService(models.Model):
+class PaymentService(Component):
     _inherit = 'payment.service'
     _name = 'payment.service.stripe'
+    _usage = 'stripe'
     _allowed_capture_method = ['immediately']
 
     def _get_error_message(self, code):
@@ -59,7 +61,7 @@ class PaymentService(models.Model):
 
     def _api_key(self):
         account = self._get_account()
-        return account.get_password()
+        return account._get_password()
 
     def _prepare_charge(self, record, source=None, **kwargs):
         description = "%s|%s" % (
@@ -154,9 +156,9 @@ class PaymentService(models.Model):
             res['risk_level'] = risk_level
         return res
 
-    def get_transaction_state(self, transaction):
+    def get_transaction_state(self):
         source = stripe.Source.retrieve(
-            transaction.external_id, api_key=self._api_key())
+            self.collection.external_id, api_key=self._api_key())
         return MAP_SOURCE_STATE[source['status']]
 
     def _prepare_odoo_transaction_from_charge(self, charge):
@@ -168,7 +170,8 @@ class PaymentService(models.Model):
             'data': json.dumps(charge),
         }
 
-    def capture(self, transaction, amount):
+    def capture(self, amount):
+        transaction = self.collection
         if transaction.external_id.startswith('src_'):
             # Transaction is a source convert it to a charge
             charge = stripe.Charge.create(

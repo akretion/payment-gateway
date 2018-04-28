@@ -18,7 +18,7 @@
         "bin": [],
     },
     "depends": [
-        # "sale_payment",
+        "base_rest",
         "account_payment_sale",
         "keychain",
         "base_suspend_security",

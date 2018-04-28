@@ -2,20 +2,21 @@
 # Copyright 2017 Akretion (http://www.akretion.com).
 # @author Sébastien BEAU <sebastien.beau@akretion.com>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
-
-from odoo.exceptions import Warning as UserError
-from odoo.tests.common import TransactionCase
 import os
 import unittest
 import stripe
 import json
 import requests
 
+from odoo.exceptions import Warning as UserError
+from odoo.tests.common import TransactionCase
+from odoo.addons.component.tests.common import SavepointComponentCase
+
 
 @unittest.skipUnless(
     os.environ.get('STRIPE_API'),
     "Missing stripe connection environment variables")
-class StripeCommonCase(TransactionCase):
+class StripeCommonCase(SavepointComponentCase):
 
     def setUp(self, *args, **kwargs):
         super(StripeCommonCase, self).setUp(*args, **kwargs)
@@ -43,7 +44,7 @@ class StripeCommonCase(TransactionCase):
 
     def _fill_3d_secure(self, source, success=True):
         res = requests.get(source['redirect']['url'])
-        url = res._content.split('action="')[1].split('">')[0]
+        url = res._content.split('method="POST" action="')[1].split('">')[0]
         requests.post(url, {'PaRes': 'success' if success else 'failure'})
 
 
@@ -101,7 +102,8 @@ class StripeCase(StripeCommonCase, StripeScenario):
 
     def _create_transaction(self, card):
         source = self._get_source(card)
-        transaction = self.env['payment.service.stripe'].generate(
+        transaction = self.env['gateway.transaction'].generate(
+            'stripe',
             self.sale,
             source=source['id'],
             return_url='https://IwillBeBack.vd')
