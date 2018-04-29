@@ -168,4 +168,4 @@ class GatewayTransaction(models.Model):
         for record in self:
             if record.state == 'pending':
                 with record._get_provider() as provider:
-                    record.write({'state': provider.get_transaction_state()})
+                    record.write({'state': provider.get_state()})

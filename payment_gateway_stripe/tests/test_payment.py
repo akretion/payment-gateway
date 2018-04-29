@@ -12,6 +12,17 @@ from odoo.exceptions import Warning as UserError
 from odoo.tests.common import TransactionCase
 from odoo.addons.component.tests.common import SavepointComponentCase
 
+from vcr import VCR
+
+logging.getLogger("vcr").setLevel(logging.WARNING)
+
+recorder = VCR(
+    record_mode='once',
+    cassette_library_dir=join(dirname(__file__), 'fixtures/cassettes'),
+    path_transformer=VCR.ensure_suffix('.yaml'),
+    filter_headers=['Authorization'],
+)
+
 
 @unittest.skipUnless(
     os.environ.get('STRIPE_API'),
@@ -50,34 +61,44 @@ class StripeCommonCase(SavepointComponentCase):
 
 class StripeScenario(object):
 
+    @recorder.use_cassette
     def test_create_transaction_3d_required_failed(self):
         self._test_3d('4000000000003063', success=False)
 
+    @recorder.use_cassette
     def test_create_transaction_3d_required_success(self):
         self._test_3d('4000000000003063', success=True)
 
+    @recorder.use_cassette
     def test_create_transaction_3d_optional_failed(self):
         self._test_3d('4000000000003055', success=False)
 
+    @recorder.use_cassette
     def test_create_transaction_3d_optional_success(self):
         self._test_3d('4000000000003055', success=True)
 
+    @recorder.use_cassette
     def test_create_transaction_3d_not_supported(self):
         transaction, source = self._create_transaction('378282246310005')
         self.assertEqual(transaction.state, 'succeeded')
 
+    @recorder.use_cassette
     def test_create_transaction_visa(self):
         self._test_card('4242424242424242')
 
+    @recorder.use_cassette
     def test_create_transaction_brazil(self):
         self._test_card('4000000760000002')
 
+    @recorder.use_cassette
     def test_create_transaction_france(self):
         self._test_card('4000002500000003')
 
+    @recorder.use_cassette
     def test_create_transaction_france(self):
         self._test_card('4000002500000003')
 
+    @recorder.use_cassette
     def test_create_transaction_risk_highest(self):
         with self.assertRaises(UserError):
             self._test_card(
@@ -85,11 +106,13 @@ class StripeScenario(object):
                 expected_state='failed',
                 expected_risk_level='unknown')
 
+    @recorder.use_cassette
     def test_create_transaction_risk_elevated(self):
         self._test_card(
             '4000000000009235',
             expected_risk_level='elevated')
 
+    @recorder.use_cassette
     def test_create_transaction_expired_card(self):
         with self.assertRaises(UserError):
             self._test_card(

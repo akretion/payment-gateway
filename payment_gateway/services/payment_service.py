@@ -6,6 +6,7 @@
 from odoo import api, models
 from odoo.addons.component.core import AbstractComponent
 
+
 class PaymentService(AbstractComponent):
     _name = 'payment.service'
     _description = 'Payment Service'
@@ -19,20 +20,22 @@ class PaymentService(AbstractComponent):
             ('namespace', '=', namespace)
             ])[0]
 
-    def _create_provider_transaction(self, **kwargs):
+    def _create_transaction(self, **kwargs):
+        """Create the transaction on the backend of the service provider
+        and return a json of the result of the creation"""
         raise NotImplemented
 
-    def _prepare_odoo_transaction(self, transaction, **kwargs):
+    def _parse_creation_result(self, transaction, **kwargs):
         return {}
 
     def generate(self, **kwargs):
         """Generate the transaction in the provider backend
-            and create the transaction in odoo"""
-        transaction = self._create_provider_transaction(**kwargs)
-        vals = self._prepare_odoo_transaction(transaction, **kwargs)
+        and update the odoo gateway.transaction"""
+        transaction = self._create_transaction(**kwargs)
+        vals = self._parse_creation_result(transaction, **kwargs)
         return self.collection.write(vals)
 
-    def get_transaction_state(self):
+    def get_state(self):
         raise NotImplemented
 
     def capture(self, amount):

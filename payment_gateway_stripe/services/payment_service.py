@@ -17,6 +17,7 @@ try:
 except ImportError:
     _logger.debug('Can not import stripe')
 
+
 MAP_SOURCE_STATE = {
     'canceled': 'cancel',
     'chargeable': 'to_capture',
@@ -38,6 +39,7 @@ class PaymentService(Component):
     _usage = 'stripe'
     _allowed_capture_method = ['immediately']
 
+    @property
     def _api_key(self):
         account = self._get_account()
         return account._get_password()
@@ -81,10 +83,10 @@ class PaymentService(Component):
 
     def _prepare_charge(self, source=None, **kwargs):
         transaction = self.collection
-        description = "|".join(
-            transaction.id,
+        description = "|".join([
             transaction.name,
-            transaction.partner_id.email)
+            transaction.partner_id.email,
+            str(transaction.id)])
         # For now capture is always true as only the policy 'immedialtely' is
         # available in the configuration but it will be easier to implement
         # the logic of defeared capture
@@ -95,7 +97,7 @@ class PaymentService(Component):
             'description': description,
             'capture': capture,
             'amount': self._get_formatted_amount(),
-            'api_key': self._api_key(),
+            'api_key': self._api_key,
             }
 
     def _need_three_d_secure(self, source_data):
@@ -108,11 +110,11 @@ class PaymentService(Component):
             'currency': self.collection.currency_id.name,
             'three_d_secure': {'card': source},
             'redirect': {'return_url': return_url},
-            'api_key': self._api_key(),
+            'api_key': self._api_key,
         }
 
-    def _create_provider_transaction(self, source=None, **kwargs):
-        source_data = stripe.Source.retrieve(source, api_key=self._api_key())
+    def _create_transaction(self, source=None, **kwargs):
+        source_data = stripe.Source.retrieve(source, api_key=self._api_key)
         three_d_secure = self._need_three_d_secure(source_data)
         try:
             if three_d_secure:
@@ -130,9 +132,9 @@ class PaymentService(Component):
         except stripe.error.CardError as e:
             raise UserError(self._get_error_message(e.code))
 
-    def _prepare_odoo_transaction(self, transaction, **kwargs):
+    def _parse_creation_result(self, transaction, **kwargs):
         res = super(PaymentService, self).\
-            _prepare_odoo_transaction(transaction, **kwargs)
+            _parse_creation_result(transaction, **kwargs)
         res.update({
             'amount': transaction['amount']/100.,
             'external_id': transaction['id'],
@@ -148,14 +150,14 @@ class PaymentService(Component):
 
     # code for getting the state of the current transaction
 
-    def get_transaction_state(self):
+    def get_state(self):
         source = stripe.Source.retrieve(
-            self.collection.external_id, api_key=self._api_key())
+            self.collection.external_id, api_key=self._api_key)
         return MAP_SOURCE_STATE[source['status']]
 
     # Code for capturing the transaction
 
-    def _prepare_odoo_transaction_from_charge(self, charge):
+    def _parse_capture_result(self, charge):
         return {
             'amount': charge['amount']/100.,
             'external_id': charge['id'],
@@ -164,16 +166,21 @@ class PaymentService(Component):
             'data': json.dumps(charge),
         }
 
-    def capture(self):
+    def _prepare_capture_payload(self):
         transaction = self.collection
-        if transaction.external_id.startswith('src_'):
+        return {
+            'currency': transaction.currency_id.name,
+            'source': transaction.external_id,
+            'description': transaction.name,
+            'capture': True,
+            'amount': self._get_formatted_amount(),
+            'api_key': self._api_key,
+            }
+
+    def capture(self):
+        if self.collection.external_id.startswith('src_'):
             # Transaction is a source convert it to a charge
-            charge = stripe.Charge.create(
-                currency=transaction.currency_id.name,
-                source=transaction.external_id,
-                description=transaction.name,
-                capture=True,
-                amount=self._get_formatted_amount(),
-                api_key=self._api_key())
-            vals = self._prepare_odoo_transaction_from_charge(charge)
-            transaction.write(vals)
+            payload = self._prepare_capture_payload()
+            charge = stripe.Charge.create(**payload)
+            vals = self._parse_capture_result(charge)
+            self.collection.write(vals)
