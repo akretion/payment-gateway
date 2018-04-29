@@ -1,0 +1,214 @@
+interactions:
+- request:
+    body: !!python/unicode 'type=card&card%5Bnumber%5D=4242424242424242&card%5Bexp_year%5D=2040&card%5Bcvc%5D=123&card%5Bexp_month%5D=12'
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['108']
+      Content-Type: [application/x-www-form-urlencoded]
+      User-Agent: [Stripe/v1 PythonBindings/1.80.0]
+      X-Stripe-Client-User-Agent: ['{"lang": "python", "publisher": "stripe", "httplib":
+          "requests", "uname": "Linux 82fb5178e632 4.4.0-119-generic #143-Ubuntu SMP
+          Mon Apr 2 16:08:24 UTC 2018 x86_64 x86_64", "lang_version": "2.7.12", "platform":
+          "Linux-4.4.0-119-generic-x86_64-with-Ubuntu-16.04-xenial", "bindings_version":
+          "1.80.0"}']
+    method: POST
+    uri: https://api.stripe.com/v1/sources
+  response:
+    body: {string: !!python/unicode "{\n  \"id\": \"src_1CMABfE60z0O0voX8DAhH4yY\"\
+        ,\n  \"object\": \"source\",\n  \"amount\": null,\n  \"card\": {\n    \"exp_year\"\
+        : 2040,\n    \"exp_month\": 12,\n    \"brand\": \"Visa\",\n    \"card_automatically_updated\"\
+        : false,\n    \"country\": \"US\",\n    \"cvc_check\": \"unchecked\",\n  \
+        \  \"fingerprint\": \"kXi8sQ3nJYkhxXwn\",\n    \"funding\": \"credit\",\n\
+        \    \"last4\": \"4242\",\n    \"three_d_secure\": \"optional\",\n    \"address_line1_check\"\
+        : null,\n    \"address_zip_check\": null,\n    \"tokenization_method\": null,\n\
+        \    \"dynamic_last4\": null\n  },\n  \"client_secret\": \"src_client_secret_ClhaZaZgGLSdXSU3T59SYnhA\"\
+        ,\n  \"created\": 1524987791,\n  \"currency\": null,\n  \"flow\": \"none\"\
+        ,\n  \"livemode\": false,\n  \"metadata\": {},\n  \"owner\": {\n    \"address\"\
+        : null,\n    \"email\": null,\n    \"name\": null,\n    \"phone\": null,\n\
+        \    \"verified_address\": null,\n    \"verified_email\": null,\n    \"verified_name\"\
+        : null,\n    \"verified_phone\": null\n  },\n  \"statement_descriptor\": null,\n\
+        \  \"status\": \"chargeable\",\n  \"type\": \"card\",\n  \"usage\": \"reusable\"\
+        \n}\n"}
+    headers:
+      access-control-allow-credentials: ['true']
+      access-control-allow-methods: ['GET, POST, HEAD, OPTIONS, DELETE']
+      access-control-allow-origin: ['*']
+      access-control-expose-headers: ['Request-Id, Stripe-Manage-Version, X-Stripe-External-Auth-Required,
+          X-Stripe-Privileged-Session-Required']
+      access-control-max-age: ['300']
+      cache-control: ['no-cache, no-store']
+      connection: [keep-alive]
+      content-length: ['971']
+      content-type: [application/json]
+      date: ['Sun, 29 Apr 2018 07:43:12 GMT']
+      request-id: [req_iA8spIfVrlIe3g]
+      server: [nginx]
+      strict-transport-security: [max-age=31556926; includeSubDomains; preload]
+      stripe-version: ['2016-07-06']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [Stripe/v1 PythonBindings/1.80.0]
+      X-Stripe-Client-User-Agent: ['{"lang": "python", "publisher": "stripe", "httplib":
+          "requests", "uname": "Linux 82fb5178e632 4.4.0-119-generic #143-Ubuntu SMP
+          Mon Apr 2 16:08:24 UTC 2018 x86_64 x86_64", "lang_version": "2.7.12", "platform":
+          "Linux-4.4.0-119-generic-x86_64-with-Ubuntu-16.04-xenial", "bindings_version":
+          "1.80.0"}']
+    method: GET
+    uri: https://api.stripe.com/v1/sources/src_1CMABfE60z0O0voX8DAhH4yY
+  response:
+    body: {string: !!python/unicode "{\n  \"id\": \"src_1CMABfE60z0O0voX8DAhH4yY\"\
+        ,\n  \"object\": \"source\",\n  \"amount\": null,\n  \"card\": {\n    \"exp_year\"\
+        : 2040,\n    \"exp_month\": 12,\n    \"brand\": \"Visa\",\n    \"card_automatically_updated\"\
+        : false,\n    \"country\": \"US\",\n    \"cvc_check\": \"unchecked\",\n  \
+        \  \"fingerprint\": \"kXi8sQ3nJYkhxXwn\",\n    \"funding\": \"credit\",\n\
+        \    \"last4\": \"4242\",\n    \"three_d_secure\": \"optional\",\n    \"address_line1_check\"\
+        : null,\n    \"address_zip_check\": null,\n    \"tokenization_method\": null,\n\
+        \    \"dynamic_last4\": null\n  },\n  \"client_secret\": \"src_client_secret_ClhaZaZgGLSdXSU3T59SYnhA\"\
+        ,\n  \"created\": 1524987791,\n  \"currency\": null,\n  \"flow\": \"none\"\
+        ,\n  \"livemode\": false,\n  \"metadata\": {},\n  \"owner\": {\n    \"address\"\
+        : null,\n    \"email\": null,\n    \"name\": null,\n    \"phone\": null,\n\
+        \    \"verified_address\": null,\n    \"verified_email\": null,\n    \"verified_name\"\
+        : null,\n    \"verified_phone\": null\n  },\n  \"statement_descriptor\": null,\n\
+        \  \"status\": \"chargeable\",\n  \"type\": \"card\",\n  \"usage\": \"reusable\"\
+        \n}\n"}
+    headers:
+      access-control-allow-credentials: ['true']
+      access-control-allow-methods: ['GET, POST, HEAD, OPTIONS, DELETE']
+      access-control-allow-origin: ['*']
+      access-control-expose-headers: ['Request-Id, Stripe-Manage-Version, X-Stripe-External-Auth-Required,
+          X-Stripe-Privileged-Session-Required']
+      access-control-max-age: ['300']
+      cache-control: ['no-cache, no-store']
+      connection: [keep-alive]
+      content-length: ['971']
+      content-type: [application/json]
+      date: ['Sun, 29 Apr 2018 07:43:13 GMT']
+      request-id: [req_FuUdOUS4BG82FZ]
+      server: [nginx]
+      strict-transport-security: [max-age=31556926; includeSubDomains; preload]
+      stripe-version: ['2016-07-06']
+    status: {code: 200, message: OK}
+- request:
+    body: !!python/unicode 'redirect%5Breturn_url%5D=https%3A%2F%2FIwillBeBack.vd&currency=USD&amount=294750&type=three_d_secure&three_d_secure%5Bcard%5D=src_1CMABfE60z0O0voX8DAhH4yY'
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['154']
+      Content-Type: [application/x-www-form-urlencoded]
+      User-Agent: [Stripe/v1 PythonBindings/1.80.0]
+      X-Stripe-Client-User-Agent: ['{"lang": "python", "publisher": "stripe", "httplib":
+          "requests", "uname": "Linux 82fb5178e632 4.4.0-119-generic #143-Ubuntu SMP
+          Mon Apr 2 16:08:24 UTC 2018 x86_64 x86_64", "lang_version": "2.7.12", "platform":
+          "Linux-4.4.0-119-generic-x86_64-with-Ubuntu-16.04-xenial", "bindings_version":
+          "1.80.0"}']
+    method: POST
+    uri: https://api.stripe.com/v1/sources
+  response:
+    body: {string: !!python/unicode "{\n  \"id\": \"src_1CMABiE60z0O0voX7gYnhUEf\"\
+        ,\n  \"object\": \"source\",\n  \"amount\": 294750,\n  \"client_secret\":\
+        \ \"src_client_secret_ClhaBDlLSuF8XIe4najaDf4r\",\n  \"created\": 1524987794,\n\
+        \  \"currency\": \"usd\",\n  \"flow\": \"redirect\",\n  \"livemode\": false,\n\
+        \  \"metadata\": {},\n  \"owner\": {\n    \"address\": null,\n    \"email\"\
+        : null,\n    \"name\": null,\n    \"phone\": null,\n    \"verified_address\"\
+        : null,\n    \"verified_email\": null,\n    \"verified_name\": null,\n   \
+        \ \"verified_phone\": null\n  },\n  \"redirect\": {\n    \"failure_reason\"\
+        : null,\n    \"return_url\": \"https://IwillBeBack.vd\",\n    \"status\":\
+        \ \"succeeded\",\n    \"url\": \"https://hooks.stripe.com/redirect/authenticate/src_1CMABiE60z0O0voX7gYnhUEf?client_secret=src_client_secret_ClhaBDlLSuF8XIe4najaDf4r\"\
+        \n  },\n  \"statement_descriptor\": null,\n  \"status\": \"chargeable\",\n\
+        \  \"three_d_secure\": {\n    \"card\": \"src_1CMABfE60z0O0voX8DAhH4yY\",\n\
+        \    \"customer\": null,\n    \"authenticated\": false\n  },\n  \"type\":\
+        \ \"three_d_secure\",\n  \"usage\": \"single_use\"\n}\n"}
+    headers:
+      access-control-allow-credentials: ['true']
+      access-control-allow-methods: ['GET, POST, HEAD, OPTIONS, DELETE']
+      access-control-allow-origin: ['*']
+      access-control-expose-headers: ['Request-Id, Stripe-Manage-Version, X-Stripe-External-Auth-Required,
+          X-Stripe-Privileged-Session-Required']
+      access-control-max-age: ['300']
+      cache-control: ['no-cache, no-store']
+      connection: [keep-alive]
+      content-length: ['961']
+      content-type: [application/json]
+      date: ['Sun, 29 Apr 2018 07:43:15 GMT']
+      request-id: [req_RPn6GpNQL5WLEb]
+      server: [nginx]
+      strict-transport-security: [max-age=31556926; includeSubDomains; preload]
+      stripe-version: ['2016-07-06']
+    status: {code: 200, message: OK}
+- request:
+    body: !!python/unicode 'currency=USD&capture=True&amount=294750&description=SO002%7Cdeltapc%40yourcompany.example.com%7C153&source=src_1CMABfE60z0O0voX8DAhH4yY'
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['135']
+      Content-Type: [application/x-www-form-urlencoded]
+      User-Agent: [Stripe/v1 PythonBindings/1.80.0]
+      X-Stripe-Client-User-Agent: ['{"lang": "python", "publisher": "stripe", "httplib":
+          "requests", "uname": "Linux 82fb5178e632 4.4.0-119-generic #143-Ubuntu SMP
+          Mon Apr 2 16:08:24 UTC 2018 x86_64 x86_64", "lang_version": "2.7.12", "platform":
+          "Linux-4.4.0-119-generic-x86_64-with-Ubuntu-16.04-xenial", "bindings_version":
+          "1.80.0"}']
+    method: POST
+    uri: https://api.stripe.com/v1/charges
+  response:
+    body: {string: !!python/unicode "{\n  \"id\": \"ch_1CMABkE60z0O0voXPl7aFEAh\"\
+        ,\n  \"object\": \"charge\",\n  \"amount\": 294750,\n  \"amount_refunded\"\
+        : 0,\n  \"application\": null,\n  \"application_fee\": null,\n  \"balance_transaction\"\
+        : \"txn_1CMABkE60z0O0voXLNav0qjQ\",\n  \"captured\": true,\n  \"created\"\
+        : 1524987796,\n  \"currency\": \"usd\",\n  \"customer\": null,\n  \"description\"\
+        : \"SO002|deltapc@yourcompany.example.com|153\",\n  \"destination\": null,\n\
+        \  \"dispute\": null,\n  \"failure_code\": null,\n  \"failure_message\": null,\n\
+        \  \"fraud_details\": {},\n  \"invoice\": null,\n  \"livemode\": false,\n\
+        \  \"metadata\": {},\n  \"on_behalf_of\": null,\n  \"order\": null,\n  \"\
+        outcome\": {\n    \"network_status\": \"approved_by_network\",\n    \"reason\"\
+        : null,\n    \"risk_level\": \"normal\",\n    \"seller_message\": \"Payment\
+        \ complete.\",\n    \"type\": \"authorized\"\n  },\n  \"paid\": true,\n  \"\
+        receipt_email\": null,\n  \"receipt_number\": null,\n  \"refunded\": false,\n\
+        \  \"refunds\": {\n    \"object\": \"list\",\n    \"data\": [],\n    \"has_more\"\
+        : false,\n    \"total_count\": 0,\n    \"url\": \"/v1/charges/ch_1CMABkE60z0O0voXPl7aFEAh/refunds\"\
+        \n  },\n  \"review\": null,\n  \"shipping\": null,\n  \"source\": {\n    \"\
+        id\": \"src_1CMABfE60z0O0voX8DAhH4yY\",\n    \"object\": \"source\",\n   \
+        \ \"amount\": null,\n    \"card\": {\n      \"exp_year\": 2040,\n      \"\
+        exp_month\": 12,\n      \"brand\": \"Visa\",\n      \"card_automatically_updated\"\
+        : false,\n      \"country\": \"US\",\n      \"cvc_check\": \"pass\",\n   \
+        \   \"fingerprint\": \"kXi8sQ3nJYkhxXwn\",\n      \"funding\": \"credit\"\
+        ,\n      \"last4\": \"4242\",\n      \"three_d_secure\": \"optional\",\n \
+        \     \"address_line1_check\": null,\n      \"address_zip_check\": null,\n\
+        \      \"tokenization_method\": null,\n      \"dynamic_last4\": null\n   \
+        \ },\n    \"client_secret\": \"src_client_secret_ClhaZaZgGLSdXSU3T59SYnhA\"\
+        ,\n    \"created\": 1524987796,\n    \"currency\": null,\n    \"flow\": \"\
+        none\",\n    \"livemode\": false,\n    \"metadata\": {},\n    \"owner\": {\n\
+        \      \"address\": null,\n      \"email\": null,\n      \"name\": null,\n\
+        \      \"phone\": null,\n      \"verified_address\": null,\n      \"verified_email\"\
+        : null,\n      \"verified_name\": null,\n      \"verified_phone\": null\n\
+        \    },\n    \"statement_descriptor\": null,\n    \"status\": \"consumed\"\
+        ,\n    \"type\": \"card\",\n    \"usage\": \"reusable\"\n  },\n  \"source_transfer\"\
+        : null,\n  \"statement_descriptor\": null,\n  \"status\": \"succeeded\",\n\
+        \  \"transfer_group\": null\n}\n"}
+    headers:
+      access-control-allow-credentials: ['true']
+      access-control-allow-methods: ['GET, POST, HEAD, OPTIONS, DELETE']
+      access-control-allow-origin: ['*']
+      access-control-expose-headers: ['Request-Id, Stripe-Manage-Version, X-Stripe-External-Auth-Required,
+          X-Stripe-Privileged-Session-Required']
+      access-control-max-age: ['300']
+      cache-control: ['no-cache, no-store']
+      connection: [keep-alive]
+      content-length: ['2216']
+      content-type: [application/json]
+      date: ['Sun, 29 Apr 2018 07:43:16 GMT']
+      request-id: [req_J6czYoLthD8wi3]
+      server: [nginx]
+      strict-transport-security: [max-age=31556926; includeSubDomains; preload]
+      stripe-version: ['2016-07-06']
+    status: {code: 200, message: OK}
+version: 1

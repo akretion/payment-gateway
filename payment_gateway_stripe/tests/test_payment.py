@@ -2,31 +2,34 @@
 # Copyright 2017 Akretion (http://www.akretion.com).
 # @author Sébastien BEAU <sebastien.beau@akretion.com>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
+
+# pylint: disable=missing-manifest-dependency
+# disable warning on 'vcr' missing in manifest: this is only a dependency for
+# dev/tests
+
 import os
 import unittest
 import stripe
 import json
 import requests
+import logging
+from vcr import VCR
+from os.path import join, dirname
 
 from odoo.exceptions import Warning as UserError
 from odoo.tests.common import TransactionCase
 from odoo.addons.component.tests.common import SavepointComponentCase
 
-from vcr import VCR
-
 logging.getLogger("vcr").setLevel(logging.WARNING)
 
 recorder = VCR(
-    record_mode='once',
+    record_mode=os.environ.get('VCR_MODE', 'once'),
     cassette_library_dir=join(dirname(__file__), 'fixtures/cassettes'),
     path_transformer=VCR.ensure_suffix('.yaml'),
     filter_headers=['Authorization'],
 )
 
 
-@unittest.skipUnless(
-    os.environ.get('STRIPE_API'),
-    "Missing stripe connection environment variables")
 class StripeCommonCase(SavepointComponentCase):
 
     def setUp(self, *args, **kwargs):
