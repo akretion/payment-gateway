@@ -1,22 +1,16 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017 Akretion (http://www.akretion.com).
-# @author Sébastien BEAU <sebastien.beau@akretion.com>
-# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
+# copyright 2017 akretion (http://www.akretion.com).
+# @author sébastien beau <sebastien.beau@akretion.com>
+# license agpl-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from odoo import api, fields, models
 from odoo.tools.translate import _
 
 
-# Note on V9 and V10 the sale.payment.method is replaced by
-# the account.payment.mode
-# we will depend on the following OCA module
-# oca/bank-payment/account_payment_sale
-
-
 class AccountPaymentMode(models.Model):
     _inherit = 'account.payment.mode'
 
-    provider = fields.Selection(selection="_selection_provider")
+    provider = fields.Selection(selection=[])
     capture_payment = fields.Selection(selection='_selection_capture_payment')
 
     def _selection_capture_payment(self):
@@ -26,16 +20,6 @@ class AccountPaymentMode(models.Model):
             # ('order_confirm', _('At Order Confirmation')),
             # ('picking_confirm', _('At Picking Confirmation')),
             ]
-
-    def _get_all_provider(self):
-        work = WorkContext(
-            model_name='payment.transaction',
-            collection=self.env['payment.transaction'])
-        return [c._name for c in work._lookup_components('payment.service')]
-
-    def _selection_provider(self):
-        return [(p.replace('payment.service'), p.replace('payment.service.', '').capitalize())
-                for p in self._get_all_provider()]
 
    # @api.onchange('provider')
    # def onchange_provider(self):

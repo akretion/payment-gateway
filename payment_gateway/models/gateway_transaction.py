@@ -8,6 +8,7 @@ from datetime import datetime
 from odoo import api, fields, models
 import odoo.addons.decimal_precision as dp
 from odoo.addons.component.core import WorkContext
+from odoo.addons.queue_job.job import job, related_action
 
 
 class GatewayTransaction(models.Model):
@@ -169,3 +170,9 @@ class GatewayTransaction(models.Model):
             if record.state == 'pending':
                 with record._get_provider() as provider:
                     record.write({'state': provider.get_state()})
+
+    @job(default_channel='root.gateway.webhook')
+    def process_webhook(self, service_name, method_name, params):
+        print "TODO"
+        return True
+
