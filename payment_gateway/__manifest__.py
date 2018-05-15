@@ -18,6 +18,7 @@
         "bin": [],
     },
     "depends": [
+        "component",
         "queue_job",
         "account_payment_sale",
         "keychain",
