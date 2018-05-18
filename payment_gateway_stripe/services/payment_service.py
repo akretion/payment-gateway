@@ -3,7 +3,6 @@
 # @author Sébastien BEAU <sebastien.beau@akretion.com>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-from odoo import models
 from odoo.exceptions import Warning as UserError
 from odoo.tools.translate import _
 from odoo.tools.float_utils import float_round
@@ -26,7 +25,7 @@ MAP_SOURCE_STATE = {
     'pending': 'pending',
     'succeeded': 'succeeded'}
 
- # zero decimal currency https://stripe.com/docs/currencies#zero-decimal
+# zero decimal currency https://stripe.com/docs/currencies#zero-decimal
 ZERO_DECIMAL_CURRENCIES = [
     u'BIF', u'CLP', u'DJF', u'GNF', u'JPY', u'KMF', u'KRW', u'MGA',
     u'PYG', u'RWF', u'VND', u'VUV', u'XAF', u'XOF', u'XPF',

@@ -21,20 +21,24 @@ class AccountPaymentMode(models.Model):
             # ('picking_confirm', _('At Picking Confirmation')),
             ]
 
-   # @api.onchange('provider')
-   # def onchange_provider(self):
-   #     self.capture_payment = \
-   #         self.env[self.provider]._allowed_capture_method[0]
+    def _get_allowed_capture_method(self):
+        transaction_obj = self.env['gateway.transaction']
+        with transaction_obj._get_provider(usage='stripe') as provider:
+            return provider._allowed_capture_method
 
-   # # TODO we should be able to apply domain on selection field
-   # @api.onchange('capture_payment')
-   # def onchange_capture(self):
-   #     if self.provider:
-   #         provider = self.env[self.provider]
-   #         if self.capture_payment not in provider._allowed_capture_method:
-   #             self.capture_payment = provider._allowed_capture_method[0]
-   #             return {'warning': {
-   #                 'title': _('Incorrect Value'),
-   #                 'message': _('This method is not compatible with '
-   #                              'the provider selected'),
-   #                 }}
+    @api.onchange('provider')
+    def onchange_provider(self):
+        self.capture_method = self._get_allowed_capture_method()[0]
+
+    # TODO we should be able to apply domain on selection field
+    @api.onchange('capture_payment')
+    def onchange_capture(self):
+        if self.provider:
+            capture_methods = self._get_allowed_capture_method()
+            if self.capture_payment not in capture_methods:
+                self.capture_payment = capture_methods[0]
+                return {'warning': {
+                    'title': _('Incorrect Value'),
+                    'message': _('This method is not compatible with '
+                                 'the provider selected'),
+                    }}

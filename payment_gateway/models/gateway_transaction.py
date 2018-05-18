@@ -8,7 +8,8 @@ from datetime import datetime
 from odoo import api, fields, models
 import odoo.addons.decimal_precision as dp
 from odoo.addons.component.core import WorkContext
-from odoo.addons.queue_job.job import job, related_action
+from odoo.addons.queue_job.job import job
+from odoo.exceptions import UserError
 
 
 class GatewayTransaction(models.Model):

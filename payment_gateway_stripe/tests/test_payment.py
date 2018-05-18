@@ -8,7 +8,6 @@
 # dev/tests
 
 import os
-import unittest
 import stripe
 import json
 import requests
@@ -19,7 +18,6 @@ from os.path import join, dirname
 
 from openerp import api
 from odoo.exceptions import Warning as UserError
-from odoo.tests.common import TransactionCase
 from odoo.addons.component.tests.common import SavepointComponentCase
 from odoo.addons.queue_job.job import Job
 
@@ -29,9 +27,11 @@ logging.getLogger("vcr").setLevel(logging.WARNING)
 
 WEBHOOK_PATH = '/payment-gateway-json-webhook/stripe/process_event'
 
+
 def before_record(request):
     if WEBHOOK_PATH not in request.path:
         return request
+
 
 recorder = VCR(
     before_record_request=before_record,
@@ -165,15 +165,14 @@ class StripeCase(StripeCommonCase, StripeScenario):
 
     def _simulate_webhook(self, transaction):
         self._init_job_counter()
-        with transaction._get_provider() as provider:
-            # We only mock the data that we are interested in
-            event = {'data': {'object': {'id': transaction.external_id}}}
-            # Commit transaction (fake commit on test cursor)
-            self.env.cr.commit()
-            r = requests.post(self.base_url + WEBHOOK_PATH, json=event)
-            self.assertEqual(r.status_code, 200)
-            self._check_nbr_job_created(1)
-            self._perform_created_job()
+        # We only mock the data that we are interested in
+        event = {'data': {'object': {'id': transaction.external_id}}}
+        # Commit transaction (fake commit on test cursor)
+        self.env.cr.commit()
+        r = requests.post(self.base_url + WEBHOOK_PATH, json=event)
+        self.assertEqual(r.status_code, 200)
+        self._check_nbr_job_created(1)
+        self._perform_created_job()
 
     def _create_transaction(self, card):
         source = self._get_source(card)
