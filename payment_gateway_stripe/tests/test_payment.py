@@ -13,17 +13,29 @@ import stripe
 import json
 import requests
 import logging
+import stripe
 from vcr import VCR
 from os.path import join, dirname
 
+from openerp import api
 from odoo.exceptions import Warning as UserError
 from odoo.tests.common import TransactionCase
 from odoo.addons.component.tests.common import SavepointComponentCase
+from odoo.addons.queue_job.job import Job
+
 
 logging.getLogger("vcr").setLevel(logging.WARNING)
 
+
+WEBHOOK_PATH = '/payment-gateway-json-webhook/stripe/process_event'
+
+def before_record(request):
+    if WEBHOOK_PATH not in request.path:
+        return request
+
 recorder = VCR(
-    record_mode=os.environ.get('VCR_MODE', 'once'),
+    before_record_request=before_record,
+    record_mode=os.environ.get('VCR_MODE', 'none'),
     cassette_library_dir=join(dirname(__file__), 'fixtures/cassettes'),
     path_transformer=VCR.ensure_suffix('.yaml'),
     filter_headers=['Authorization'],
@@ -34,6 +46,8 @@ class StripeCommonCase(SavepointComponentCase):
 
     def setUp(self, *args, **kwargs):
         super(StripeCommonCase, self).setUp(*args, **kwargs)
+        self.registry.enter_test_mode()
+        self.env = api.Environment(self.registry.test_cr, 1, {})
         self.stripe_api = os.environ.get('STRIPE_API')
         self.env['keychain.account'].create({
             'namespace': 'stripe',
@@ -45,6 +59,10 @@ class StripeCommonCase(SavepointComponentCase):
         self.account_payment_mode = self.env.ref(
             'payment_gateway_stripe.account_payment_mode_stripe')
         self.sale.write({'payment_mode_id': self.account_payment_mode.id})
+
+    def tearDown(self):
+        self.registry.leave_test_mode()
+        super(StripeCommonCase, self).tearDown()
 
     def _get_source(self, card):
         return stripe.Source.create(
@@ -60,6 +78,20 @@ class StripeCommonCase(SavepointComponentCase):
         res = requests.get(source['redirect']['url'])
         url = res._content.split('method="POST" action="')[1].split('">')[0]
         requests.post(url, {'PaRes': 'success' if success else 'failure'})
+
+    def _init_job_counter(self):
+        self.existing_job = self.env['queue.job'].search([])
+
+    @property
+    def created_jobs(self):
+        return self.env['queue.job'].search([]) - self.existing_job
+
+    def _check_nbr_job_created(self, nbr):
+        self.assertEqual(len(self.created_jobs), nbr)
+
+    def _perform_created_job(self):
+        for job in self.created_jobs:
+            Job.load(self.env, job.uuid).perform()
 
 
 class StripeScenario(object):
@@ -126,6 +158,23 @@ class StripeScenario(object):
 
 class StripeCase(StripeCommonCase, StripeScenario):
 
+    def setUp(self, *args, **kwargs):
+        super(StripeCase, self).setUp(*args, **kwargs)
+        self.base_url = self.env['ir.config_parameter']\
+            .get_param('web.base.url')
+
+    def _simulate_webhook(self, transaction):
+        self._init_job_counter()
+        with transaction._get_provider() as provider:
+            # We only mock the data that we are interested in
+            event = {'data': {'object': {'id': transaction.external_id}}}
+            # Commit transaction (fake commit on test cursor)
+            self.env.cr.commit()
+            r = requests.post(self.base_url + WEBHOOK_PATH, json=event)
+            self.assertEqual(r.status_code, 200)
+            self._check_nbr_job_created(1)
+            self._perform_created_job()
+
     def _create_transaction(self, card):
         source = self._get_source(card)
         transaction = self.env['gateway.transaction'].generate(
@@ -147,7 +196,7 @@ class StripeCase(StripeCommonCase, StripeScenario):
         transaction, source = self._create_transaction(card)
         self.assertEqual(transaction.state, 'pending')
         self._fill_3d_secure(source, success=success)
-        transaction.check_state()
+        self._simulate_webhook(transaction)
         if success:
             self._check_captured(transaction)
         else:

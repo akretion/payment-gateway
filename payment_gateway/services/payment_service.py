@@ -5,6 +5,7 @@
 
 from odoo import api, models
 from odoo.addons.component.core import AbstractComponent
+from cerberus import Validator
 
 
 class PaymentService(AbstractComponent):
@@ -12,6 +13,44 @@ class PaymentService(AbstractComponent):
     _description = 'Payment Service'
     _collection = 'gateway.transaction'
     _allowed_capture_method = None
+    _webhook_method = []
+
+    # TODO this code is inspired from base_rest
+    # maybe we should found a way to mutualise it
+    def _get_schema_for_method(self, method_name):
+        validator_method = '_validator_%s' % method_name
+        if not hasattr(self, validator_method):
+            raise NotImplementedError(validator_method)
+        return getattr(self, validator_method)()
+
+    def _secure_params(self, method, params):
+        """
+        This internal method is used to validate and sanitize the parameters
+        expected by the given method.  These parameters are validated and
+        sanitized according to a schema provided by a method  following the
+        naming convention: '_validator_{method_name}'.
+        :param method:
+        :param params:
+        :return:
+        """
+        method_name = method.__name__
+        schema = self._get_schema_for_method(method_name)
+        v = Validator(schema, purge_unknown=True)
+        if v.validate(params):
+            return v.document
+        _logger.error("BadRequest %s", v.errors)
+        raise UserError(_('Invalid Form'))
+
+    def dispatch(self, method_name, params):
+        if method_name not in self._webhook_method:
+            raise UserError('Method not allowed for service %s', self._name)
+
+        func = getattr(self, method_name, None)
+        if not func:
+            raise UserError('Method %s not found in service %s',
+                            method_name, self._name)
+        secure_params = self._secure_params(func, params)
+        return func(**secure_params)
 
     def _get_account(self):
         keychain = self.env['keychain.account']

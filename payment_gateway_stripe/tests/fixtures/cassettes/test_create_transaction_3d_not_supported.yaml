@@ -165,4 +165,668 @@ interactions:
       strict-transport-security: [max-age=31556926; includeSubDomains; preload]
       stripe-version: ['2016-07-06']
     status: {code: 200, message: OK}
+- request:
+    body: !!python/unicode 'type=card&card%5Bnumber%5D=378282246310005&card%5Bexp_year%5D=2040&card%5Bcvc%5D=123&card%5Bexp_month%5D=12'
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['107']
+      Content-Type: [application/x-www-form-urlencoded]
+      User-Agent: [Stripe/v1 PythonBindings/1.80.0]
+      X-Stripe-Client-User-Agent: ['{"lang": "python", "publisher": "stripe", "httplib":
+          "requests", "uname": "Linux 82fb5178e632 4.4.0-119-generic #143-Ubuntu SMP
+          Mon Apr 2 16:08:24 UTC 2018 x86_64 x86_64", "lang_version": "2.7.12", "platform":
+          "Linux-4.4.0-119-generic-x86_64-with-Ubuntu-16.04-xenial", "bindings_version":
+          "1.80.0"}']
+    method: POST
+    uri: https://api.stripe.com/v1/sources
+  response:
+    body: {string: !!python/unicode "{\n  \"id\": \"src_1CMZDtE60z0O0voXPNXBDunN\"\
+        ,\n  \"object\": \"source\",\n  \"amount\": null,\n  \"card\": {\n    \"exp_year\"\
+        : 2040,\n    \"exp_month\": 12,\n    \"brand\": \"American Express\",\n  \
+        \  \"card_automatically_updated\": false,\n    \"country\": \"US\",\n    \"\
+        cvc_check\": \"unchecked\",\n    \"fingerprint\": \"Uprp5MbueMDuRAYU\",\n\
+        \    \"funding\": \"credit\",\n    \"last4\": \"0005\",\n    \"three_d_secure\"\
+        : \"not_supported\",\n    \"address_line1_check\": null,\n    \"address_zip_check\"\
+        : null,\n    \"tokenization_method\": null,\n    \"dynamic_last4\": null\n\
+        \  },\n  \"client_secret\": \"src_client_secret_Cm7SmWcNlK7PpT2CYOzUFf2n\"\
+        ,\n  \"created\": 1525084029,\n  \"currency\": null,\n  \"flow\": \"none\"\
+        ,\n  \"livemode\": false,\n  \"metadata\": {},\n  \"owner\": {\n    \"address\"\
+        : null,\n    \"email\": null,\n    \"name\": null,\n    \"phone\": null,\n\
+        \    \"verified_address\": null,\n    \"verified_email\": null,\n    \"verified_name\"\
+        : null,\n    \"verified_phone\": null\n  },\n  \"statement_descriptor\": null,\n\
+        \  \"status\": \"chargeable\",\n  \"type\": \"card\",\n  \"usage\": \"reusable\"\
+        \n}\n"}
+    headers:
+      access-control-allow-credentials: ['true']
+      access-control-allow-methods: ['GET, POST, HEAD, OPTIONS, DELETE']
+      access-control-allow-origin: ['*']
+      access-control-expose-headers: ['Request-Id, Stripe-Manage-Version, X-Stripe-External-Auth-Required,
+          X-Stripe-Privileged-Session-Required']
+      access-control-max-age: ['300']
+      cache-control: ['no-cache, no-store']
+      connection: [keep-alive]
+      content-length: ['988']
+      content-type: [application/json]
+      date: ['Mon, 30 Apr 2018 10:27:10 GMT']
+      request-id: [req_dAenjV3VIq0Zqv]
+      server: [nginx]
+      strict-transport-security: [max-age=31556926; includeSubDomains; preload]
+      stripe-version: ['2016-07-06']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [Stripe/v1 PythonBindings/1.80.0]
+      X-Stripe-Client-User-Agent: ['{"lang": "python", "publisher": "stripe", "httplib":
+          "requests", "uname": "Linux 82fb5178e632 4.4.0-119-generic #143-Ubuntu SMP
+          Mon Apr 2 16:08:24 UTC 2018 x86_64 x86_64", "lang_version": "2.7.12", "platform":
+          "Linux-4.4.0-119-generic-x86_64-with-Ubuntu-16.04-xenial", "bindings_version":
+          "1.80.0"}']
+    method: GET
+    uri: https://api.stripe.com/v1/sources/src_1CMZDtE60z0O0voXPNXBDunN
+  response:
+    body: {string: !!python/unicode "{\n  \"id\": \"src_1CMZDtE60z0O0voXPNXBDunN\"\
+        ,\n  \"object\": \"source\",\n  \"amount\": null,\n  \"card\": {\n    \"exp_year\"\
+        : 2040,\n    \"exp_month\": 12,\n    \"brand\": \"American Express\",\n  \
+        \  \"card_automatically_updated\": false,\n    \"country\": \"US\",\n    \"\
+        cvc_check\": \"unchecked\",\n    \"fingerprint\": \"Uprp5MbueMDuRAYU\",\n\
+        \    \"funding\": \"credit\",\n    \"last4\": \"0005\",\n    \"three_d_secure\"\
+        : \"not_supported\",\n    \"address_line1_check\": null,\n    \"address_zip_check\"\
+        : null,\n    \"tokenization_method\": null,\n    \"dynamic_last4\": null\n\
+        \  },\n  \"client_secret\": \"src_client_secret_Cm7SmWcNlK7PpT2CYOzUFf2n\"\
+        ,\n  \"created\": 1525084029,\n  \"currency\": null,\n  \"flow\": \"none\"\
+        ,\n  \"livemode\": false,\n  \"metadata\": {},\n  \"owner\": {\n    \"address\"\
+        : null,\n    \"email\": null,\n    \"name\": null,\n    \"phone\": null,\n\
+        \    \"verified_address\": null,\n    \"verified_email\": null,\n    \"verified_name\"\
+        : null,\n    \"verified_phone\": null\n  },\n  \"statement_descriptor\": null,\n\
+        \  \"status\": \"chargeable\",\n  \"type\": \"card\",\n  \"usage\": \"reusable\"\
+        \n}\n"}
+    headers:
+      access-control-allow-credentials: ['true']
+      access-control-allow-methods: ['GET, POST, HEAD, OPTIONS, DELETE']
+      access-control-allow-origin: ['*']
+      access-control-expose-headers: ['Request-Id, Stripe-Manage-Version, X-Stripe-External-Auth-Required,
+          X-Stripe-Privileged-Session-Required']
+      access-control-max-age: ['300']
+      cache-control: ['no-cache, no-store']
+      connection: [keep-alive]
+      content-length: ['988']
+      content-type: [application/json]
+      date: ['Mon, 30 Apr 2018 10:27:11 GMT']
+      request-id: [req_qyTqaDuIZKVDkw]
+      server: [nginx]
+      strict-transport-security: [max-age=31556926; includeSubDomains; preload]
+      stripe-version: ['2016-07-06']
+    status: {code: 200, message: OK}
+- request:
+    body: !!python/unicode 'currency=USD&capture=True&amount=294750&description=SO002%7Cdeltapc%40yourcompany.example.com%7C201&source=src_1CMZDtE60z0O0voXPNXBDunN'
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['135']
+      Content-Type: [application/x-www-form-urlencoded]
+      User-Agent: [Stripe/v1 PythonBindings/1.80.0]
+      X-Stripe-Client-User-Agent: ['{"lang": "python", "publisher": "stripe", "httplib":
+          "requests", "uname": "Linux 82fb5178e632 4.4.0-119-generic #143-Ubuntu SMP
+          Mon Apr 2 16:08:24 UTC 2018 x86_64 x86_64", "lang_version": "2.7.12", "platform":
+          "Linux-4.4.0-119-generic-x86_64-with-Ubuntu-16.04-xenial", "bindings_version":
+          "1.80.0"}']
+    method: POST
+    uri: https://api.stripe.com/v1/charges
+  response:
+    body: {string: !!python/unicode "{\n  \"id\": \"ch_1CMZDwE60z0O0voXHONNE3Td\"\
+        ,\n  \"object\": \"charge\",\n  \"amount\": 294750,\n  \"amount_refunded\"\
+        : 0,\n  \"application\": null,\n  \"application_fee\": null,\n  \"balance_transaction\"\
+        : \"txn_1CMZDwE60z0O0voXzb3RWv70\",\n  \"captured\": true,\n  \"created\"\
+        : 1525084032,\n  \"currency\": \"usd\",\n  \"customer\": null,\n  \"description\"\
+        : \"SO002|deltapc@yourcompany.example.com|201\",\n  \"destination\": null,\n\
+        \  \"dispute\": null,\n  \"failure_code\": null,\n  \"failure_message\": null,\n\
+        \  \"fraud_details\": {},\n  \"invoice\": null,\n  \"livemode\": false,\n\
+        \  \"metadata\": {},\n  \"on_behalf_of\": null,\n  \"order\": null,\n  \"\
+        outcome\": {\n    \"network_status\": \"approved_by_network\",\n    \"reason\"\
+        : null,\n    \"risk_level\": \"normal\",\n    \"seller_message\": \"Payment\
+        \ complete.\",\n    \"type\": \"authorized\"\n  },\n  \"paid\": true,\n  \"\
+        receipt_email\": null,\n  \"receipt_number\": null,\n  \"refunded\": false,\n\
+        \  \"refunds\": {\n    \"object\": \"list\",\n    \"data\": [],\n    \"has_more\"\
+        : false,\n    \"total_count\": 0,\n    \"url\": \"/v1/charges/ch_1CMZDwE60z0O0voXHONNE3Td/refunds\"\
+        \n  },\n  \"review\": null,\n  \"shipping\": null,\n  \"source\": {\n    \"\
+        id\": \"src_1CMZDtE60z0O0voXPNXBDunN\",\n    \"object\": \"source\",\n   \
+        \ \"amount\": null,\n    \"card\": {\n      \"exp_year\": 2040,\n      \"\
+        exp_month\": 12,\n      \"brand\": \"American Express\",\n      \"card_automatically_updated\"\
+        : false,\n      \"country\": \"US\",\n      \"cvc_check\": \"pass\",\n   \
+        \   \"fingerprint\": \"Uprp5MbueMDuRAYU\",\n      \"funding\": \"credit\"\
+        ,\n      \"last4\": \"0005\",\n      \"three_d_secure\": \"not_supported\"\
+        ,\n      \"address_line1_check\": null,\n      \"address_zip_check\": null,\n\
+        \      \"tokenization_method\": null,\n      \"dynamic_last4\": null\n   \
+        \ },\n    \"client_secret\": \"src_client_secret_Cm7SmWcNlK7PpT2CYOzUFf2n\"\
+        ,\n    \"created\": 1525084032,\n    \"currency\": null,\n    \"flow\": \"\
+        none\",\n    \"livemode\": false,\n    \"metadata\": {},\n    \"owner\": {\n\
+        \      \"address\": null,\n      \"email\": null,\n      \"name\": null,\n\
+        \      \"phone\": null,\n      \"verified_address\": null,\n      \"verified_email\"\
+        : null,\n      \"verified_name\": null,\n      \"verified_phone\": null\n\
+        \    },\n    \"statement_descriptor\": null,\n    \"status\": \"consumed\"\
+        ,\n    \"type\": \"card\",\n    \"usage\": \"reusable\"\n  },\n  \"source_transfer\"\
+        : null,\n  \"statement_descriptor\": null,\n  \"status\": \"succeeded\",\n\
+        \  \"transfer_group\": null\n}\n"}
+    headers:
+      access-control-allow-credentials: ['true']
+      access-control-allow-methods: ['GET, POST, HEAD, OPTIONS, DELETE']
+      access-control-allow-origin: ['*']
+      access-control-expose-headers: ['Request-Id, Stripe-Manage-Version, X-Stripe-External-Auth-Required,
+          X-Stripe-Privileged-Session-Required']
+      access-control-max-age: ['300']
+      cache-control: ['no-cache, no-store']
+      connection: [keep-alive]
+      content-length: ['2233']
+      content-type: [application/json]
+      date: ['Mon, 30 Apr 2018 10:27:12 GMT']
+      request-id: [req_AqJifk63VhYK8P]
+      server: [nginx]
+      strict-transport-security: [max-age=31556926; includeSubDomains; preload]
+      stripe-version: ['2016-07-06']
+    status: {code: 200, message: OK}
+- request:
+    body: !!python/unicode 'type=card&card%5Bnumber%5D=378282246310005&card%5Bexp_year%5D=2040&card%5Bcvc%5D=123&card%5Bexp_month%5D=12'
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['107']
+      Content-Type: [application/x-www-form-urlencoded]
+      User-Agent: [Stripe/v1 PythonBindings/1.80.0]
+      X-Stripe-Client-User-Agent: ['{"lang": "python", "publisher": "stripe", "httplib":
+          "requests", "uname": "Linux 82fb5178e632 4.4.0-119-generic #143-Ubuntu SMP
+          Mon Apr 2 16:08:24 UTC 2018 x86_64 x86_64", "lang_version": "2.7.12", "platform":
+          "Linux-4.4.0-119-generic-x86_64-with-Ubuntu-16.04-xenial", "bindings_version":
+          "1.80.0"}']
+    method: POST
+    uri: https://api.stripe.com/v1/sources
+  response:
+    body: {string: !!python/unicode "{\n  \"id\": \"src_1CMZRKE60z0O0voXA1rlFk9l\"\
+        ,\n  \"object\": \"source\",\n  \"amount\": null,\n  \"card\": {\n    \"exp_year\"\
+        : 2040,\n    \"exp_month\": 12,\n    \"brand\": \"American Express\",\n  \
+        \  \"card_automatically_updated\": false,\n    \"country\": \"US\",\n    \"\
+        cvc_check\": \"unchecked\",\n    \"fingerprint\": \"Uprp5MbueMDuRAYU\",\n\
+        \    \"funding\": \"credit\",\n    \"last4\": \"0005\",\n    \"three_d_secure\"\
+        : \"not_supported\",\n    \"address_line1_check\": null,\n    \"address_zip_check\"\
+        : null,\n    \"tokenization_method\": null,\n    \"dynamic_last4\": null\n\
+        \  },\n  \"client_secret\": \"src_client_secret_Cm7g7GUc7eloeswXaRg9a9xe\"\
+        ,\n  \"created\": 1525084862,\n  \"currency\": null,\n  \"flow\": \"none\"\
+        ,\n  \"livemode\": false,\n  \"metadata\": {},\n  \"owner\": {\n    \"address\"\
+        : null,\n    \"email\": null,\n    \"name\": null,\n    \"phone\": null,\n\
+        \    \"verified_address\": null,\n    \"verified_email\": null,\n    \"verified_name\"\
+        : null,\n    \"verified_phone\": null\n  },\n  \"statement_descriptor\": null,\n\
+        \  \"status\": \"chargeable\",\n  \"type\": \"card\",\n  \"usage\": \"reusable\"\
+        \n}\n"}
+    headers:
+      access-control-allow-credentials: ['true']
+      access-control-allow-methods: ['GET, POST, HEAD, OPTIONS, DELETE']
+      access-control-allow-origin: ['*']
+      access-control-expose-headers: ['Request-Id, Stripe-Manage-Version, X-Stripe-External-Auth-Required,
+          X-Stripe-Privileged-Session-Required']
+      access-control-max-age: ['300']
+      cache-control: ['no-cache, no-store']
+      connection: [keep-alive]
+      content-length: ['988']
+      content-type: [application/json]
+      date: ['Mon, 30 Apr 2018 10:41:03 GMT']
+      request-id: [req_fyMuMeFvP5KNhC]
+      server: [nginx]
+      strict-transport-security: [max-age=31556926; includeSubDomains; preload]
+      stripe-version: ['2016-07-06']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [Stripe/v1 PythonBindings/1.80.0]
+      X-Stripe-Client-User-Agent: ['{"lang": "python", "publisher": "stripe", "httplib":
+          "requests", "uname": "Linux 82fb5178e632 4.4.0-119-generic #143-Ubuntu SMP
+          Mon Apr 2 16:08:24 UTC 2018 x86_64 x86_64", "lang_version": "2.7.12", "platform":
+          "Linux-4.4.0-119-generic-x86_64-with-Ubuntu-16.04-xenial", "bindings_version":
+          "1.80.0"}']
+    method: GET
+    uri: https://api.stripe.com/v1/sources/src_1CMZRKE60z0O0voXA1rlFk9l
+  response:
+    body: {string: !!python/unicode "{\n  \"id\": \"src_1CMZRKE60z0O0voXA1rlFk9l\"\
+        ,\n  \"object\": \"source\",\n  \"amount\": null,\n  \"card\": {\n    \"exp_year\"\
+        : 2040,\n    \"exp_month\": 12,\n    \"brand\": \"American Express\",\n  \
+        \  \"card_automatically_updated\": false,\n    \"country\": \"US\",\n    \"\
+        cvc_check\": \"unchecked\",\n    \"fingerprint\": \"Uprp5MbueMDuRAYU\",\n\
+        \    \"funding\": \"credit\",\n    \"last4\": \"0005\",\n    \"three_d_secure\"\
+        : \"not_supported\",\n    \"address_line1_check\": null,\n    \"address_zip_check\"\
+        : null,\n    \"tokenization_method\": null,\n    \"dynamic_last4\": null\n\
+        \  },\n  \"client_secret\": \"src_client_secret_Cm7g7GUc7eloeswXaRg9a9xe\"\
+        ,\n  \"created\": 1525084862,\n  \"currency\": null,\n  \"flow\": \"none\"\
+        ,\n  \"livemode\": false,\n  \"metadata\": {},\n  \"owner\": {\n    \"address\"\
+        : null,\n    \"email\": null,\n    \"name\": null,\n    \"phone\": null,\n\
+        \    \"verified_address\": null,\n    \"verified_email\": null,\n    \"verified_name\"\
+        : null,\n    \"verified_phone\": null\n  },\n  \"statement_descriptor\": null,\n\
+        \  \"status\": \"chargeable\",\n  \"type\": \"card\",\n  \"usage\": \"reusable\"\
+        \n}\n"}
+    headers:
+      access-control-allow-credentials: ['true']
+      access-control-allow-methods: ['GET, POST, HEAD, OPTIONS, DELETE']
+      access-control-allow-origin: ['*']
+      access-control-expose-headers: ['Request-Id, Stripe-Manage-Version, X-Stripe-External-Auth-Required,
+          X-Stripe-Privileged-Session-Required']
+      access-control-max-age: ['300']
+      cache-control: ['no-cache, no-store']
+      connection: [keep-alive]
+      content-length: ['988']
+      content-type: [application/json]
+      date: ['Mon, 30 Apr 2018 10:41:04 GMT']
+      request-id: [req_GwmFJUWzY6ZNS6]
+      server: [nginx]
+      strict-transport-security: [max-age=31556926; includeSubDomains; preload]
+      stripe-version: ['2016-07-06']
+    status: {code: 200, message: OK}
+- request:
+    body: !!python/unicode 'currency=USD&capture=True&amount=294750&description=SO002%7Cdeltapc%40yourcompany.example.com%7C203&source=src_1CMZRKE60z0O0voXA1rlFk9l'
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['135']
+      Content-Type: [application/x-www-form-urlencoded]
+      User-Agent: [Stripe/v1 PythonBindings/1.80.0]
+      X-Stripe-Client-User-Agent: ['{"lang": "python", "publisher": "stripe", "httplib":
+          "requests", "uname": "Linux 82fb5178e632 4.4.0-119-generic #143-Ubuntu SMP
+          Mon Apr 2 16:08:24 UTC 2018 x86_64 x86_64", "lang_version": "2.7.12", "platform":
+          "Linux-4.4.0-119-generic-x86_64-with-Ubuntu-16.04-xenial", "bindings_version":
+          "1.80.0"}']
+    method: POST
+    uri: https://api.stripe.com/v1/charges
+  response:
+    body: {string: !!python/unicode "{\n  \"id\": \"ch_1CMZRNE60z0O0voXh1AHFT2n\"\
+        ,\n  \"object\": \"charge\",\n  \"amount\": 294750,\n  \"amount_refunded\"\
+        : 0,\n  \"application\": null,\n  \"application_fee\": null,\n  \"balance_transaction\"\
+        : \"txn_1CMZRNE60z0O0voXQwV71C9d\",\n  \"captured\": true,\n  \"created\"\
+        : 1525084865,\n  \"currency\": \"usd\",\n  \"customer\": null,\n  \"description\"\
+        : \"SO002|deltapc@yourcompany.example.com|203\",\n  \"destination\": null,\n\
+        \  \"dispute\": null,\n  \"failure_code\": null,\n  \"failure_message\": null,\n\
+        \  \"fraud_details\": {},\n  \"invoice\": null,\n  \"livemode\": false,\n\
+        \  \"metadata\": {},\n  \"on_behalf_of\": null,\n  \"order\": null,\n  \"\
+        outcome\": {\n    \"network_status\": \"approved_by_network\",\n    \"reason\"\
+        : null,\n    \"risk_level\": \"normal\",\n    \"seller_message\": \"Payment\
+        \ complete.\",\n    \"type\": \"authorized\"\n  },\n  \"paid\": true,\n  \"\
+        receipt_email\": null,\n  \"receipt_number\": null,\n  \"refunded\": false,\n\
+        \  \"refunds\": {\n    \"object\": \"list\",\n    \"data\": [],\n    \"has_more\"\
+        : false,\n    \"total_count\": 0,\n    \"url\": \"/v1/charges/ch_1CMZRNE60z0O0voXh1AHFT2n/refunds\"\
+        \n  },\n  \"review\": null,\n  \"shipping\": null,\n  \"source\": {\n    \"\
+        id\": \"src_1CMZRKE60z0O0voXA1rlFk9l\",\n    \"object\": \"source\",\n   \
+        \ \"amount\": null,\n    \"card\": {\n      \"exp_year\": 2040,\n      \"\
+        exp_month\": 12,\n      \"brand\": \"American Express\",\n      \"card_automatically_updated\"\
+        : false,\n      \"country\": \"US\",\n      \"cvc_check\": \"pass\",\n   \
+        \   \"fingerprint\": \"Uprp5MbueMDuRAYU\",\n      \"funding\": \"credit\"\
+        ,\n      \"last4\": \"0005\",\n      \"three_d_secure\": \"not_supported\"\
+        ,\n      \"address_line1_check\": null,\n      \"address_zip_check\": null,\n\
+        \      \"tokenization_method\": null,\n      \"dynamic_last4\": null\n   \
+        \ },\n    \"client_secret\": \"src_client_secret_Cm7g7GUc7eloeswXaRg9a9xe\"\
+        ,\n    \"created\": 1525084865,\n    \"currency\": null,\n    \"flow\": \"\
+        none\",\n    \"livemode\": false,\n    \"metadata\": {},\n    \"owner\": {\n\
+        \      \"address\": null,\n      \"email\": null,\n      \"name\": null,\n\
+        \      \"phone\": null,\n      \"verified_address\": null,\n      \"verified_email\"\
+        : null,\n      \"verified_name\": null,\n      \"verified_phone\": null\n\
+        \    },\n    \"statement_descriptor\": null,\n    \"status\": \"consumed\"\
+        ,\n    \"type\": \"card\",\n    \"usage\": \"reusable\"\n  },\n  \"source_transfer\"\
+        : null,\n  \"statement_descriptor\": null,\n  \"status\": \"succeeded\",\n\
+        \  \"transfer_group\": null\n}\n"}
+    headers:
+      access-control-allow-credentials: ['true']
+      access-control-allow-methods: ['GET, POST, HEAD, OPTIONS, DELETE']
+      access-control-allow-origin: ['*']
+      access-control-expose-headers: ['Request-Id, Stripe-Manage-Version, X-Stripe-External-Auth-Required,
+          X-Stripe-Privileged-Session-Required']
+      access-control-max-age: ['300']
+      cache-control: ['no-cache, no-store']
+      connection: [keep-alive]
+      content-length: ['2233']
+      content-type: [application/json]
+      date: ['Mon, 30 Apr 2018 10:41:05 GMT']
+      request-id: [req_Rhns9C84EctbBd]
+      server: [nginx]
+      strict-transport-security: [max-age=31556926; includeSubDomains; preload]
+      stripe-version: ['2016-07-06']
+    status: {code: 200, message: OK}
+- request:
+    body: !!python/unicode 'type=card&card%5Bnumber%5D=378282246310005&card%5Bexp_year%5D=2040&card%5Bcvc%5D=123&card%5Bexp_month%5D=12'
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['107']
+      Content-Type: [application/x-www-form-urlencoded]
+      User-Agent: [Stripe/v1 PythonBindings/1.80.0]
+      X-Stripe-Client-User-Agent: ['{"lang": "python", "publisher": "stripe", "httplib":
+          "requests", "uname": "Linux 82fb5178e632 4.4.0-119-generic #143-Ubuntu SMP
+          Mon Apr 2 16:08:24 UTC 2018 x86_64 x86_64", "lang_version": "2.7.12", "platform":
+          "Linux-4.4.0-119-generic-x86_64-with-Ubuntu-16.04-xenial", "bindings_version":
+          "1.80.0"}']
+    method: POST
+    uri: https://api.stripe.com/v1/sources
+  response:
+    body: {string: !!python/unicode "{\n  \"id\": \"src_1CMZSIE60z0O0voXasfQ4kQP\"\
+        ,\n  \"object\": \"source\",\n  \"amount\": null,\n  \"card\": {\n    \"exp_year\"\
+        : 2040,\n    \"exp_month\": 12,\n    \"brand\": \"American Express\",\n  \
+        \  \"card_automatically_updated\": false,\n    \"country\": \"US\",\n    \"\
+        cvc_check\": \"unchecked\",\n    \"fingerprint\": \"Uprp5MbueMDuRAYU\",\n\
+        \    \"funding\": \"credit\",\n    \"last4\": \"0005\",\n    \"three_d_secure\"\
+        : \"not_supported\",\n    \"address_line1_check\": null,\n    \"address_zip_check\"\
+        : null,\n    \"tokenization_method\": null,\n    \"dynamic_last4\": null\n\
+        \  },\n  \"client_secret\": \"src_client_secret_Cm7hspVtTUwMNof9HfMmmFFn\"\
+        ,\n  \"created\": 1525084922,\n  \"currency\": null,\n  \"flow\": \"none\"\
+        ,\n  \"livemode\": false,\n  \"metadata\": {},\n  \"owner\": {\n    \"address\"\
+        : null,\n    \"email\": null,\n    \"name\": null,\n    \"phone\": null,\n\
+        \    \"verified_address\": null,\n    \"verified_email\": null,\n    \"verified_name\"\
+        : null,\n    \"verified_phone\": null\n  },\n  \"statement_descriptor\": null,\n\
+        \  \"status\": \"chargeable\",\n  \"type\": \"card\",\n  \"usage\": \"reusable\"\
+        \n}\n"}
+    headers:
+      access-control-allow-credentials: ['true']
+      access-control-allow-methods: ['GET, POST, HEAD, OPTIONS, DELETE']
+      access-control-allow-origin: ['*']
+      access-control-expose-headers: ['Request-Id, Stripe-Manage-Version, X-Stripe-External-Auth-Required,
+          X-Stripe-Privileged-Session-Required']
+      access-control-max-age: ['300']
+      cache-control: ['no-cache, no-store']
+      connection: [keep-alive]
+      content-length: ['988']
+      content-type: [application/json]
+      date: ['Mon, 30 Apr 2018 10:42:03 GMT']
+      request-id: [req_PC1pGFUA6yTgqy]
+      server: [nginx]
+      strict-transport-security: [max-age=31556926; includeSubDomains; preload]
+      stripe-version: ['2016-07-06']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [Stripe/v1 PythonBindings/1.80.0]
+      X-Stripe-Client-User-Agent: ['{"lang": "python", "publisher": "stripe", "httplib":
+          "requests", "uname": "Linux 82fb5178e632 4.4.0-119-generic #143-Ubuntu SMP
+          Mon Apr 2 16:08:24 UTC 2018 x86_64 x86_64", "lang_version": "2.7.12", "platform":
+          "Linux-4.4.0-119-generic-x86_64-with-Ubuntu-16.04-xenial", "bindings_version":
+          "1.80.0"}']
+    method: GET
+    uri: https://api.stripe.com/v1/sources/src_1CMZSIE60z0O0voXasfQ4kQP
+  response:
+    body: {string: !!python/unicode "{\n  \"id\": \"src_1CMZSIE60z0O0voXasfQ4kQP\"\
+        ,\n  \"object\": \"source\",\n  \"amount\": null,\n  \"card\": {\n    \"exp_year\"\
+        : 2040,\n    \"exp_month\": 12,\n    \"brand\": \"American Express\",\n  \
+        \  \"card_automatically_updated\": false,\n    \"country\": \"US\",\n    \"\
+        cvc_check\": \"unchecked\",\n    \"fingerprint\": \"Uprp5MbueMDuRAYU\",\n\
+        \    \"funding\": \"credit\",\n    \"last4\": \"0005\",\n    \"three_d_secure\"\
+        : \"not_supported\",\n    \"address_line1_check\": null,\n    \"address_zip_check\"\
+        : null,\n    \"tokenization_method\": null,\n    \"dynamic_last4\": null\n\
+        \  },\n  \"client_secret\": \"src_client_secret_Cm7hspVtTUwMNof9HfMmmFFn\"\
+        ,\n  \"created\": 1525084922,\n  \"currency\": null,\n  \"flow\": \"none\"\
+        ,\n  \"livemode\": false,\n  \"metadata\": {},\n  \"owner\": {\n    \"address\"\
+        : null,\n    \"email\": null,\n    \"name\": null,\n    \"phone\": null,\n\
+        \    \"verified_address\": null,\n    \"verified_email\": null,\n    \"verified_name\"\
+        : null,\n    \"verified_phone\": null\n  },\n  \"statement_descriptor\": null,\n\
+        \  \"status\": \"chargeable\",\n  \"type\": \"card\",\n  \"usage\": \"reusable\"\
+        \n}\n"}
+    headers:
+      access-control-allow-credentials: ['true']
+      access-control-allow-methods: ['GET, POST, HEAD, OPTIONS, DELETE']
+      access-control-allow-origin: ['*']
+      access-control-expose-headers: ['Request-Id, Stripe-Manage-Version, X-Stripe-External-Auth-Required,
+          X-Stripe-Privileged-Session-Required']
+      access-control-max-age: ['300']
+      cache-control: ['no-cache, no-store']
+      connection: [keep-alive]
+      content-length: ['988']
+      content-type: [application/json]
+      date: ['Mon, 30 Apr 2018 10:42:04 GMT']
+      request-id: [req_soyJJ7YELWuAqQ]
+      server: [nginx]
+      strict-transport-security: [max-age=31556926; includeSubDomains; preload]
+      stripe-version: ['2016-07-06']
+    status: {code: 200, message: OK}
+- request:
+    body: !!python/unicode 'currency=USD&capture=True&amount=294750&description=SO002%7Cdeltapc%40yourcompany.example.com%7C212&source=src_1CMZSIE60z0O0voXasfQ4kQP'
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['135']
+      Content-Type: [application/x-www-form-urlencoded]
+      User-Agent: [Stripe/v1 PythonBindings/1.80.0]
+      X-Stripe-Client-User-Agent: ['{"lang": "python", "publisher": "stripe", "httplib":
+          "requests", "uname": "Linux 82fb5178e632 4.4.0-119-generic #143-Ubuntu SMP
+          Mon Apr 2 16:08:24 UTC 2018 x86_64 x86_64", "lang_version": "2.7.12", "platform":
+          "Linux-4.4.0-119-generic-x86_64-with-Ubuntu-16.04-xenial", "bindings_version":
+          "1.80.0"}']
+    method: POST
+    uri: https://api.stripe.com/v1/charges
+  response:
+    body: {string: !!python/unicode "{\n  \"id\": \"ch_1CMZSLE60z0O0voX81fnGyaL\"\
+        ,\n  \"object\": \"charge\",\n  \"amount\": 294750,\n  \"amount_refunded\"\
+        : 0,\n  \"application\": null,\n  \"application_fee\": null,\n  \"balance_transaction\"\
+        : \"txn_1CMZSLE60z0O0voXSDFtqjIh\",\n  \"captured\": true,\n  \"created\"\
+        : 1525084925,\n  \"currency\": \"usd\",\n  \"customer\": null,\n  \"description\"\
+        : \"SO002|deltapc@yourcompany.example.com|212\",\n  \"destination\": null,\n\
+        \  \"dispute\": null,\n  \"failure_code\": null,\n  \"failure_message\": null,\n\
+        \  \"fraud_details\": {},\n  \"invoice\": null,\n  \"livemode\": false,\n\
+        \  \"metadata\": {},\n  \"on_behalf_of\": null,\n  \"order\": null,\n  \"\
+        outcome\": {\n    \"network_status\": \"approved_by_network\",\n    \"reason\"\
+        : null,\n    \"risk_level\": \"normal\",\n    \"seller_message\": \"Payment\
+        \ complete.\",\n    \"type\": \"authorized\"\n  },\n  \"paid\": true,\n  \"\
+        receipt_email\": null,\n  \"receipt_number\": null,\n  \"refunded\": false,\n\
+        \  \"refunds\": {\n    \"object\": \"list\",\n    \"data\": [],\n    \"has_more\"\
+        : false,\n    \"total_count\": 0,\n    \"url\": \"/v1/charges/ch_1CMZSLE60z0O0voX81fnGyaL/refunds\"\
+        \n  },\n  \"review\": null,\n  \"shipping\": null,\n  \"source\": {\n    \"\
+        id\": \"src_1CMZSIE60z0O0voXasfQ4kQP\",\n    \"object\": \"source\",\n   \
+        \ \"amount\": null,\n    \"card\": {\n      \"exp_year\": 2040,\n      \"\
+        exp_month\": 12,\n      \"brand\": \"American Express\",\n      \"card_automatically_updated\"\
+        : false,\n      \"country\": \"US\",\n      \"cvc_check\": \"pass\",\n   \
+        \   \"fingerprint\": \"Uprp5MbueMDuRAYU\",\n      \"funding\": \"credit\"\
+        ,\n      \"last4\": \"0005\",\n      \"three_d_secure\": \"not_supported\"\
+        ,\n      \"address_line1_check\": null,\n      \"address_zip_check\": null,\n\
+        \      \"tokenization_method\": null,\n      \"dynamic_last4\": null\n   \
+        \ },\n    \"client_secret\": \"src_client_secret_Cm7hspVtTUwMNof9HfMmmFFn\"\
+        ,\n    \"created\": 1525084925,\n    \"currency\": null,\n    \"flow\": \"\
+        none\",\n    \"livemode\": false,\n    \"metadata\": {},\n    \"owner\": {\n\
+        \      \"address\": null,\n      \"email\": null,\n      \"name\": null,\n\
+        \      \"phone\": null,\n      \"verified_address\": null,\n      \"verified_email\"\
+        : null,\n      \"verified_name\": null,\n      \"verified_phone\": null\n\
+        \    },\n    \"statement_descriptor\": null,\n    \"status\": \"consumed\"\
+        ,\n    \"type\": \"card\",\n    \"usage\": \"reusable\"\n  },\n  \"source_transfer\"\
+        : null,\n  \"statement_descriptor\": null,\n  \"status\": \"succeeded\",\n\
+        \  \"transfer_group\": null\n}\n"}
+    headers:
+      access-control-allow-credentials: ['true']
+      access-control-allow-methods: ['GET, POST, HEAD, OPTIONS, DELETE']
+      access-control-allow-origin: ['*']
+      access-control-expose-headers: ['Request-Id, Stripe-Manage-Version, X-Stripe-External-Auth-Required,
+          X-Stripe-Privileged-Session-Required']
+      access-control-max-age: ['300']
+      cache-control: ['no-cache, no-store']
+      connection: [keep-alive]
+      content-length: ['2233']
+      content-type: [application/json]
+      date: ['Mon, 30 Apr 2018 10:42:05 GMT']
+      request-id: [req_c21OIBHjoFFHfy]
+      server: [nginx]
+      strict-transport-security: [max-age=31556926; includeSubDomains; preload]
+      stripe-version: ['2016-07-06']
+    status: {code: 200, message: OK}
+- request:
+    body: !!python/unicode 'type=card&card%5Bnumber%5D=378282246310005&card%5Bexp_year%5D=2040&card%5Bcvc%5D=123&card%5Bexp_month%5D=12'
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['107']
+      Content-Type: [application/x-www-form-urlencoded]
+      User-Agent: [Stripe/v1 PythonBindings/1.80.0]
+      X-Stripe-Client-User-Agent: ['{"lang": "python", "publisher": "stripe", "httplib":
+          "requests", "uname": "Linux eefe42e1e1ac 4.4.0-121-generic #145-Ubuntu SMP
+          Fri Apr 13 13:47:23 UTC 2018 x86_64 x86_64", "lang_version": "2.7.12", "platform":
+          "Linux-4.4.0-121-generic-x86_64-with-Ubuntu-16.04-xenial", "bindings_version":
+          "1.80.0"}']
+    method: POST
+    uri: https://api.stripe.com/v1/sources
+  response:
+    body: {string: !!python/unicode "{\n  \"id\": \"src_1CT7SxE60z0O0voXatl2bWiL\"\
+        ,\n  \"object\": \"source\",\n  \"amount\": null,\n  \"card\": {\n    \"exp_year\"\
+        : 2040,\n    \"exp_month\": 12,\n    \"brand\": \"American Express\",\n  \
+        \  \"card_automatically_updated\": false,\n    \"country\": \"US\",\n    \"\
+        cvc_check\": \"unchecked\",\n    \"fingerprint\": \"Uprp5MbueMDuRAYU\",\n\
+        \    \"funding\": \"credit\",\n    \"last4\": \"0005\",\n    \"three_d_secure\"\
+        : \"not_supported\",\n    \"address_line1_check\": null,\n    \"address_zip_check\"\
+        : null,\n    \"tokenization_method\": null,\n    \"dynamic_last4\": null\n\
+        \  },\n  \"client_secret\": \"src_client_secret_CstFOT3UjSMSv0lvc9WQqgja\"\
+        ,\n  \"created\": 1526645627,\n  \"currency\": null,\n  \"flow\": \"none\"\
+        ,\n  \"livemode\": false,\n  \"metadata\": {},\n  \"owner\": {\n    \"address\"\
+        : null,\n    \"email\": null,\n    \"name\": null,\n    \"phone\": null,\n\
+        \    \"verified_address\": null,\n    \"verified_email\": null,\n    \"verified_name\"\
+        : null,\n    \"verified_phone\": null\n  },\n  \"statement_descriptor\": null,\n\
+        \  \"status\": \"chargeable\",\n  \"type\": \"card\",\n  \"usage\": \"reusable\"\
+        \n}\n"}
+    headers:
+      access-control-allow-credentials: ['true']
+      access-control-allow-methods: ['GET, POST, HEAD, OPTIONS, DELETE']
+      access-control-allow-origin: ['*']
+      access-control-expose-headers: ['Request-Id, Stripe-Manage-Version, X-Stripe-External-Auth-Required,
+          X-Stripe-Privileged-Session-Required']
+      access-control-max-age: ['300']
+      cache-control: ['no-cache, no-store']
+      connection: [keep-alive]
+      content-length: ['988']
+      content-type: [application/json]
+      date: ['Fri, 18 May 2018 12:13:48 GMT']
+      request-id: [req_jPW2DGIh8bWzTo]
+      server: [nginx]
+      strict-transport-security: [max-age=31556926; includeSubDomains; preload]
+      stripe-version: ['2016-07-06']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [Stripe/v1 PythonBindings/1.80.0]
+      X-Stripe-Client-User-Agent: ['{"lang": "python", "publisher": "stripe", "httplib":
+          "requests", "uname": "Linux eefe42e1e1ac 4.4.0-121-generic #145-Ubuntu SMP
+          Fri Apr 13 13:47:23 UTC 2018 x86_64 x86_64", "lang_version": "2.7.12", "platform":
+          "Linux-4.4.0-121-generic-x86_64-with-Ubuntu-16.04-xenial", "bindings_version":
+          "1.80.0"}']
+    method: GET
+    uri: https://api.stripe.com/v1/sources/src_1CT7SxE60z0O0voXatl2bWiL
+  response:
+    body: {string: !!python/unicode "{\n  \"id\": \"src_1CT7SxE60z0O0voXatl2bWiL\"\
+        ,\n  \"object\": \"source\",\n  \"amount\": null,\n  \"card\": {\n    \"exp_year\"\
+        : 2040,\n    \"exp_month\": 12,\n    \"brand\": \"American Express\",\n  \
+        \  \"card_automatically_updated\": false,\n    \"country\": \"US\",\n    \"\
+        cvc_check\": \"unchecked\",\n    \"fingerprint\": \"Uprp5MbueMDuRAYU\",\n\
+        \    \"funding\": \"credit\",\n    \"last4\": \"0005\",\n    \"three_d_secure\"\
+        : \"not_supported\",\n    \"address_line1_check\": null,\n    \"address_zip_check\"\
+        : null,\n    \"tokenization_method\": null,\n    \"dynamic_last4\": null\n\
+        \  },\n  \"client_secret\": \"src_client_secret_CstFOT3UjSMSv0lvc9WQqgja\"\
+        ,\n  \"created\": 1526645627,\n  \"currency\": null,\n  \"flow\": \"none\"\
+        ,\n  \"livemode\": false,\n  \"metadata\": {},\n  \"owner\": {\n    \"address\"\
+        : null,\n    \"email\": null,\n    \"name\": null,\n    \"phone\": null,\n\
+        \    \"verified_address\": null,\n    \"verified_email\": null,\n    \"verified_name\"\
+        : null,\n    \"verified_phone\": null\n  },\n  \"statement_descriptor\": null,\n\
+        \  \"status\": \"chargeable\",\n  \"type\": \"card\",\n  \"usage\": \"reusable\"\
+        \n}\n"}
+    headers:
+      access-control-allow-credentials: ['true']
+      access-control-allow-methods: ['GET, POST, HEAD, OPTIONS, DELETE']
+      access-control-allow-origin: ['*']
+      access-control-expose-headers: ['Request-Id, Stripe-Manage-Version, X-Stripe-External-Auth-Required,
+          X-Stripe-Privileged-Session-Required']
+      access-control-max-age: ['300']
+      cache-control: ['no-cache, no-store']
+      connection: [keep-alive]
+      content-length: ['988']
+      content-type: [application/json]
+      date: ['Fri, 18 May 2018 12:13:49 GMT']
+      request-id: [req_FDW4DwKVtveXRY]
+      server: [nginx]
+      strict-transport-security: [max-age=31556926; includeSubDomains; preload]
+      stripe-version: ['2016-07-06']
+    status: {code: 200, message: OK}
+- request:
+    body: !!python/unicode 'currency=USD&capture=True&amount=294750&description=SO002%7Cdeltapc%40yourcompany.example.com%7C275&source=src_1CT7SxE60z0O0voXatl2bWiL'
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['135']
+      Content-Type: [application/x-www-form-urlencoded]
+      User-Agent: [Stripe/v1 PythonBindings/1.80.0]
+      X-Stripe-Client-User-Agent: ['{"lang": "python", "publisher": "stripe", "httplib":
+          "requests", "uname": "Linux eefe42e1e1ac 4.4.0-121-generic #145-Ubuntu SMP
+          Fri Apr 13 13:47:23 UTC 2018 x86_64 x86_64", "lang_version": "2.7.12", "platform":
+          "Linux-4.4.0-121-generic-x86_64-with-Ubuntu-16.04-xenial", "bindings_version":
+          "1.80.0"}']
+    method: POST
+    uri: https://api.stripe.com/v1/charges
+  response:
+    body: {string: !!python/unicode "{\n  \"id\": \"ch_1CT7SzE60z0O0voXVwuNzOxh\"\
+        ,\n  \"object\": \"charge\",\n  \"amount\": 294750,\n  \"amount_refunded\"\
+        : 0,\n  \"application\": null,\n  \"application_fee\": null,\n  \"balance_transaction\"\
+        : \"txn_1CT7T0E60z0O0voX8KdX08ue\",\n  \"captured\": true,\n  \"created\"\
+        : 1526645629,\n  \"currency\": \"usd\",\n  \"customer\": null,\n  \"description\"\
+        : \"SO002|deltapc@yourcompany.example.com|275\",\n  \"destination\": null,\n\
+        \  \"dispute\": null,\n  \"failure_code\": null,\n  \"failure_message\": null,\n\
+        \  \"fraud_details\": {},\n  \"invoice\": null,\n  \"livemode\": false,\n\
+        \  \"metadata\": {},\n  \"on_behalf_of\": null,\n  \"order\": null,\n  \"\
+        outcome\": {\n    \"network_status\": \"approved_by_network\",\n    \"reason\"\
+        : null,\n    \"risk_level\": \"normal\",\n    \"seller_message\": \"Payment\
+        \ complete.\",\n    \"type\": \"authorized\"\n  },\n  \"paid\": true,\n  \"\
+        receipt_email\": null,\n  \"receipt_number\": null,\n  \"refunded\": false,\n\
+        \  \"refunds\": {\n    \"object\": \"list\",\n    \"data\": [],\n    \"has_more\"\
+        : false,\n    \"total_count\": 0,\n    \"url\": \"/v1/charges/ch_1CT7SzE60z0O0voXVwuNzOxh/refunds\"\
+        \n  },\n  \"review\": null,\n  \"shipping\": null,\n  \"source\": {\n    \"\
+        id\": \"src_1CT7SxE60z0O0voXatl2bWiL\",\n    \"object\": \"source\",\n   \
+        \ \"amount\": null,\n    \"card\": {\n      \"exp_year\": 2040,\n      \"\
+        exp_month\": 12,\n      \"brand\": \"American Express\",\n      \"card_automatically_updated\"\
+        : false,\n      \"country\": \"US\",\n      \"cvc_check\": \"pass\",\n   \
+        \   \"fingerprint\": \"Uprp5MbueMDuRAYU\",\n      \"funding\": \"credit\"\
+        ,\n      \"last4\": \"0005\",\n      \"three_d_secure\": \"not_supported\"\
+        ,\n      \"address_line1_check\": null,\n      \"address_zip_check\": null,\n\
+        \      \"tokenization_method\": null,\n      \"dynamic_last4\": null\n   \
+        \ },\n    \"client_secret\": \"src_client_secret_CstFOT3UjSMSv0lvc9WQqgja\"\
+        ,\n    \"created\": 1526645630,\n    \"currency\": null,\n    \"flow\": \"\
+        none\",\n    \"livemode\": false,\n    \"metadata\": {},\n    \"owner\": {\n\
+        \      \"address\": null,\n      \"email\": null,\n      \"name\": null,\n\
+        \      \"phone\": null,\n      \"verified_address\": null,\n      \"verified_email\"\
+        : null,\n      \"verified_name\": null,\n      \"verified_phone\": null\n\
+        \    },\n    \"statement_descriptor\": null,\n    \"status\": \"consumed\"\
+        ,\n    \"type\": \"card\",\n    \"usage\": \"reusable\"\n  },\n  \"source_transfer\"\
+        : null,\n  \"statement_descriptor\": null,\n  \"status\": \"succeeded\",\n\
+        \  \"transfer_group\": null\n}\n"}
+    headers:
+      access-control-allow-credentials: ['true']
+      access-control-allow-methods: ['GET, POST, HEAD, OPTIONS, DELETE']
+      access-control-allow-origin: ['*']
+      access-control-expose-headers: ['Request-Id, Stripe-Manage-Version, X-Stripe-External-Auth-Required,
+          X-Stripe-Privileged-Session-Required']
+      access-control-max-age: ['300']
+      cache-control: ['no-cache, no-store']
+      connection: [keep-alive]
+      content-length: ['2233']
+      content-type: [application/json]
+      date: ['Fri, 18 May 2018 12:13:50 GMT']
+      request-id: [req_igDLH8IlphyjPg]
+      server: [nginx]
+      strict-transport-security: [max-age=31556926; includeSubDomains; preload]
+      stripe-version: ['2016-07-06']
+    status: {code: 200, message: OK}
 version: 1

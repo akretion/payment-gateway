@@ -173,6 +173,5 @@ class GatewayTransaction(models.Model):
 
     @job(default_channel='root.gateway.webhook')
     def process_webhook(self, service_name, method_name, params):
-        print "TODO"
-        return True
-
+        with self._get_provider(service_name) as provider:
+            return provider.dispatch(method_name, params)

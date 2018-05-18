@@ -38,6 +38,36 @@ class PaymentService(Component):
     _name = 'payment.service.stripe'
     _usage = 'stripe'
     _allowed_capture_method = ['immediately']
+    _webhook_method = ['process_event']
+
+    def process_event(self, **params):
+        transaction_id = params['data']['object']['id']
+        # For now we only implement a basic webhook for simple transaction
+        # Receving the webhook will force to update the related transaction
+        transaction = self.env['gateway.transaction'].search([
+            ('external_id', '=', transaction_id),
+            ('payment_mode_id.provider', '=', 'stripe'),
+            ])
+        if transaction:
+            transaction.check_state()
+        else:
+            raise UserError(
+                _('The transaction %s do not exist') % transaction_id)
+
+    def _validator_process_event(self):
+        return {
+            'data': {
+                'type': 'dict',
+                'schema': {
+                    'object': {
+                        'type': 'dict',
+                        'schema': {
+                            'id': {'type': 'string'},
+                        }
+                    }
+                }
+            }
+        }
 
     @property
     def _api_key(self):
