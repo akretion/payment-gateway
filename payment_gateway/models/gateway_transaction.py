@@ -5,7 +5,7 @@
 
 from contextlib import contextmanager
 from datetime import datetime
-from odoo import api, fields, models
+from odoo import _, api, fields, models
 import odoo.addons.decimal_precision as dp
 from odoo.addons.component.core import WorkContext
 from odoo.addons.queue_job.job import job
@@ -24,7 +24,7 @@ class GatewayTransaction(models.Model):
             if self:
                 usage = self.payment_mode_id.provider
             else:
-                raise UserError('Usage is missing')
+                raise UserError(_('Usage is missing'))
         work = WorkContext(model_name=self._name, collection=self)
         yield work.component(usage=usage)
 

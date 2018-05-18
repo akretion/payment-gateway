@@ -4,11 +4,15 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from odoo.addons.component.core import AbstractComponent
-from cerberus import Validator
 from odoo.exceptions import UserError
 from odoo import _
 import logging
 _logger = logging.getLogger(__name__)
+
+try:
+    from cerberus import Validator
+except ImportError:
+    _logger.debug('Can not import cerberus')
 
 
 class PaymentService(AbstractComponent):
@@ -46,11 +50,11 @@ class PaymentService(AbstractComponent):
 
     def dispatch(self, method_name, params):
         if method_name not in self._webhook_method:
-            raise UserError('Method not allowed for service %s', self._name)
+            raise UserError(_('Method not allowed for service %s'), self._name)
 
         func = getattr(self, method_name, None)
         if not func:
-            raise UserError('Method %s not found in service %s',
+            raise UserError(_('Method %s not found in service %s'),
                             method_name, self._name)
         secure_params = self._secure_params(func, params)
         return func(**secure_params)

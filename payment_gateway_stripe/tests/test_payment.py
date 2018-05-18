@@ -3,12 +3,11 @@
 # @author Sébastien BEAU <sebastien.beau@akretion.com>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-# pylint: disable=missing-manifest-dependency
+# pylint: disable=missing-manifest-dependency,invalid-commit
 # disable warning on 'vcr' missing in manifest: this is only a dependency for
 # dev/tests
 
 import os
-import stripe
 import json
 import requests
 import logging
