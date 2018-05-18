@@ -15,7 +15,7 @@ _logger = logging.getLogger(__name__)
 try:
     import stripe
 except ImportError:
-    _logger.debug('Can not import stripe')
+    _logger.debug('Cannot import stripe')
 
 
 MAP_SOURCE_STATE = {
@@ -89,7 +89,7 @@ class PaymentService(Component):
             str(transaction.id)])
         # For now capture is always true as only the policy 'immedialtely' is
         # available in the configuration but it will be easier to implement
-        # the logic of defeared capture
+        # the logic of deferred capture
         capture = transaction.capture_payment == 'immediately'
         return {
             'currency': transaction.currency_id.name,
@@ -121,7 +121,7 @@ class PaymentService(Component):
                 res = stripe.Source.create(
                     **self._prepare_source(source=source, **kwargs))
                 if res['status'] == 'chargeable':
-                    # 3D secure have been not activated or not ready
+                    # 3D secure has not been activated or is not ready
                     # for this customer
                     three_d_secure = False
                 else:
