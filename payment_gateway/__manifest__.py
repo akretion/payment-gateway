@@ -18,7 +18,8 @@
         "bin": [],
     },
     "depends": [
-        # "sale_payment",
+        "component",
+        "queue_job",
         "account_payment_sale",
         "keychain",
         "base_suspend_security",

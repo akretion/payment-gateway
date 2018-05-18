@@ -11,8 +11,7 @@
                 <field name="external_id"/>
                 <field name="amount"/>
                 <field name="currency_id"/>
-                <field name="sale_id"/>
-                <field name="invoice_id"/>
+                <field name="origin_id"/>
                 <button
                     name="capture"
                     class="oe_highlight"
@@ -84,8 +83,7 @@
                         <field name="capture_payment"/>
                         <field name="url" widget="url"/>
                         <field name="amount"/>
-                        <field name="sale_id"/>
-                        <field name="invoice_id"/>
+                        <field name="origin_id"/>
                         <field name="state"/>
                     </group>
                     <field name="data" colspan="4"/>

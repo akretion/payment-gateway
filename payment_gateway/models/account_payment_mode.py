@@ -1,22 +1,16 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017 Akretion (http://www.akretion.com).
-# @author Sébastien BEAU <sebastien.beau@akretion.com>
-# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
+# copyright 2017 akretion (http://www.akretion.com).
+# @author sébastien beau <sebastien.beau@akretion.com>
+# license agpl-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from odoo import api, fields, models
 from odoo.tools.translate import _
 
 
-# Note on V9 and V10 the sale.payment.method is replaced by
-# the account.payment.mode
-# we will depend on the following OCA module
-# oca/bank-payment/account_payment_sale
-
-
 class AccountPaymentMode(models.Model):
     _inherit = 'account.payment.mode'
 
-    provider = fields.Selection(selection="_selection_provider")
+    provider = fields.Selection(selection=[])
     capture_payment = fields.Selection(selection='_selection_capture_payment')
 
     def _selection_capture_payment(self):
@@ -27,22 +21,22 @@ class AccountPaymentMode(models.Model):
             # ('picking_confirm', _('At Picking Confirmation')),
             ]
 
-    def _selection_provider(self):
-        return [(p, p.replace('payment.service.', '').capitalize())
-                for p in self.env['payment.service']._get_all_provider()]
+    def _get_allowed_capture_method(self):
+        transaction_obj = self.env['gateway.transaction']
+        with transaction_obj._get_provider(usage='stripe') as provider:
+            return provider._allowed_capture_method
 
     @api.onchange('provider')
     def onchange_provider(self):
-        self.capture_payment = \
-            self.env[self.provider]._allowed_capture_method[0]
+        self.capture_method = self._get_allowed_capture_method()[0]
 
     # TODO we should be able to apply domain on selection field
     @api.onchange('capture_payment')
     def onchange_capture(self):
         if self.provider:
-            provider = self.env[self.provider]
-            if self.capture_payment not in provider._allowed_capture_method:
-                self.capture_payment = provider._allowed_capture_method[0]
+            capture_methods = self._get_allowed_capture_method()
+            if self.capture_payment not in capture_methods:
+                self.capture_payment = capture_methods[0]
                 return {'warning': {
                     'title': _('Incorrect Value'),
                     'message': _('This method is not compatible with '

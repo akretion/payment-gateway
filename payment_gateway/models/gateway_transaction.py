@@ -3,16 +3,30 @@
 # @author Sébastien BEAU <sebastien.beau@akretion.com>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-from odoo import api, fields, models
-import odoo.addons.decimal_precision as dp
-
+from contextlib import contextmanager
 from datetime import datetime
+from odoo import _, api, fields, models
+import odoo.addons.decimal_precision as dp
+from odoo.addons.component.core import WorkContext
+from odoo.addons.queue_job.job import job
+from odoo.exceptions import UserError
 
 
 class GatewayTransaction(models.Model):
     _name = 'gateway.transaction'
     _description = 'Gateway Transaction'
     _order = 'create_date desc'
+
+    @contextmanager
+    @api.multi
+    def _get_provider(self, usage=None):
+        if not usage:
+            if self:
+                usage = self.payment_mode_id.provider
+            else:
+                raise UserError(_('Usage is missing'))
+        work = WorkContext(model_name=self._name, collection=self)
+        yield work.component(usage=usage)
 
     @api.model
     def _selection_capture_payment(self):
@@ -31,12 +45,16 @@ class GatewayTransaction(models.Model):
     currency_id = fields.Many2one(
         'res.currency',
         'Currency')
-    sale_id = fields.Many2one(
-        'sale.order',
-        'Sale')
-    invoice_id = fields.Many2one(
-        'account.invoice',
-        'Invoice')
+    origin_id = fields.Reference(
+        selection=[
+            ('sale.order', 'Sale Order'),
+            ('account.invoice', 'Account Invoice'),
+            ])
+    res_model = fields.Char(compute='_compute_origin')
+    res_id = fields.Integer(compute='_compute_origin')
+    partner_id = fields.Many2one(
+        'res.partner',
+        'Partner')
     state = fields.Selection([
         ('draft', 'Draft (Not requested to the bank)'),
         ('pending', 'Pending (Waiting Feedback from bank)'),
@@ -69,22 +87,18 @@ class GatewayTransaction(models.Model):
     redirect_cancel_url = fields.Char()
     redirect_success_url = fields.Char()
 
-    def _provider(self):
-        return self.env[self.payment_mode_id.provider]
+    @api.depends('origin_id')
+    def _compute_origin(self):
+        for record in self:
+            record.res_id = record.origin_id.id
+            record.res_model = record.origin_id._name
 
     def _get_amount_to_capture(self):
-        if self.invoice_id:
-            # TODO
-            pass
-        elif self.sale_id:
-            # TODO - the field "residual" missed in object "sale.order". On 8.0
-            # version it was create on module payment_sale_method
-            # https://github.com/OCA/sale-workflow/blob/8.0/sale_payment_method/
-            # sale.py#L53 there is PR on migration to 9.0 where the field was
-            # create in module sale_payment
-            # https://github.com/OCA/sale-workflow/pull/403/
-            # files#diff-c002243b01cfec667dfb7e6dac0c77d4R34
-            return self.sale_id.amount_total
+        origin = self.origin_id
+        if origin._name == 'account.invoice':
+            return origin.residual
+        elif origin._name == 'sale.order':
+            return origin.amount_total
 
     @api.multi
     def cancel(self):
@@ -103,12 +117,27 @@ class GatewayTransaction(models.Model):
                     record.capture()
         return True
 
+    def _prepare_transaction(self, origin, **kwargs):
+        mode = origin.payment_mode_id
+        return {
+            'name': origin.name,
+            'payment_mode_id': mode.id,
+            'capture_payment': mode.capture_payment,
+            'redirect_cancel_url': kwargs.get('redirect_cancel_url'),
+            'redirect_success_url': kwargs.get('redirect_success_url'),
+            'currency_id': origin.currency_id.id,
+            'origin_id': '%s,%s' % (origin._name, origin.id),
+            'partner_id': origin.partner_id.id,
+            }
+
     @api.model
-    def create(self, vals):
-        transaction = super(GatewayTransaction, self).create(vals)
-        if vals['state'] == 'to_capture':
-            if transaction.capture_payment == 'immediately':
-                transaction.capture()
+    def generate(self, usage, origin, **kwargs):
+        """Generate the transaction in the provider backend
+        and create the transaction in odoo"""
+        vals = self._prepare_transaction(origin)
+        transaction = self.create(vals)
+        with transaction._get_provider(usage) as provider:
+            provider.generate(**kwargs)
         return transaction
 
     @api.multi
@@ -119,10 +148,10 @@ class GatewayTransaction(models.Model):
         if self.state == 'succeeded':
             pass
         else:
-            amount = self._get_amount_to_capture()
             vals = {}
             try:
-                self._provider().capture(self, amount)
+                with self._get_provider() as provider:
+                    provider.capture()
                 vals = {
                     'state': 'succeeded',
                     'date_processing': datetime.now(),
@@ -140,5 +169,10 @@ class GatewayTransaction(models.Model):
     def check_state(self):
         for record in self:
             if record.state == 'pending':
-                record.write({
-                    'state': record._provider().get_transaction_state(record)})
+                with record._get_provider() as provider:
+                    record.write({'state': provider.get_state()})
+
+    @job(default_channel='root.gateway.webhook')
+    def process_webhook(self, service_name, method_name, params):
+        with self._get_provider(service_name) as provider:
+            return provider.dispatch(method_name, params)

@@ -3,21 +3,61 @@
 # @author Sébastien BEAU <sebastien.beau@akretion.com>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-from odoo import api, models
+from odoo.addons.component.core import AbstractComponent
+from odoo.exceptions import UserError
+from odoo import _
+import logging
+_logger = logging.getLogger(__name__)
+
+try:
+    from cerberus import Validator
+except ImportError:
+    _logger.debug('Can not import cerberus')
 
 
-# It will be better to have a class that is more abstract than the AbtractModel
-# Indeed I just use this here in order to use the inheritance feature
-class PaymentService(models.AbstractModel):
+class PaymentService(AbstractComponent):
     _name = 'payment.service'
     _description = 'Payment Service'
+    _collection = 'gateway.transaction'
+    _allowed_capture_method = None
+    _webhook_method = []
 
-    def _get_all_provider(self):
-        provider = []
-        for model in self.env.registry.keys():
-            if 'payment.service' in model and 'payment.service' != model:
-                provider.append(model)
-        return provider
+    # TODO this code is inspired from base_rest
+    # maybe we should found a way to mutualise it
+    def _get_schema_for_method(self, method_name):
+        validator_method = '_validator_%s' % method_name
+        if not hasattr(self, validator_method):
+            raise NotImplementedError(validator_method)
+        return getattr(self, validator_method)()
+
+    def _secure_params(self, method, params):
+        """
+        This internal method is used to validate and sanitize the parameters
+        expected by the given method.  These parameters are validated and
+        sanitized according to a schema provided by a method  following the
+        naming convention: '_validator_{method_name}'.
+        :param method:
+        :param params:
+        :return:
+        """
+        method_name = method.__name__
+        schema = self._get_schema_for_method(method_name)
+        v = Validator(schema, purge_unknown=True)
+        if v.validate(params):
+            return v.document
+        _logger.error("BadRequest %s", v.errors)
+        raise UserError(_('Invalid Form'))
+
+    def dispatch(self, method_name, params):
+        if method_name not in self._webhook_method:
+            raise UserError(_('Method not allowed for service %s'), self._name)
+
+        func = getattr(self, method_name, None)
+        if not func:
+            raise UserError(_('Method %s not found in service %s'),
+                            method_name, self._name)
+        secure_params = self._secure_params(func, params)
+        return func(**secure_params)
 
     def _get_account(self):
         keychain = self.env['keychain.account']
@@ -26,39 +66,23 @@ class PaymentService(models.AbstractModel):
             ('namespace', '=', namespace)
             ])[0]
 
-    def create_provider_transaction(self, record, **kwargs):
+    def _create_transaction(self, **kwargs):
+        """Create the transaction on the backend of the service provider
+        and return a json of the result of the creation"""
         raise NotImplemented
 
-    def _prepare_odoo_transaction(self, record, transaction, **kwargs):
-        mode = record.payment_mode_id
-        res = {
-            'payment_mode_id': mode.id,
-            'redirect_cancel_url': kwargs.get('redirect_cancel_url'),
-            'redirect_success_url': kwargs.get('redirect_success_url'),
-            }
-        if record._name == 'sale.order':
-            res.update({
-                'sale_id': record.id,
-                'currency_id': record.currency_id.id,
-                'name': record.name,
-                'capture_payment': mode.capture_payment,
-            })
-        elif record._name == 'account.invoice':
-            res['invoice_id'] = record.id
-        return res
+    def _parse_creation_result(self, transaction, **kwargs):
+        return {}
 
-    @api.model
-    def generate(self, record, **kwargs):
+    def generate(self, **kwargs):
         """Generate the transaction in the provider backend
-        and create the transaction in odoo"""
-        transaction = self.create_provider_transaction(record, **kwargs)
-        vals = self._prepare_odoo_transaction(record, transaction, **kwargs)
-        return self.env['gateway.transaction'].create(vals)
+        and update the odoo gateway.transaction"""
+        transaction = self._create_transaction(**kwargs)
+        vals = self._parse_creation_result(transaction, **kwargs)
+        return self.collection.write(vals)
 
-    @api.model
-    def get_transaction_state(self, transaction):
+    def get_state(self):
         raise NotImplemented
 
-    @api.model
-    def capture(self, transaction, amount):
+    def capture(self, amount):
         raise NotImplemented

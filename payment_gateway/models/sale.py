@@ -11,8 +11,9 @@ class SaleOrder(models.Model):
 
     transaction_ids = fields.One2many(
         'gateway.transaction',
-        'sale_id',
-        'Transaction')
+        'res_id',
+        'Transaction',
+        domain=[('res_model', '=', 'sale.order')])
     current_transaction_id = fields.Many2one(
         'gateway.transaction',
         'Current Transaction',
