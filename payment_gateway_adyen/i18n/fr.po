@@ -1,0 +1,88 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#	* payment_gateway_stripe
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 8.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-03-09 15:36+0000\n"
+"PO-Revision-Date: 2017-03-09 15:36+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: payment_gateway_stripe
+#: code:addons/payment_gateway_stripe/services/payment_service.py:28
+#, python-format
+msgid "An error occurred while processing the card."
+msgstr "Une erreur est survenue lors du contrôle de la carte."
+
+#. module: payment_gateway_stripe
+#: code:addons/payment_gateway_stripe/services/payment_service.py:23
+#, python-format
+msgid "The card has expired."
+msgstr "La carte a expiré."
+
+#. module: payment_gateway_stripe
+#: code:addons/payment_gateway_stripe/services/payment_service.py:22
+#, python-format
+msgid "The card number is incorrect."
+msgstr "Le numéro de carte est incorrect."
+
+#. module: payment_gateway_stripe
+#: code:addons/payment_gateway_stripe/services/payment_service.py:17
+#, python-format
+msgid "The card number is not a valid credit card number."
+msgstr "Le numéro de carte n’est pas un numéro de carte valide."
+
+#. module: payment_gateway_stripe
+#: code:addons/payment_gateway_stripe/services/payment_service.py:26
+#, python-format
+msgid "The card was declined."
+msgstr "La carte a été refusée."
+
+#. module: payment_gateway_stripe
+#: code:addons/payment_gateway_stripe/services/payment_service.py:18
+#, python-format
+msgid "The card's expiration month is invalid."
+msgstr "Le mois d’expiration de la carte n’est pas valide."
+
+#. module: payment_gateway_stripe
+#: code:addons/payment_gateway_stripe/services/payment_service.py:19
+#, python-format
+msgid "The card's expiration year is invalid."
+msgstr "L’année d’expiration de la carte n’est pas valide."
+
+#. module: payment_gateway_stripe
+#: code:addons/payment_gateway_stripe/services/payment_service.py:24
+#, python-format
+msgid "The card's security code is incorrect."
+msgstr "Le code de sécurité de la carte est incorrect."
+
+#. module: payment_gateway_stripe
+#: code:addons/payment_gateway_stripe/services/payment_service.py:20
+#, python-format
+msgid "The card's security code is invalid."
+msgstr "Le code de sécurité de la carte n’est pas valide."
+
+#. module: payment_gateway_stripe
+#: code:addons/payment_gateway_stripe/services/payment_service.py:21
+#, python-format
+msgid "The card's swipe data is invalid."
+msgstr "Le code de sécurité est incorrect."
+
+#. module: payment_gateway_stripe
+#: code:addons/payment_gateway_stripe/services/payment_service.py:25
+#, python-format
+msgid "The card's zip code failed validation."
+msgstr "La validation du code postal de la carte a échoué."
+
+#. module: payment_gateway_stripe
+#: code:addons/payment_gateway_stripe/services/payment_service.py:27
+#, python-format
+msgid "There is no card on a customer that is being charged."
+msgstr "Aucune carte sur le client qui a été débité."
