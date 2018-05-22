@@ -29,6 +29,12 @@ class GatewayTransaction(models.Model):
         yield work.component(usage=usage)
 
     @api.model
+    def _get_all_provider(self):
+        work = WorkContext(model_name=self._name, collection=self)
+        return [provider for provider in work.many_components()
+                if provider._usage]
+
+    @api.model
     def _selection_capture_payment(self):
         return self.env['account.payment.mode']._selection_capture_payment()
 
@@ -50,8 +56,8 @@ class GatewayTransaction(models.Model):
             ('sale.order', 'Sale Order'),
             ('account.invoice', 'Account Invoice'),
             ])
-    res_model = fields.Char(compute='_compute_origin')
-    res_id = fields.Integer(compute='_compute_origin')
+    res_model = fields.Char(compute='_compute_origin', store=True)
+    res_id = fields.Integer(compute='_compute_origin', store=True)
     partner_id = fields.Many2one(
         'res.partner',
         'Partner')
@@ -134,7 +140,7 @@ class GatewayTransaction(models.Model):
     def generate(self, usage, origin, **kwargs):
         """Generate the transaction in the provider backend
         and create the transaction in odoo"""
-        vals = self._prepare_transaction(origin)
+        vals = self._prepare_transaction(origin, **kwargs)
         transaction = self.create(vals)
         with transaction._get_provider(usage) as provider:
             provider.generate(**kwargs)

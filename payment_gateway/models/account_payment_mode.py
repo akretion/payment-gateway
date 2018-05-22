@@ -10,7 +10,7 @@ from odoo.tools.translate import _
 class AccountPaymentMode(models.Model):
     _inherit = 'account.payment.mode'
 
-    provider = fields.Selection(selection=[])
+    provider = fields.Selection(selection='_selection_provider')
     capture_payment = fields.Selection(selection='_selection_capture_payment')
 
     def _selection_capture_payment(self):
@@ -21,9 +21,14 @@ class AccountPaymentMode(models.Model):
             # ('picking_confirm', _('At Picking Confirmation')),
             ]
 
+    def _selection_provider(self):
+        return [
+            (p, p.title())
+            for p in self.env['gateway.transaction']._get_all_provider()]
+
     def _get_allowed_capture_method(self):
         transaction_obj = self.env['gateway.transaction']
-        with transaction_obj._get_provider(usage='stripe') as provider:
+        with transaction_obj._get_provider(usage=self.provider) as provider:
             return provider._allowed_capture_method
 
     @api.onchange('provider')
