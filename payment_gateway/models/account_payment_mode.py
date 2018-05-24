@@ -22,8 +22,15 @@ class AccountPaymentMode(models.Model):
             ]
 
     def _selection_provider(self):
+        if self._context.get('install_mode'):
+            # load all component that should be installed
+            builder = self.env['component.builder']
+            components_registry = builder._init_global_registry()
+            builder.build_registry(
+                components_registry,
+                states=('installed', 'to upgrade', 'to install'))
         return [
-            (p, p.title())
+            (p._usage, p._usage.title())
             for p in self.env['gateway.transaction']._get_all_provider()]
 
     def _get_allowed_capture_method(self):
