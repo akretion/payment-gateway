@@ -30,7 +30,7 @@ class AccountPaymentMode(models.Model):
                 components_registry,
                 states=('installed', 'to upgrade', 'to install'))
         return [
-            (p._usage, p._usage.title())
+            (p._name, p._name.strip('payment.service.').title())
             for p in self.env['gateway.transaction']._get_all_provider()]
 
     def _get_allowed_capture_method(self):

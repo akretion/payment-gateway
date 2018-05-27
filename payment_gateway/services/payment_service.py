@@ -19,6 +19,7 @@ class PaymentService(AbstractComponent):
     _name = 'payment.service'
     _description = 'Payment Service'
     _collection = 'gateway.transaction'
+    _usage = 'gateway.provider'
     _allowed_capture_method = None
     _webhook_method = []
 

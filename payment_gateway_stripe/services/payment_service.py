@@ -35,7 +35,6 @@ ZERO_DECIMAL_CURRENCIES = [
 class PaymentService(Component):
     _inherit = 'payment.service'
     _name = 'payment.service.stripe'
-    _usage = 'stripe'
     _allowed_capture_method = ['immediately']
     _webhook_method = ['process_event']
 
@@ -45,7 +44,7 @@ class PaymentService(Component):
         # Receving the webhook will force to update the related transaction
         transaction = self.env['gateway.transaction'].search([
             ('external_id', '=', transaction_id),
-            ('payment_mode_id.provider', '=', 'stripe'),
+            ('payment_mode_id.provider', '=', 'payment.service.stripe'),
             ])
         if transaction:
             transaction.check_state()
