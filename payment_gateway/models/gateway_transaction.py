@@ -19,20 +19,20 @@ class GatewayTransaction(models.Model):
 
     @contextmanager
     @api.multi
-    def _get_provider(self, usage=None):
-        if not usage:
+    def _get_provider(self, provider_name=None):
+        if not provider_name:
             if self:
-                usage = self.payment_mode_id.provider
+                provider_name = self.payment_mode_id.provider
             else:
-                raise UserError(_('Usage is missing'))
+                raise UserError(_('Provider name is missing'))
         work = WorkContext(model_name=self._name, collection=self)
-        yield work.component(usage=usage)
+        yield work.component_by_name(provider_name)
 
     @api.model
     def _get_all_provider(self):
         work = WorkContext(model_name=self._name, collection=self)
-        return [provider for provider in work.many_components()
-                if provider._usage]
+        return [provider for provider in work.many_components(
+                usage='gateway.provider')]
 
     @api.model
     def _selection_capture_payment(self):
@@ -180,5 +180,6 @@ class GatewayTransaction(models.Model):
 
     @job(default_channel='root.gateway.webhook')
     def process_webhook(self, service_name, method_name, params):
-        with self._get_provider(service_name) as provider:
+        provider_name = 'payment.service.%s' % service_name
+        with self._get_provider(provider_name) as provider:
             return provider.dispatch(method_name, params)

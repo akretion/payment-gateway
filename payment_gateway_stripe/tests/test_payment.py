@@ -176,7 +176,7 @@ class StripeCase(StripeCommonCase, StripeScenario):
     def _create_transaction(self, card):
         source = self._get_source(card)
         transaction = self.env['gateway.transaction'].generate(
-            'stripe',
+            'payment.service.stripe',
             self.sale,
             source=source['id'],
             return_url='https://IwillBeBack.vd')
