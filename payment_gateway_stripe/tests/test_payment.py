@@ -32,15 +32,6 @@ def before_record(request):
         return request
 
 
-recorder = VCR(
-    before_record_request=before_record,
-    record_mode=os.environ.get('VCR_MODE', 'none'),
-    cassette_library_dir=join(dirname(__file__), 'fixtures/cassettes'),
-    path_transformer=VCR.ensure_suffix('.yaml'),
-    filter_headers=['Authorization'],
-)
-
-
 class StripeCommonCase(SavepointComponentCase):
 
     def setUp(self, *args, **kwargs):
@@ -95,44 +86,47 @@ class StripeCommonCase(SavepointComponentCase):
 
 class StripeScenario(object):
 
-    @recorder.use_cassette
+    def _decorate_test(self, test_path):
+        recorder = VCR(
+            before_record_request=before_record,
+            record_mode=os.environ.get('VCR_MODE', 'none'),
+            cassette_library_dir=join(test_path, 'fixtures/cassettes'),
+            path_transformer=VCR.ensure_suffix('.yaml'),
+            filter_headers=['Authorization'],
+        )
+        for test_func in dir(self):
+            if test_func.startswith('test'):
+                setattr(self, test_func,
+                        recorder.use_cassette(getattr(self, test_func)))
+
     def test_create_transaction_3d_required_failed(self):
         self._test_3d('4000000000003063', success=False)
 
-    @recorder.use_cassette
     def test_create_transaction_3d_required_success(self):
         self._test_3d('4000000000003063', success=True)
 
-    @recorder.use_cassette
     def test_create_transaction_3d_optional_failed(self):
         self._test_3d('4000000000003055', success=False)
 
-    @recorder.use_cassette
     def test_create_transaction_3d_optional_success(self):
         self._test_3d('4000000000003055', success=True)
 
-    @recorder.use_cassette
     def test_create_transaction_3d_not_supported(self):
         transaction, source = self._create_transaction('378282246310005')
         self.assertEqual(transaction.state, 'succeeded')
 
-    @recorder.use_cassette
     def test_create_transaction_visa(self):
         self._test_card('4242424242424242')
 
-    @recorder.use_cassette
     def test_create_transaction_brazil(self):
         self._test_card('4000000760000002')
 
-    @recorder.use_cassette
     def test_create_transaction_france(self):
         self._test_card('4000002500000003')
 
-    @recorder.use_cassette
     def test_create_transaction_france(self):
         self._test_card('4000002500000003')
 
-    @recorder.use_cassette
     def test_create_transaction_risk_highest(self):
         with self.assertRaises(UserError):
             self._test_card(
@@ -140,13 +134,11 @@ class StripeScenario(object):
                 expected_state='failed',
                 expected_risk_level='unknown')
 
-    @recorder.use_cassette
     def test_create_transaction_risk_elevated(self):
         self._test_card(
             '4000000000009235',
             expected_risk_level='elevated')
 
-    @recorder.use_cassette
     def test_create_transaction_expired_card(self):
         with self.assertRaises(UserError):
             self._test_card(
@@ -156,6 +148,10 @@ class StripeScenario(object):
 
 
 class StripeCase(StripeCommonCase, StripeScenario):
+
+    def __init__(self, *args, **kwargs):
+        super(StripeCase, self).__init__(*args, **kwargs)
+        self._decorate_test(dirname(__file__))
 
     def setUp(self, *args, **kwargs):
         super(StripeCase, self).setUp(*args, **kwargs)
