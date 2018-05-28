@@ -10,26 +10,26 @@ class PaymentGatewayWebhook(http.Controller):
 
     @http.route(
         '/payment-gateway-http-webhook/'
-        '<string:service_name>/<string:method_name>',
+        '<string:provider_name>/<string:method_name>',
         type='http',
         auth='none',
         csrf=False,
         methods=['POST'])
     def payment_gateway_http_hook(
-            self, service_name=None, method_name=None, **params):
+            self, provider_name=None, method_name=None, **params):
         http.request.env['gateway.transaction'].sudo().with_delay()\
-            .process_webhook(service_name, method_name, params)
+            .process_webhook(provider_name, method_name, params)
         return ''
 
     @http.route(
         '/payment-gateway-json-webhook/'
-        '<string:service_name>/<string:method_name>',
+        '<string:provider_name>/<string:method_name>',
         type='json',
         auth='none',
         csrf=False,
         methods=['POST'])
-    def payment_gateway_json_hook(self, service_name=None, method_name=None):
+    def payment_gateway_json_hook(self, provider_name=None, method_name=None):
         params = http.request.jsonrequest
         http.request.env['gateway.transaction'].sudo().with_delay()\
-            .process_webhook(service_name, method_name, params)
+            .process_webhook(provider_name, method_name, params)
         return True
