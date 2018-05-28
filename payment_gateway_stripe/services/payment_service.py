@@ -44,7 +44,7 @@ class PaymentService(Component):
         # Receving the webhook will force to update the related transaction
         transaction = self.env['gateway.transaction'].search([
             ('external_id', '=', transaction_id),
-            ('payment_mode_id.provider', '=', 'payment.service.stripe'),
+            ('payment_mode_id.provider', '=', 'stripe'),
             ])
         if transaction:
             transaction.check_state()

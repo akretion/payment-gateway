@@ -26,7 +26,7 @@ class GatewayTransaction(models.Model):
             else:
                 raise UserError(_('Provider name is missing'))
         work = WorkContext(model_name=self._name, collection=self)
-        yield work.component_by_name(provider_name)
+        yield work.component_by_name('payment.service.%s' % provider_name)
 
     @api.model
     def _get_all_provider(self):
@@ -137,12 +137,12 @@ class GatewayTransaction(models.Model):
             }
 
     @api.model
-    def generate(self, usage, origin, **kwargs):
+    def generate(self, provider_name, origin, **kwargs):
         """Generate the transaction in the provider backend
         and create the transaction in odoo"""
         vals = self._prepare_transaction(origin, **kwargs)
         transaction = self.create(vals)
-        with transaction._get_provider(usage) as provider:
+        with transaction._get_provider(provider_name) as provider:
             provider.generate(**kwargs)
         return transaction
 
@@ -179,7 +179,6 @@ class GatewayTransaction(models.Model):
                     record.write({'state': provider.get_state()})
 
     @job(default_channel='root.gateway.webhook')
-    def process_webhook(self, service_name, method_name, params):
-        provider_name = 'payment.service.%s' % service_name
+    def process_webhook(self, provider_name, method_name, params):
         with self._get_provider(provider_name) as provider:
             return provider.dispatch(method_name, params)

@@ -4,7 +4,7 @@
 
         <record id="account_payment_mode_stripe" model="account.payment.mode">
             <field name="name">Stripe</field>
-            <field name="provider">payment.service.stripe</field>
+            <field name="provider">stripe</field>
             <field name="capture_payment">immediately</field>
             <field name="bank_account_link">variable</field>
             <field name="payment_method_id" ref="account.account_payment_method_manual_out"/>

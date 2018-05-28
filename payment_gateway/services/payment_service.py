@@ -23,6 +23,10 @@ class PaymentService(AbstractComponent):
     _allowed_capture_method = None
     _webhook_method = []
 
+    @property
+    def _provider_name(self):
+        return self._name.replace('payment.service.', '')
+
     # TODO this code is inspired from base_rest
     # maybe we should found a way to mutualise it
     def _get_schema_for_method(self, method_name):
