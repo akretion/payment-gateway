@@ -13,6 +13,8 @@ import Adyen
 import json
 import requests
 import logging
+from lxml import etree
+from io import StringIO
 from vcr import VCR
 from os.path import join, dirname
 
@@ -21,6 +23,8 @@ from odoo.tests.common import TransactionCase
 from odoo.addons.component.tests.common import SavepointComponentCase
 
 logging.getLogger("vcr").setLevel(logging.WARNING)
+
+WEBHOOK_PATH = '/payment-gateway-http-webhook/adyen/process_event'
 
 recorder = VCR(
     record_mode=os.environ.get('VCR_MODE', 'once'),
@@ -63,10 +67,35 @@ class AdyenCommonCase(SavepointComponentCase):
                    "holderName": 'John Doe',
                    }
 
-#    def _fill_3d_secure(self, source, success=True):
-#        res = requests.get(source['redirect']['url'])
-#        url = res._content.split('method="POST" action="')[1].split('">')[0]
-#        requests.post(url, {'PaRes': 'success' if success else 'failure'})
+    def _fill_3d_secure(self, source, card_number, success=True):
+        url = source['issuerUrl']
+        webhook_url = str('http://localhost:8069' + WEBHOOK_PATH)  # TODO
+        data = {
+                   'PaReq': source['paRequest'],
+                   'MD': source['md'],
+                   'TermUrl': webhook_url,
+               }
+        result = requests.post(url, data)
+        session_id = result.headers['Set-Cookie'].split(
+            'JSESSIONID=')[1].split(';')[0]
+        validate_url = "https://test.adyen.com/hpp/3d/authenticate.shtml;jsessionid=%s" % (session_id,)
+        validation = requests.post(validate_url, data={
+            'PaReq': source['paRequest'],
+            'MD': source['md'],
+            'TermUrl': webhook_url,
+            'username': 'user',
+            'password': 'password',
+            'cardNumber': card_number
+        })
+        parser = etree.HTMLParser()
+        tree = etree.parse(StringIO(unicode(validation.content)), parser)
+        e = tree.xpath("//input[@name='PaRes']")[0]
+        pa_res = e.values()[2]
+        r = requests.post(webhook_url, {
+            'MD': source['md'],
+            'pa_res': pa_res
+        })
+        self.assertEqual(r.status_code, 200)
 
 
 class AdyenScenario(object):
@@ -75,9 +104,9 @@ class AdyenScenario(object):
 #    def test_create_transaction_3d_required_failed(self):
 #        self._test_3d('4000000000003063', success=False)
 
-#    @recorder.use_cassette
-#    def test_create_transaction_3d_required_success(self):
-#        self._test_3d('4000000000003063', success=True)
+    @recorder.use_cassette
+    def test_create_transaction_3d_required_success(self):
+        self._test_3d('5212345678901234', success=True)
 
 #    @recorder.use_cassette
 #    def test_create_transaction_3d_optional_failed(self):
@@ -139,6 +168,11 @@ class AdyenScenario(object):
 
 class AdyenCase(AdyenCommonCase, AdyenScenario):
 
+    def setUp(self, *args, **kwargs):
+        super(AdyenCase, self).setUp(*args, **kwargs)
+        self.base_url = self.env['ir.config_parameter']\
+            .get_param('web.base.url')
+
     def _create_transaction(self, card):
         card = self._get_card(card)
         transaction = self.env['gateway.transaction'].generate(
@@ -154,15 +188,14 @@ class AdyenCase(AdyenCommonCase, AdyenScenario):
         self.assertEqual(self.sale.amount_total, transaction.amount)
 #        self.assertEqual(transaction.risk_level, expected_risk_level)
 
-#    def _test_3d(self, card, success=True):
-#        transaction, source = self._create_transaction(card)
-#        self.assertEqual(transaction.state, 'pending')
-#        self._fill_3d_secure(source, success=success)
-#        transaction.check_state()
-#        if success:
-#            self._check_captured(transaction)
-#        else:
-#            self.assertEqual(transaction.state, 'failed')
+    def _test_3d(self, card, success=True):
+        transaction, source = self._create_transaction(card)
+        self.assertEqual(transaction.state, 'pending')
+        self._fill_3d_secure(source, card, success=success)
+        if success:
+            self._check_captured(transaction)
+        else:
+            self.assertEqual(transaction.state, 'failed')
 
     def _test_card(self, card, **kwargs):
         transaction, source = self._create_transaction(card)

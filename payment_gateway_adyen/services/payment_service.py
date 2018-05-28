@@ -22,7 +22,7 @@ MAP_SOURCE_STATE = { # TODO complete
     'Authorised': 'to_capture',
     'consumed': 'succeeded',
     'Refused': 'failed',
-    'pending': 'pending',
+    'RedirectShopper': 'pending',
     '[capture-received]': 'succeeded'}
 
 # decimal points of currencies https://docs.adyen.com/developers/currency-codes
@@ -41,6 +41,47 @@ class PaymentService(Component):
     _name = 'payment.service.adyen'
     _usage = 'adyen'
     _allowed_capture_method = ['immediately']
+    _webhook_method = ['process_event']
+
+    def process_event(self, **params):
+        payload = {}
+        payload["browserInfo"] = {
+            "userAgent": "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9) Gecko/2008052912 Firefox/3.0",
+            "acceptHeader": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+        }
+        payload["md"] = params['MD']
+        payload["paResponse"] = params['PaRes']
+        result = self._get_adyen_client().authorise3d(request=payload)
+        vals = {
+            'state': MAP_SOURCE_STATE[result['resultCode']],
+            'data': json.dumps(result.message),
+        }
+
+        transaction = self.env['gateway.transaction'].search([
+            ('external_id', '=', result['pspReference']),
+            ('payment_mode_id.provider', '=', 'adyen'),
+            ])
+        if transaction:
+            transaction.write(vals)
+        else:
+            raise UserError(
+                _('The transaction %s do not exist') % transaction_id)
+
+    def _validator_process_event(self):
+        return {
+            'data': {
+                'type': 'dict',
+                'schema': {
+                    'object': {
+                        'type': 'dict',
+                        'schema': {
+                            'MD': {'type': 'string'},
+                            'PaRes': {'type': 'string'},
+                        }
+                    }
+                }
+            }
+        }
 
     def _get_formatted_amount(self, amount=None):
         if amount is None:
@@ -92,30 +133,13 @@ class PaymentService(Component):
         # available in the configuration but it will be easier to implement
         # the logic of defeared capture
         capture = transaction.capture_payment == 'immediately'
-
-        # TODO card + encrypt
-        # see https://docs.adyen.com/developers/api-reference/payments-api#card
-        # https://docs.adyen.com/developers/ecommerce-integration/cse-integration-ecommerce
-        # TODO use source somewhere?
         return {
                    'amount':  {"value": self._get_formatted_amount(),
                                "currency": transaction.currency_id.name},
                    'card': kwargs['card'],
                    'reference': description,
+                   'additionalData': {"executeThreeD": "true"}  # TODO add CSE
                }
-
-    def _need_three_d_secure(self, source_data): # TODO
-        return source_data['card']['three_d_secure'] != 'not_supported'
-
-    def _prepare_source(self, source=None, return_url=None, **kwargs): # TODO
-        return {
-            'type': 'three_d_secure',
-            'amount': self._get_formatted_amount(),
-            'currency': self.collection.currency_id.name,
-            'three_d_secure': {'card': source},
-            'redirect': {'return_url': return_url},
-            'api_key': self._api_key,
-        }
 
     def _get_adyen_client(self):
         account = self._get_account()
@@ -129,24 +153,10 @@ class PaymentService(Component):
         return ady.payment
 
     def _create_transaction(self, source=None, **kwargs):
-#        source_data = stripe.Source.retrieve(source, api_key=self._api_key)
-#        three_d_secure = self._need_three_d_secure(source_data)
-        three_d_secure = False
         try:
-#        if True: # TODO
-            if three_d_secure:
-                res = stripe.Source.create(
-                    **self._prepare_source(source=source, **kwargs))
-                if res['status'] == 'chargeable':
-                    # 3D secure have been not activated or not ready
-                    # for this customer
-                    three_d_secure = False
-                else:
-                    return res
-            if not three_d_secure:
-                return self._get_adyen_client().authorise(
-                     request=self._prepare_charge(source=source, **kwargs))
-        except ValueError as e: # TODO catch orther errors
+            return self._get_adyen_client().authorise(
+                request=self._prepare_charge(source=source, **kwargs))
+        except ValueError as e:  # TODO catch orther errors
             raise UserError(e)
 
     def _parse_creation_result(self, transaction, **kwargs):
