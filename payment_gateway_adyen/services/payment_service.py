@@ -25,10 +25,14 @@ MAP_SOURCE_STATE = { # TODO complete
     'pending': 'pending',
     '[capture-received]': 'succeeded'}
 
- # zero decimal currency https://stripe.com/docs/currencies#zero-decimal
+# decimal points of currencies https://docs.adyen.com/developers/currency-codes
 ZERO_DECIMAL_CURRENCIES = [
-    u'BIF', u'CLP', u'DJF', u'GNF', u'JPY', u'KMF', u'KRW', u'MGA',
-    u'PYG', u'RWF', u'VND', u'VUV', u'XAF', u'XOF', u'XPF',
+    u'CVE', u'DJF', u'GNF', u'IDR', u'JPY', u'KMF', u'KRW', u'PYG',
+    u'RWF', u'UGX', u'VND', u'VUV', u'XAF', u'XOF', u'XPF',
+],
+
+THREE_DECIMAL_CURRENCIES = [
+    u'BHD', u'JOD', u'KWD', u'LYD', u'OMR', u'TND'
 ]
 
 
@@ -38,12 +42,15 @@ class PaymentService(Component):
     _usage = 'adyen'
     _allowed_capture_method = ['immediately']
 
-    def _get_formatted_amount(self): # TODO useful?
-        amount = self.collection._get_amount_to_capture()
+    def _get_formatted_amount(self, amount=None):
+        if amount is None:
+            amount = self.collection._get_amount_to_capture()
         if self.collection.currency_id.name in ZERO_DECIMAL_CURRENCIES:
             return int(amount)
+        elif self.collection.currency_id.name in THREE_DECIMAL_CURRENCIES:
+            return int(float_round(amount * 1000, 0))
         else:
-            return int(float_round(amount*100, 0))
+            return int(float_round(amount * 100, 0))
 
     # Code for generating the transaction on stripe and the transaction on odoo
 
@@ -149,7 +156,7 @@ class PaymentService(Component):
             _parse_creation_result(transaction, **kwargs)
         transaction = transaction.message
         res.update({
-            'amount': self.collection._get_amount_to_capture(), # transaction['amount']/100., TODO unlike Stripe, we don't have the amount in the result with Adyen
+            'amount': self.collection._get_amount_to_capture(),
             'external_id': transaction['pspReference'],
             'state': MAP_SOURCE_STATE[transaction['resultCode']],
             'data': json.dumps(transaction),
@@ -172,7 +179,6 @@ class PaymentService(Component):
 
     def _parse_capture_result(self, charge):
         return {
-#            'amount': charge['amount']/100., TODO not such info with Adyen
             'external_id': charge['pspReference'],
             'state': MAP_SOURCE_STATE[str(charge['response'])],
 #            'risk_level': charge.get('outcome', {}).get('risk_level'), # TODO
@@ -183,7 +189,9 @@ class PaymentService(Component):
         transaction = self.collection
         return {
             'originalReference': transaction.external_id,
-            'modificationAmount': {'currency': transaction.currency_id.name, 'value': transaction.amount}
+            'modificationAmount': {'currency': transaction.currency_id.name,
+                                   'value': self._get_formatted_amount(
+                                       transaction.amount)}
             }
 
     def capture(self):

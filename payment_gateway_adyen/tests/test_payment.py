@@ -151,10 +151,7 @@ class AdyenCase(AdyenCommonCase, AdyenScenario):
     def _check_captured(self, transaction, expected_state='succeeded',
                         expected_risk_level='normal'):
         self.assertEqual(transaction.state, expected_state)
-        charge = json.loads(transaction.data) # NOPE with Adyen
         self.assertEqual(self.sale.amount_total, transaction.amount)
-        # TODO
-#        self.assertEqual(charge['amount'], int(transaction.amount*100))
 #        self.assertEqual(transaction.risk_level, expected_risk_level)
 
 #    def _test_3d(self, card, success=True):
