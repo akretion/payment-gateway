@@ -12,8 +12,13 @@ class KeychainAccount(models.Model):
     namespace = fields.Selection(
         selection_add=[('adyen', 'Adyen')])
 
-    def _adyen_init_data(self): # TODO
-        return {}
+    def _adyen_init_data(self):
+        return """{
+                "merchant_account": "MerchantAccount",
+                "username": "webservice_user",
+                "platform": "test",
+                "app_name": "shopinvader"
+            }"""
 
     def _adyen_validate_data(self, data): # TODO
         return True

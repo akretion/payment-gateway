@@ -40,7 +40,12 @@ class AdyenCommonCase(SavepointComponentCase):
             'name': 'Adyen',
             'clear_password': self.adyen_api,
             'technical_name': 'adyen',
-            'data': "{}"})
+            'data': """{
+                "merchant_account": "AkretionCOM",
+                "username": "ws@Company.Akretion",
+                "platform": "test",
+                "app_name": "shopinvader"
+            }"""})
         self.sale = self.env.ref('sale.sale_order_2')
         self.account_payment_mode = self.env.ref(
             'payment_gateway_adyen.account_payment_mode_adyen')

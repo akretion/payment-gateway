@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017 Akretion (http://www.akretion.com).
-# @author Sébastien BEAU <sebastien.beau@akretion.com>
+# Copyright 2018 Akretion (http://www.akretion.com).
+# @author Raphael Valyi <raphael.valyi@akretion.com>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from odoo.exceptions import Warning as UserError
@@ -37,11 +37,6 @@ class PaymentService(Component):
     _name = 'payment.service.adyen'
     _usage = 'adyen'
     _allowed_capture_method = ['immediately']
-
-    @property
-    def _api_key(self):
-        account = self._get_account()
-        return account._get_password()
 
     def _get_formatted_amount(self): # TODO useful?
         amount = self.collection._get_amount_to_capture()
@@ -115,6 +110,17 @@ class PaymentService(Component):
             'api_key': self._api_key,
         }
 
+    def _get_adyen_client(self):
+        account = self._get_account()
+        data = account.get_data()
+        ady = Adyen.Adyen()
+        ady.payment.client.username = data['username']
+        ady.payment.client.platform = str(data['platform'])
+        ady.payment.client.merchant_account = data['merchant_account']
+        ady.payment.client.password = account._get_password()
+        ady.payment.client.app_name = data['app_name']
+        return ady.payment
+
     def _create_transaction(self, source=None, **kwargs):
 #        source_data = stripe.Source.retrieve(source, api_key=self._api_key)
 #        three_d_secure = self._need_three_d_secure(source_data)
@@ -131,19 +137,7 @@ class PaymentService(Component):
                 else:
                     return res
             if not three_d_secure:
-
-#                return stripe.Charge.create(
-                # TODO dynamic client creation
-                ady = Adyen.Adyen()
-                merchant_account="AkretionCOM"
-                ady.payment.client.username = "ws@Company.Akretion"
-                # ady.payment.client.skin_code = "hosted payment pages skin code"
-                # ady.payment.client.hmac = "hmac key associated with this skin generated in the customer area."
-                ady.payment.client.platform = "test"
-                ady.payment.client.merchant_account = merchant_account
-                ady.payment.client.password = self._api_key
-                ady.payment.client.app_name = "shopinvader"
-                return ady.payment.authorise(
+                return self._get_adyen_client().authorise(
                      request=self._prepare_charge(source=source, **kwargs))
         except ValueError as e: # TODO catch orther errors
             raise UserError(e)
@@ -195,15 +189,6 @@ class PaymentService(Component):
     def capture(self):
         if self.collection.external_id.isdigit():
             payload = self._prepare_capture_payload()
-            ady = Adyen.Adyen()
-            merchant_account="AkretionCOM"
-            ady.payment.client.username = "ws@Company.Akretion"
-            # ady.payment.client.skin_code = "hosted payment pages skin code"
-            # ady.payment.client.hmac = "hmac key associated with this skin generated in the customer area."
-            ady.payment.client.platform = "test"
-            ady.payment.client.merchant_account = merchant_account
-            ady.payment.client.password = self._api_key
-            ady.payment.client.app_name = "shopinvader"
-            charge = ady.payment.capture(request=payload)
+            charge = self._get_adyen_client().capture(request=payload)
             vals = self._parse_capture_result(charge.message)
             self.collection.write(vals)
