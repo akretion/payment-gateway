@@ -91,35 +91,18 @@ class AdyenCommonCase(SavepointComponentCase):
         tree = etree.parse(StringIO(unicode(validation.content)), parser)
         e = tree.xpath("//input[@name='PaRes']")[0]
         pa_res = e.values()[2]
-        r = requests.post(webhook_url, {
-            'MD': source['md'],
-            'pa_res': pa_res
-        })
-        self.assertEqual(r.status_code, 200)
+        return pa_res
 
 
 class AdyenScenario(object):
 
-#    @recorder.use_cassette
-#    def test_create_transaction_3d_required_failed(self):
-#        self._test_3d('4000000000003063', success=False)
+    @recorder.use_cassette
+    def test_create_transaction_3d_required_failed(self):
+        self._test_3d('5212345678901234', success=False)
 
     @recorder.use_cassette
     def test_create_transaction_3d_required_success(self):
         self._test_3d('5212345678901234', success=True)
-
-#    @recorder.use_cassette
-#    def test_create_transaction_3d_optional_failed(self):
-#        self._test_3d('4000000000003055', success=False)
-
-#    @recorder.use_cassette
-#    def test_create_transaction_3d_optional_success(self):
-#        self._test_3d('4000000000003055', success=True)
-
-#    @recorder.use_cassette
-#    def test_create_transaction_3d_not_supported(self):
-#        transaction, source = self._create_transaction('378282246310005')
-#        self.assertEqual(transaction.state, 'succeeded')
 
     @recorder.use_cassette
     def test_create_transaction_visa(self):
@@ -128,23 +111,10 @@ class AdyenScenario(object):
     @recorder.use_cassette
     def test_create_transaction_us(self):
         self._test_card('4400000000000008')
-#                        expected_state='failed')
 
     @recorder.use_cassette
     def test_create_transaction_france(self):
         self._test_card('4977949494949497')
-
-#    @recorder.use_cassette
-#    def test_create_transaction_france(self):
-#        self._test_card('4000002500000003')
-
-#    @recorder.use_cassette
-#    def test_create_transaction_risk_highest(self):
-#        with self.assertRaises(UserError):
-#            self._test_card(
-#                '4100000000000019',
-#                expected_state='failed',
-#                expected_risk_level='unknown')
 
 #    @recorder.use_cassette
 #    def test_create_transaction_risk_elevated(self):
@@ -191,11 +161,19 @@ class AdyenCase(AdyenCommonCase, AdyenScenario):
     def _test_3d(self, card, success=True):
         transaction, source = self._create_transaction(card)
         self.assertEqual(transaction.state, 'pending')
-        self._fill_3d_secure(source, card, success=success)
+        pa_res = self._fill_3d_secure(source, card, success=success)
+        params = {
+            'MD': source['md'],
+            'PaRes': pa_res
+        }
         if success:
+            transaction.process_webhook('adyen', 'process_event', params)
             self._check_captured(transaction)
         else:
-            self.assertEqual(transaction.state, 'failed')
+            params['PaRes'] = 'failed'
+            with self.assertRaises(UserError):
+                transaction.process_webhook('adyen', 'process_event', params)
+            self.assertIn(transaction.state, ['pending', 'failed'])
 
     def _test_card(self, card, **kwargs):
         transaction, source = self._create_transaction(card)

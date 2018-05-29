@@ -17,8 +17,8 @@ except ImportError:
     _logger.debug('Cannot import Adyen')
 
 
-MAP_SOURCE_STATE = { # TODO complete
-    'canceled': 'cancel',
+MAP_SOURCE_STATE = {  # TODO check if complete
+    '[cancel-received]': 'cancel',
     'Authorised': 'to_capture',
     'consumed': 'succeeded',
     'Refused': 'failed',
@@ -51,21 +51,29 @@ class PaymentService(Component):
         }
         payload["md"] = params['MD']
         payload["paResponse"] = params['PaRes']
-        result = self._get_adyen_client().authorise3d(request=payload)
-        vals = {
-            'state': MAP_SOURCE_STATE[result['resultCode']],
-            'data': json.dumps(result.message),
-        }
+        transaction = None
+        try:
+            result = self._get_adyen_client().authorise3d(request=payload)
+            vals = {
+                'state': MAP_SOURCE_STATE[result.message['resultCode']],
+                'data': json.dumps(result.message),
+            }
 
-        transaction = self.env['gateway.transaction'].search([
-            ('external_id', '=', result['pspReference']),
-            ('payment_mode_id.provider', '=', 'adyen'),
-            ])
+            transaction = self.env['gateway.transaction'].search([
+                ('external_id', '=', result.message['pspReference']),
+                ('payment_mode_id.provider', '=', 'adyen'),
+                ])
+        except ValueError as e:
+            # NOTE catch orther errors?
+            # do we want to cancel the transaction? Can we do it?
+            raise UserError(e.message)
+
         if transaction:
             transaction.write(vals)
         else:
             raise UserError(
-                _('The transaction %s do not exist') % transaction_id)
+                _('The transaction %s do not exist in Odoo') % result.message[
+                    'pspReference'])
 
     def _validator_process_event(self):
         return {
@@ -92,36 +100,6 @@ class PaymentService(Component):
             return int(float_round(amount * 1000, 0))
         else:
             return int(float_round(amount * 100, 0))
-
-    # Code for generating the transaction on stripe and the transaction on odoo
-
-    def _get_error_message(self, code): # TODO
-        return {
-            'invalid_number':
-                _("The card number is not a valid credit card number."),
-            'invalid_expiry_month':
-                _("The card's expiration month is invalid."),
-            'invalid_expiry_year':
-                _("The card's expiration year is invalid."),
-            'invalid_cvc':
-                _("The card's security code is invalid."),
-            'invalid_swipe_data':
-                _("The card's swipe data is invalid."),
-            'incorrect_number':
-                _("The card number is incorrect."),
-            'expired_card':
-                _("The card has expired."),
-            'incorrect_cvc':
-                _("The card's security code is incorrect."),
-            'incorrect_zip':
-                _("The card's zip code failed validation."),
-            'card_declined':
-                _("The card was declined."),
-            'missing':
-                _("There is no card on a customer that is being charged."),
-            'processing_error':
-                _("An error occurred while processing the card."),
-        }[code]
 
     def _prepare_charge(self, source=None, **kwargs):
         transaction = self.collection
@@ -156,8 +134,8 @@ class PaymentService(Component):
         try:
             return self._get_adyen_client().authorise(
                 request=self._prepare_charge(source=source, **kwargs))
-        except ValueError as e:  # TODO catch orther errors
-            raise UserError(e)
+        except ValueError as e:  # TODO catch orther errors?
+            raise UserError(e.message)
 
     def _parse_creation_result(self, transaction, **kwargs):
         # TODO does it make sense to call super with the specific AdyenResult
