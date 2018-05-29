@@ -43,7 +43,7 @@ class PaymentService(Component):
     _allowed_capture_method = ['immediately']
     _webhook_method = ['process_event']
 
-    def process_event(self, **params):
+    def process_return(self, **params):
         payload = {}
         payload["browserInfo"] = {
             "userAgent": "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9) Gecko/2008052912 Firefox/3.0",

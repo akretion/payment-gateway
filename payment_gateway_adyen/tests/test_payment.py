@@ -167,12 +167,14 @@ class AdyenCase(AdyenCommonCase, AdyenScenario):
             'PaRes': pa_res
         }
         if success:
-            transaction.process_webhook('adyen', 'process_event', params)
+            with transaction._get_provider('adyen') as provider:
+                provider.process_return(**params)
             self._check_captured(transaction)
         else:
-            params['PaRes'] = 'failed'
+            params['PaRes'] = 'failed validation'
             with self.assertRaises(UserError):
-                transaction.process_webhook('adyen', 'process_event', params)
+                with transaction._get_provider('adyen') as provider:
+                    provider.process_return(**params)
             self.assertIn(transaction.state, ['pending', 'failed'])
 
     def _test_card(self, card, **kwargs):
