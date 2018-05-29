@@ -38,6 +38,14 @@ class PaymentService(Component):
     _allowed_capture_method = ['immediately']
     _webhook_method = ['process_event']
 
+    def process_return(self, **params):
+        transaction = self.env['gateway.transaction'].search([
+            ('external_id', '=', params['source']),
+            ('payment_mode_id.provider', '=', 'stripe'),
+            ('state', '=', 'pending')])
+        transaction.check_state()
+        return transaction
+
     def process_event(self, **params):
         transaction_id = params['data']['object']['id']
         # For now we only implement a basic webhook for simple transaction
@@ -66,6 +74,16 @@ class PaymentService(Component):
                 }
             }
         }
+
+    def _validator_add_payment(self):
+        return {
+            'source': {'type': 'string'},
+            'redirect_success_url': {'type': 'string'},
+            'redirect_cancel_url': {'type': 'string'},
+            }
+
+    def _validator_check_payment(self):
+        return {'source': {'type': 'string'}}
 
     @property
     def _api_key(self):

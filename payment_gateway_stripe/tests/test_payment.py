@@ -31,6 +31,8 @@ class StripeCommonCase(HttpSavepointComponentCase):
         self.account_payment_mode = self.env.ref(
             'payment_gateway_stripe.account_payment_mode_stripe')
         self.sale.write({'payment_mode_id': self.account_payment_mode.id})
+        self.base_url = self.env['ir.config_parameter']\
+            .get_param('web.base.url')
 
     def _get_source(self, card):
         return stripe.Source.create(
@@ -47,6 +49,26 @@ class StripeCommonCase(HttpSavepointComponentCase):
         url = res._content.split('method="POST" action="')[1].split('">')[0]
         requests.post(url, {'PaRes': 'success' if success else 'failure'})
 
+    def _simulate_webhook(self, transaction):
+        self._init_job_counter()
+        # We only mock the data that we are interested in
+        event = {'data': {'object': {'id': transaction.external_id}}}
+        # Commit transaction (fake commit on test cursor)
+        self.env.cr.commit()
+        hook_url = self.base_url + JSON_WEBHOOK_PATH + '/stripe/process_event'
+        r = requests.post(hook_url, json=event)
+        self.assertEqual(r.status_code, 200)
+        self._check_nbr_job_created(1)
+        self._perform_created_job()
+
+    def _check_captured(self, transaction, expected_state='succeeded',
+                        expected_risk_level='normal'):
+        self.assertEqual(transaction.state, expected_state)
+        charge = json.loads(transaction.data)
+        self.assertEqual(self.sale.amount_total, transaction.amount)
+        self.assertEqual(charge['amount'], int(transaction.amount*100))
+        self.assertEqual(transaction.risk_level, expected_risk_level)
+
 
 class StripeScenario(RecordedScenario):
 
@@ -61,6 +83,18 @@ class StripeScenario(RecordedScenario):
 
     def test_create_transaction_3d_optional_success(self):
         self._test_3d('4000000000003055', success=True)
+
+    def test_create_transaction_3d_required_failed_webhook(self):
+        self._test_3d('4000000000003063', success=False, mode='webhook')
+
+    def test_create_transaction_3d_required_success_webhook(self):
+        self._test_3d('4000000000003063', success=True, mode='webhook')
+
+    def test_create_transaction_3d_optional_failed_webhook(self):
+        self._test_3d('4000000000003055', success=False, mode='webhook')
+
+    def test_create_transaction_3d_optional_success_webhook(self):
+        self._test_3d('4000000000003055', success=True, mode='webhook')
 
     def test_create_transaction_3d_not_supported(self):
         transaction, source = self._create_transaction('378282246310005')
@@ -104,22 +138,24 @@ class StripeCase(StripeCommonCase, StripeScenario):
         super(StripeCase, self).__init__(*args, **kwargs)
         self._decorate_test(dirname(__file__))
 
-    def setUp(self, *args, **kwargs):
-        super(StripeCase, self).setUp(*args, **kwargs)
-        self.base_url = self.env['ir.config_parameter']\
-            .get_param('web.base.url')
+    def _simulate_return(self, transaction):
+        with transaction._get_provider('stripe') as provider:
+            provider.process_return(source=transaction.external_id)
 
-    def _simulate_webhook(self, transaction):
-        self._init_job_counter()
-        # We only mock the data that we are interested in
-        event = {'data': {'object': {'id': transaction.external_id}}}
-        # Commit transaction (fake commit on test cursor)
-        self.env.cr.commit()
-        hook_url = self.base_url + JSON_WEBHOOK_PATH + '/stripe/process_event'
-        r = requests.post(hook_url, json=event)
-        self.assertEqual(r.status_code, 200)
-        self._check_nbr_job_created(1)
-        self._perform_created_job()
+    def _test_3d(self, card, success=True, mode='return'):
+        transaction, source = self._create_transaction(card)
+        self.assertEqual(transaction.state, 'pending')
+        self._fill_3d_secure(source, success=success)
+
+        if mode == 'webhook':
+            self._simulate_webhook(transaction)
+        else:
+            self._simulate_return(transaction)
+
+        if success:
+            self._check_captured(transaction)
+        else:
+            self.assertEqual(transaction.state, 'failed')
 
     def _create_transaction(self, card):
         source = self._get_source(card)
@@ -129,24 +165,6 @@ class StripeCase(StripeCommonCase, StripeScenario):
             source=source['id'],
             return_url='https://IwillBeBack.vd')
         return transaction, json.loads(transaction.data)
-
-    def _check_captured(self, transaction, expected_state='succeeded',
-                        expected_risk_level='normal'):
-        self.assertEqual(transaction.state, expected_state)
-        charge = json.loads(transaction.data)
-        self.assertEqual(self.sale.amount_total, transaction.amount)
-        self.assertEqual(charge['amount'], int(transaction.amount*100))
-        self.assertEqual(transaction.risk_level, expected_risk_level)
-
-    def _test_3d(self, card, success=True):
-        transaction, source = self._create_transaction(card)
-        self.assertEqual(transaction.state, 'pending')
-        self._fill_3d_secure(source, success=success)
-        self._simulate_webhook(transaction)
-        if success:
-            self._check_captured(transaction)
-        else:
-            self.assertEqual(transaction.state, 'failed')
 
     def _test_card(self, card, **kwargs):
         transaction, source = self._create_transaction(card)
