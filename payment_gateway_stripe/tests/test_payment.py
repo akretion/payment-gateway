@@ -3,41 +3,23 @@
 # @author Sébastien BEAU <sebastien.beau@akretion.com>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-# pylint: disable=missing-manifest-dependency,invalid-commit
-# disable warning on 'vcr' missing in manifest: this is only a dependency for
-# dev/tests
-
 import os
 import json
 import requests
-import logging
 import stripe
-from vcr import VCR
-from os.path import join, dirname
+from os.path import dirname
 
-from openerp import api
 from odoo.exceptions import Warning as UserError
-from odoo.addons.component.tests.common import SavepointComponentCase
-from odoo.addons.queue_job.job import Job
+from odoo.addons.payment_gateway.tests.common import (
+    RecordedScenario,
+    HttpSavepointComponentCase,
+    JSON_WEBHOOK_PATH)
 
 
-logging.getLogger("vcr").setLevel(logging.WARNING)
-
-
-WEBHOOK_PATH = '/payment-gateway-json-webhook/stripe/process_event'
-
-
-def before_record(request):
-    if WEBHOOK_PATH not in request.path:
-        return request
-
-
-class StripeCommonCase(SavepointComponentCase):
+class StripeCommonCase(HttpSavepointComponentCase):
 
     def setUp(self, *args, **kwargs):
         super(StripeCommonCase, self).setUp(*args, **kwargs)
-        self.registry.enter_test_mode()
-        self.env = api.Environment(self.registry.test_cr, 1, {})
         self.stripe_api = os.environ.get('STRIPE_API')
         self.env['keychain.account'].create({
             'namespace': 'stripe',
@@ -49,10 +31,6 @@ class StripeCommonCase(SavepointComponentCase):
         self.account_payment_mode = self.env.ref(
             'payment_gateway_stripe.account_payment_mode_stripe')
         self.sale.write({'payment_mode_id': self.account_payment_mode.id})
-
-    def tearDown(self):
-        self.registry.leave_test_mode()
-        super(StripeCommonCase, self).tearDown()
 
     def _get_source(self, card):
         return stripe.Source.create(
@@ -69,35 +47,8 @@ class StripeCommonCase(SavepointComponentCase):
         url = res._content.split('method="POST" action="')[1].split('">')[0]
         requests.post(url, {'PaRes': 'success' if success else 'failure'})
 
-    def _init_job_counter(self):
-        self.existing_job = self.env['queue.job'].search([])
 
-    @property
-    def created_jobs(self):
-        return self.env['queue.job'].search([]) - self.existing_job
-
-    def _check_nbr_job_created(self, nbr):
-        self.assertEqual(len(self.created_jobs), nbr)
-
-    def _perform_created_job(self):
-        for job in self.created_jobs:
-            Job.load(self.env, job.uuid).perform()
-
-
-class StripeScenario(object):
-
-    def _decorate_test(self, test_path):
-        recorder = VCR(
-            before_record_request=before_record,
-            record_mode=os.environ.get('VCR_MODE', 'none'),
-            cassette_library_dir=join(test_path, 'fixtures/cassettes'),
-            path_transformer=VCR.ensure_suffix('.yaml'),
-            filter_headers=['Authorization'],
-        )
-        for test_func in dir(self):
-            if test_func.startswith('test'):
-                setattr(self, test_func,
-                        recorder.use_cassette(getattr(self, test_func)))
+class StripeScenario(RecordedScenario):
 
     def test_create_transaction_3d_required_failed(self):
         self._test_3d('4000000000003063', success=False)
@@ -164,7 +115,8 @@ class StripeCase(StripeCommonCase, StripeScenario):
         event = {'data': {'object': {'id': transaction.external_id}}}
         # Commit transaction (fake commit on test cursor)
         self.env.cr.commit()
-        r = requests.post(self.base_url + WEBHOOK_PATH, json=event)
+        hook_url = self.base_url + JSON_WEBHOOK_PATH + '/stripe/process_event'
+        r = requests.post(hook_url, json=event)
         self.assertEqual(r.status_code, 200)
         self._check_nbr_job_created(1)
         self._perform_created_job()
@@ -199,3 +151,8 @@ class StripeCase(StripeCommonCase, StripeScenario):
     def _test_card(self, card, **kwargs):
         transaction, source = self._create_transaction(card)
         self._check_captured(transaction, **kwargs)
+
+    def test_config(self):
+        self.assertEqual(
+            self.account_payment_mode._get_allowed_capture_method(),
+            ['immediately'])
