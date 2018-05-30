@@ -8,15 +8,12 @@
 # dev/tests
 
 import os
-import unittest
-import Adyen
-import json
 import requests
-import logging
+import json
 from lxml import etree
 from io import StringIO
-from vcr import VCR
-from os.path import join, dirname
+from os.path import dirname
+from adyen_cse_python.encrypter import ClientSideEncrypter
 
 from odoo.exceptions import Warning as UserError
 from odoo.addons.payment_gateway.tests.common import (
@@ -29,6 +26,13 @@ class AdyenCommonCase(HttpSavepointComponentCase):
     def setUp(self, *args, **kwargs):
         super(AdyenCommonCase, self).setUp(*args, **kwargs)
         self.adyen_api = os.environ.get('ADYEN_API')
+        encryption_key = """10001|ADCCEED8EC3760415BF83DAD23F41A33CE93B749EE984\
+AE8A4B00572913728C7A8B5E8834D05E506DE378E89F58B80D609096E851B78492C55283F05B50A\
+CCB3735A046FE6F9805F7DEB49DCD23E18F8466D3682511103F142063E314173CA961DABF2C57A9\
+60DE8BD86A8AC25457FAFA2181321E84BE7A10F88692F97A1BA5253F247C9A18545FAF2AC37A69A\
+5A1F5F974923FF43DBF9054008FAFC0F712CB4381608CF8C737A0AB5B6D906E1A503BE82EF652A8\
+949B7B37D525EFEEFB6EFECBD2BCB1F807677F3BC73441028D64B7C36345BD9A39CCC43B738AF5A\
+25E6950BA6EBFD1CF6A49FE6003056F9B8627D3EAC112ED77C04947EEC9B38AA9886EC1B"""
         self.env['keychain.account'].create({
             'namespace': 'adyen',
             'name': 'Adyen',
@@ -44,6 +48,7 @@ class AdyenCommonCase(HttpSavepointComponentCase):
         self.account_payment_mode = self.env.ref(
             'payment_gateway_adyen.account_payment_mode_adyen')
         self.sale.write({'payment_mode_id': self.account_payment_mode.id})
+        self.cse = ClientSideEncrypter(encryption_key)
 
     def _get_card(self, card):
         if isinstance(card, dict):
@@ -68,7 +73,8 @@ class AdyenCommonCase(HttpSavepointComponentCase):
         result = requests.post(url, data)
         session_id = result.headers['Set-Cookie'].split(
             'JSESSIONID=')[1].split(';')[0]
-        validate_url = "https://test.adyen.com/hpp/3d/authenticate.shtml;jsessionid=%s" % (session_id,)
+        validate_url = "https://test.adyen.com/hpp/3d/authenticate.shtml;\
+            jsessionid=%s" % (session_id,)
         validation = requests.post(validate_url, data={
             'PaReq': source['paRequest'],
             'MD': source['md'],
@@ -78,7 +84,7 @@ class AdyenCommonCase(HttpSavepointComponentCase):
             'cardNumber': card_number
         })
         parser = etree.HTMLParser()
-        tree = etree.parse(StringIO(unicode(validation.content)), parser)
+        tree = etree.parse(StringIO(validation.content.decode('utf-8')), parser)
         e = tree.xpath("//input[@name='PaRes']")[0]
         pa_res = e.values()[2]
         return pa_res
@@ -108,15 +114,14 @@ class AdyenScenario(RecordedScenario):
 
     def test_create_transaction_wrong_cvc(self):
         with self.assertRaises(UserError):
-            self._test_card(
-                   {
-                   "number": '4977949494949497',
-                   "expiryMonth": 10,
-                   "expiryYear": 2020,
-                   "cvc": 'wrong',
-                   "holderName": 'John Doe',
-                   },
-                expected_state='failed')
+            self._test_card({
+                                "number": '4977949494949497',
+                                "expiryMonth": 10,
+                                "expiryYear": 2020,
+                                "cvc": 'wrong',
+                                "holderName": 'John Doe',
+                            },
+                            expected_state='failed')
 
 
 class AdyenCase(AdyenCommonCase, AdyenScenario):
@@ -125,17 +130,17 @@ class AdyenCase(AdyenCommonCase, AdyenScenario):
         super(AdyenCase, self).__init__(*args, **kwargs)
         self._decorate_test(dirname(__file__))
 
-    def setUp(self, *args, **kwargs):
-        super(AdyenCase, self).setUp(*args, **kwargs)
-        self.base_url = self.env['ir.config_parameter']\
-            .get_param('web.base.url')
-
     def _create_transaction(self, card):
         card = self._get_card(card)
+        encrypted_card = self.cse.generate_adyen_nonce(card['holderName'],
+                                                       card['number'],
+                                                       card['cvc'],
+                                                       card['expiryMonth'],
+                                                       card['expiryYear'])
         transaction = self.env['gateway.transaction'].generate(
             'adyen',
             self.sale,
-            card=card,
+            encrypted_card=encrypted_card,
             return_url='https://IwillBeBack.vd')
         return transaction, json.loads(transaction.data)
 

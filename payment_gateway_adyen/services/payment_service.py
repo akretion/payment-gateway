@@ -45,8 +45,10 @@ class PaymentService(Component):
     def process_return(self, **params):
         payload = {}
         payload["browserInfo"] = {
-            "userAgent": "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9) Gecko/2008052912 Firefox/3.0",
-            "acceptHeader": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+            "userAgent": "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:\
+            1.9) Gecko/2008052912 Firefox/3.0",
+            "acceptHeader": "text/html,application/xhtml+xml,\
+            application/xml;q=0.9,*/*;q=0.8"
         }
         payload["md"] = params['MD']
         payload["paResponse"] = params['PaRes']
@@ -74,22 +76,6 @@ class PaymentService(Component):
                 _('The transaction %s do not exist in Odoo') % result.message[
                     'pspReference'])
 
-    def _validator_process_event(self):
-        return {
-            'data': {
-                'type': 'dict',
-                'schema': {
-                    'object': {
-                        'type': 'dict',
-                        'schema': {
-                            'MD': {'type': 'string'},
-                            'PaRes': {'type': 'string'},
-                        }
-                    }
-                }
-            }
-        }
-
     def _get_formatted_amount(self, amount=None):
         if amount is None:
             amount = self.collection._get_amount_to_capture()
@@ -106,17 +92,21 @@ class PaymentService(Component):
             transaction.name,
             transaction.partner_id.email,
             str(transaction.id)])
-        # For now capture is always true as only the policy 'immedialtely' is
-        # available in the configuration but it will be easier to implement
-        # the logic of defeared capture
-        capture = transaction.capture_payment == 'immediately'
-        return {
+        vals = {
                    'amount':  {"value": self._get_formatted_amount(),
                                "currency": transaction.currency_id.name},
-                   'card': kwargs['card'],
                    'reference': description,
-                   'additionalData': {"executeThreeD": "true"}  # TODO add CSE
-               }
+                   'additionalData': {"executeThreeD": "true"}
+                }
+        if kwargs.get('card'):
+            # PCI clear card data
+            vals['card'] = kwargs['card']
+        elif kwargs.get('encrypted_card'):
+            vals['additionalData'] = {
+                'card.encrypted.json': kwargs['encrypted_card'],
+                'executeThreeD': 'true'
+            }
+        return vals
 
     def _get_adyen_client(self):
         account = self._get_account()
@@ -148,29 +138,22 @@ class PaymentService(Component):
             'state': MAP_SOURCE_STATE[transaction['resultCode']],
             'data': json.dumps(transaction),
         })
-        if transaction.get('redirect', {}).get('url'): # TODO
+        if transaction.get('redirect', {}).get('url'):  # TODO
             res['url'] = transaction['redirect']['url']
+        # TODO risk analysis if possible with API
         risk_level = transaction.get('outcome', {}).get('risk_level')
-        if risk_level: # TODO
+        if risk_level:  # TODO
             res['risk_level'] = risk_level
         return res
-
-    # code for getting the state of the current transaction
-
-    def get_state(self):
-        source = stripe.Source.retrieve(
-            self.collection.external_id, api_key=self._api_key)
-        return MAP_SOURCE_STATE[source['status']]
 
     # Code for capturing the transaction
 
     def _parse_capture_result(self, charge):
         return {
-            'external_id': charge['pspReference'],
-            'state': MAP_SOURCE_STATE[str(charge['response'])],
-#            'risk_level': charge.get('outcome', {}).get('risk_level'), # TODO
-            'data': json.dumps(charge),
-        }
+                   'external_id': charge['pspReference'],
+                   'state': MAP_SOURCE_STATE[str(charge['response'])],
+                   'data': json.dumps(charge),
+               }
 
     def _prepare_capture_payload(self):
         transaction = self.collection

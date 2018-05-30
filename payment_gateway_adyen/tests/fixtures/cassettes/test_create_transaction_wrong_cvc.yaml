@@ -1,29 +1,29 @@
 interactions:
 - request:
-    body: !!python/unicode '{"additionalData": {"executeThreeD": "true"}, "amount":
-      {"currency": "USD", "value": 294750}, "merchantAccount": "AkretionCOM", "card":
-      {"expiryYear": 2020, "holderName": "John Doe", "number": "4977949494949497",
-      "expiryMonth": 10, "cvc": "wrong"}, "reference": "SO002|deltapc@yourcompany.example.com|77"}'
+    body: !!python/unicode '{"additionalData": {"executeThreeD": "true", "card.encrypted.json":
+      "adyenan0_1_1$Aa/0Uz4lSnQ4J9t6wd+jXBwM/vDjohFyn9+p3iYXW5hIAfmLsIlQd1089sf8D9Cr/Uwfj7ZNOQ+wXiMJAtiOSrACGFHMmXjBcUCNn/zwy0VV/a7dLtNqKBwDVlAQdEFvyhwTy9GGwlKsfsRXYE6Ocflf6qwWj5Dwgg1bfqs0ljx5l8x/GWWLYTWUAAw3NGurW9a8HbY49ViB/B0rY4WgyfaM105wkGByaWG4Wcu9LBLHNOAM1POeRBeUr8ZJUqBDMGmHTUNpxMB+rfIinsjcfA1vFsHHs1iimmbpuL5t24o0T+aSHfbFhk6LV599ln84TuuyLa6xsjpoeCGtDfWrkQ==$rEqj494KF8WZWIyGt9+0P0qwsOi3O1/2d8EJsOQtLEtXcUZUXigJoRpB2+XcGcHiTfSjHQchA1gwmKCrYv4cirw9yh9AYse7p5wjZ9ll9MsJmyF/bHCvXeRLH5HjvnsmD4ZxMAg8Iw8hsbALsJ0zIIoig6QRbLTghrCOp+jAPbhqv55tDAJ8Zy3ASR41FpauPUg0iz4arBWs87d4ngaG0GCPiH+wLEyye51YsnLYOQsN"},
+      "amount": {"currency": "USD", "value": 294750}, "merchantAccount": "AkretionCOM",
+      "reference": "SO002|deltapc@yourcompany.example.com|172"}'
     headers:
       Accept: ['*/*']
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
-      Content-Length: ['305']
+      Content-Length: ['806']
       Content-Type: [application/json]
       User-Agent: [!!python/unicode 'shopinvader adyen-python-api-library/1.2.0']
     method: POST
     uri: https://pal-test.adyen.com/pal/servlet/Payment/v30/authorise
   response:
     body: {string: !!python/unicode '{"status":422,"errorCode":"103","message":"CVC
-        is not the right length","errorType":"validation","pspReference":"8515277089690172"}'}
+        is not the right length","errorType":"validation","pspReference":"8515277160024366"}'}
     headers:
       connection: [Keep-Alive]
       content-type: [application/json;charset=utf-8]
-      date: ['Wed, 30 May 2018 19:36:09 GMT']
+      date: ['Wed, 30 May 2018 21:33:22 GMT']
       keep-alive: ['timeout=15, max=100']
-      pspreference: ['8515277089690172']
+      pspreference: ['8515277160024366']
       server: [Apache]
-      set-cookie: [JSESSIONID=740F0E8D3FC6180A65B0D43B39E70973.test3e; Path=/pal;
+      set-cookie: [JSESSIONID=7072E4CD6104E59474374491BCC96E0A.test3e; Path=/pal;
           Secure; HttpOnly]
     status: {code: 422, message: Unprocessable Entity}
 version: 1
