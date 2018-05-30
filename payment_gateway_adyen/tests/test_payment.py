@@ -19,22 +19,12 @@ from vcr import VCR
 from os.path import join, dirname
 
 from odoo.exceptions import Warning as UserError
-from odoo.tests.common import TransactionCase
-from odoo.addons.component.tests.common import SavepointComponentCase
-
-logging.getLogger("vcr").setLevel(logging.WARNING)
-
-WEBHOOK_PATH = '/payment-gateway-http-webhook/adyen/process_event'
-
-recorder = VCR(
-    record_mode=os.environ.get('VCR_MODE', 'once'),
-    cassette_library_dir=join(dirname(__file__), 'fixtures/cassettes'),
-    path_transformer=VCR.ensure_suffix('.yaml'),
-    filter_headers=['Authorization'],
-)
+from odoo.addons.payment_gateway.tests.common import (
+    RecordedScenario,
+    HttpSavepointComponentCase)
 
 
-class AdyenCommonCase(SavepointComponentCase):
+class AdyenCommonCase(HttpSavepointComponentCase):
 
     def setUp(self, *args, **kwargs):
         super(AdyenCommonCase, self).setUp(*args, **kwargs)
@@ -69,7 +59,7 @@ class AdyenCommonCase(SavepointComponentCase):
 
     def _fill_3d_secure(self, source, card_number, success=True):
         url = source['issuerUrl']
-        webhook_url = str('http://localhost:8069' + WEBHOOK_PATH)  # TODO
+        webhook_url = 'http://yourserver.com/process_return'
         data = {
                    'PaReq': source['paRequest'],
                    'MD': source['md'],
@@ -94,35 +84,28 @@ class AdyenCommonCase(SavepointComponentCase):
         return pa_res
 
 
-class AdyenScenario(object):
+class AdyenScenario(RecordedScenario):
 
-    @recorder.use_cassette
     def test_create_transaction_3d_required_failed(self):
         self._test_3d('5212345678901234', success=False)
 
-    @recorder.use_cassette
     def test_create_transaction_3d_required_success(self):
         self._test_3d('5212345678901234', success=True)
 
-    @recorder.use_cassette
     def test_create_transaction_visa(self):
         self._test_card('5136333333333335')
 
-    @recorder.use_cassette
     def test_create_transaction_us(self):
         self._test_card('4400000000000008')
 
-    @recorder.use_cassette
     def test_create_transaction_france(self):
         self._test_card('4977949494949497')
 
-#    @recorder.use_cassette
 #    def test_create_transaction_risk_elevated(self):
 #        self._test_card(
 #            '4000000000009235',
 #            expected_risk_level='elevated')
 
-    @recorder.use_cassette
     def test_create_transaction_wrong_cvc(self):
         with self.assertRaises(UserError):
             self._test_card(
@@ -137,6 +120,10 @@ class AdyenScenario(object):
 
 
 class AdyenCase(AdyenCommonCase, AdyenScenario):
+
+    def __init__(self, *args, **kwargs):
+        super(AdyenCase, self).__init__(*args, **kwargs)
+        self._decorate_test(dirname(__file__))
 
     def setUp(self, *args, **kwargs):
         super(AdyenCase, self).setUp(*args, **kwargs)

@@ -1,0 +1,52 @@
+interactions:
+- request:
+    body: !!python/unicode '{"additionalData": {"executeThreeD": "true"}, "amount":
+      {"currency": "USD", "value": 294750}, "merchantAccount": "AkretionCOM", "card":
+      {"expiryYear": 2020, "holderName": "John Doe", "number": "4977949494949497",
+      "expiryMonth": 10, "cvc": "737"}, "reference": "SO002|deltapc@yourcompany.example.com|74"}'
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['303']
+      Content-Type: [application/json]
+      User-Agent: [!!python/unicode 'shopinvader adyen-python-api-library/1.2.0']
+    method: POST
+    uri: https://pal-test.adyen.com/pal/servlet/Payment/v30/authorise
+  response:
+    body: {string: !!python/unicode '{"pspReference":"8825277089576459","resultCode":"Authorised","authCode":"95496"}'}
+    headers:
+      connection: [Keep-Alive]
+      content-type: [application/json;charset=utf-8]
+      date: ['Wed, 30 May 2018 19:35:57 GMT']
+      keep-alive: ['timeout=15, max=100']
+      pspreference: ['8825277089576459']
+      server: [Apache]
+      set-cookie: [JSESSIONID=B639A23DB4018DEAA326256E3E43733E.test104e; Path=/pal;
+          Secure; HttpOnly]
+    status: {code: 200, message: OK}
+- request:
+    body: !!python/unicode '{"merchantAccount": "AkretionCOM", "modificationAmount":
+      {"currency": "USD", "value": 294750}, "originalReference": "8825277089576459"}'
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['135']
+      Content-Type: [application/json]
+      User-Agent: [!!python/unicode 'shopinvader adyen-python-api-library/1.2.0']
+    method: POST
+    uri: https://pal-test.adyen.com/pal/servlet/Payment/v30/capture
+  response:
+    body: {string: !!python/unicode '{"pspReference":"8825277089590393","response":"[capture-received]"}'}
+    headers:
+      connection: [Keep-Alive]
+      content-type: [application/json;charset=utf-8]
+      date: ['Wed, 30 May 2018 19:35:59 GMT']
+      keep-alive: ['timeout=15, max=100']
+      pspreference: ['8825277089590393']
+      server: [Apache]
+      set-cookie: [JSESSIONID=6E69A4812C5302DDB91719B0E028D8A5.test103e; Path=/pal;
+          Secure; HttpOnly]
+    status: {code: 200, message: OK}
+version: 1
