@@ -39,9 +39,8 @@ THREE_DECIMAL_CURRENCIES = [
 class PaymentService(Component):
     _inherit = 'payment.service'
     _name = 'payment.service.adyen'
-    _usage = 'adyen'
+    _usage = 'gateway.provider'
     _allowed_capture_method = ['immediately']
-    _webhook_method = ['process_event']
 
     def process_return(self, **params):
         payload = {}
