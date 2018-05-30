@@ -2,3 +2,5 @@ paypalrestsdk
 stripe
 vcrpy
 cerberus
+Adyen
+git+https://github.com/cheah/adyen-cse-python.git@master#egg=adyen-cse-python
