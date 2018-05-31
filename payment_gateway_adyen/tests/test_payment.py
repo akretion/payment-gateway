@@ -21,34 +21,43 @@ from odoo.addons.payment_gateway.tests.common import (
     HttpSavepointComponentCase)
 
 
+FAKE_KEY = (
+    "10001|A052F4CD5F64C8DA05F0A75B7F679DC3049E2F9390664F87E6A444D042A12217D"
+    "F199B787761BFA1427F1B4046FFFC1D298F5A3061EAA7F8C914A657739BC997DA59F8E2"
+    "0BBA17667848D194BA6DA399166F78EDA04BD90D6A1DB33E0ED275E427C691CC7860D90"
+    "DF09B417904004A5F2804F6703A4AF56A2CB40101EBC9EC775E150FFCDC05D7DE6EEA03"
+    "F335F4958B222619B3973DFD365BD6E904768BE5C4583CD8BB3C48DC031E0CC427D22D8"
+    "158AC5C2A1CA3EF3A51003C2DF784ACB4C5857E904F7DA41D6907C80006C4268D8CA3C9"
+    "750BF5BBCB978D834E2BAAD69B45734E8A5011E8D6CAF6D22C2859391DFC84419A40256"
+    "DBEC9B8E52FE1E0221EC5"
+)
+
+
 class AdyenCommonCase(HttpSavepointComponentCase):
 
     def setUp(self, *args, **kwargs):
         super(AdyenCommonCase, self).setUp(*args, **kwargs)
-        self.adyen_api = os.environ.get('ADYEN_API')
-        encryption_key = """10001|ADCCEED8EC3760415BF83DAD23F41A33CE93B749EE984\
-AE8A4B00572913728C7A8B5E8834D05E506DE378E89F58B80D609096E851B78492C55283F05B50A\
-CCB3735A046FE6F9805F7DEB49DCD23E18F8466D3682511103F142063E314173CA961DABF2C57A9\
-60DE8BD86A8AC25457FAFA2181321E84BE7A10F88692F97A1BA5253F247C9A18545FAF2AC37A69A\
-5A1F5F974923FF43DBF9054008FAFC0F712CB4381608CF8C737A0AB5B6D906E1A503BE82EF652A8\
-949B7B37D525EFEEFB6EFECBD2BCB1F807677F3BC73441028D64B7C36345BD9A39CCC43B738AF5A\
-25E6950BA6EBFD1CF6A49FE6003056F9B8627D3EAC112ED77C04947EEC9B38AA9886EC1B"""
+        self.adyen_api = os.environ.get('ADYEN_API', 'offline')
         self.env['keychain.account'].create({
             'namespace': 'adyen',
             'name': 'Adyen',
             'clear_password': self.adyen_api,
             'technical_name': 'adyen',
             'data': """{
-                "merchant_account": "AkretionCOM",
-                "username": "ws@Company.Akretion",
+                "merchant_account": "%s",
+                "username": "%s",
                 "platform": "test",
                 "app_name": "shopinvader"
-            }"""})
+            }""" % (
+                os.environ.get('ADYEN_ACCOUNT', 'offline'),
+                os.environ.get('ADYEN_USER', 'offline')
+                )})
         self.sale = self.env.ref('sale.sale_order_2')
         self.account_payment_mode = self.env.ref(
             'payment_gateway_adyen.account_payment_mode_adyen')
         self.sale.write({'payment_mode_id': self.account_payment_mode.id})
-        self.cse = ClientSideEncrypter(encryption_key)
+        self.cse = ClientSideEncrypter(
+            os.environ.get('ADYEN_CRYPT_KEY', FAKE_KEY))
 
     def _get_card(self, card):
         if isinstance(card, dict):
