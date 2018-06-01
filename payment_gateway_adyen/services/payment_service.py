@@ -58,7 +58,7 @@ class PaymentService(Component):
             vals = {
                 'state': MAP_SOURCE_STATE[result.message['resultCode']],
                 'data': json.dumps(result.message),
-            }
+                }
 
             transaction = self.env['gateway.transaction'].search([
                 ('external_id', '=', result.message['pspReference']),
@@ -106,7 +106,7 @@ class PaymentService(Component):
             vals['additionalData'] = {
                 'card.encrypted.json': kwargs['encrypted_card'],
                 'executeThreeD': 'true'
-            }
+                }
         return vals
 
     def _get_adyen_client(self):
@@ -138,7 +138,7 @@ class PaymentService(Component):
             'external_id': transaction['pspReference'],
             'state': MAP_SOURCE_STATE[transaction['resultCode']],
             'data': json.dumps(transaction),
-        })
+            })
         if transaction.get('redirect', {}).get('url'):  # TODO
             res['url'] = transaction['redirect']['url']
         # TODO risk analysis if possible with API
@@ -160,9 +160,10 @@ class PaymentService(Component):
         transaction = self.collection
         return {
             'originalReference': transaction.external_id,
-            'modificationAmount': {'currency': transaction.currency_id.name,
-                                   'value': self._get_formatted_amount(
-                                       transaction.amount)}
+            'modificationAmount': {
+                'currency': transaction.currency_id.name,
+                'value': self._get_formatted_amount(transaction.amount)
+                }
             }
 
     def capture(self):

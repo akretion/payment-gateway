@@ -141,11 +141,12 @@ class AdyenCase(AdyenCommonCase, AdyenScenario):
 
     def _create_transaction(self, card):
         card = self._get_card(card)
-        encrypted_card = self.cse.generate_adyen_nonce(card['holderName'],
-                                                       card['number'],
-                                                       card['cvc'],
-                                                       card['expiryMonth'],
-                                                       card['expiryYear'])
+        encrypted_card = self.cse.generate_adyen_nonce(
+            card['holderName'],
+            card['number'],
+            card['cvc'],
+            card['expiryMonth'],
+            card['expiryYear'])
         transaction = self.env['gateway.transaction'].generate(
             'adyen',
             self.sale,
