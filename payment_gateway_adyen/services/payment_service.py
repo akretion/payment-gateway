@@ -93,11 +93,12 @@ class PaymentService(Component):
             transaction.partner_id.email,
             str(transaction.id)])
         vals = {
-                   'amount':  {"value": self._get_formatted_amount(),
-                               "currency": transaction.currency_id.name},
-                   'reference': description,
-                   'additionalData': {"executeThreeD": "true"}
-                }
+            'amount': {
+                "value": self._get_formatted_amount(),
+                "currency": transaction.currency_id.name},
+            'reference': description,
+            'additionalData': {"executeThreeD": "true"}  # TODO optional?
+            }
         if kwargs.get('card'):
             # PCI clear card data
             vals['card'] = kwargs['card']
@@ -150,10 +151,10 @@ class PaymentService(Component):
 
     def _parse_capture_result(self, charge):
         return {
-                   'external_id': charge['pspReference'],
-                   'state': MAP_SOURCE_STATE[str(charge['response'])],
-                   'data': json.dumps(charge),
-               }
+            'external_id': charge['pspReference'],
+            'state': MAP_SOURCE_STATE[str(charge['response'])],
+            'data': json.dumps(charge),
+            }
 
     def _prepare_capture_payload(self):
         transaction = self.collection

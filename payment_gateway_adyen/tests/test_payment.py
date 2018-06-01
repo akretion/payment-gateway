@@ -64,21 +64,21 @@ class AdyenCommonCase(HttpSavepointComponentCase):
             return card
         else:
             return {
-                   "number": card,
-                   "expiryMonth": 10,
-                   "expiryYear": 2020,
-                   "cvc": '737',
-                   "holderName": 'John Doe',
-                   }
+                "number": card,
+                "expiryMonth": 10,
+                "expiryYear": 2020,
+                "cvc": '737',
+                "holderName": 'John Doe',
+                }
 
     def _fill_3d_secure(self, source, card_number, success=True):
         url = source['issuerUrl']
         webhook_url = 'http://yourserver.com/process_return'
         data = {
-                   'PaReq': source['paRequest'],
-                   'MD': source['md'],
-                   'TermUrl': webhook_url,
-               }
+            'PaReq': source['paRequest'],
+            'MD': source['md'],
+            'TermUrl': webhook_url,
+            }
         result = requests.post(url, data)
         session_id = result.headers['Set-Cookie'].split(
             'JSESSIONID=')[1].split(';')[0]
@@ -93,7 +93,8 @@ class AdyenCommonCase(HttpSavepointComponentCase):
             'cardNumber': card_number
         })
         parser = etree.HTMLParser()
-        tree = etree.parse(StringIO(validation.content.decode('utf-8')), parser)
+        tree = etree.parse(StringIO(validation.content.decode('utf-8')),
+                           parser)
         e = tree.xpath("//input[@name='PaRes']")[0]
         pa_res = e.values()[2]
         return pa_res
@@ -124,13 +125,12 @@ class AdyenScenario(RecordedScenario):
     def test_create_transaction_wrong_cvc(self):
         with self.assertRaises(UserError):
             self._test_card({
-                                "number": '4977949494949497',
-                                "expiryMonth": 10,
-                                "expiryYear": 2020,
-                                "cvc": 'wrong',
-                                "holderName": 'John Doe',
-                            },
-                            expected_state='failed')
+                "number": '4977949494949497',
+                "expiryMonth": 10,
+                "expiryYear": 2020,
+                "cvc": 'wrong',
+                "holderName": 'John Doe',
+                }, expected_state='failed')
 
 
 class AdyenCase(AdyenCommonCase, AdyenScenario):

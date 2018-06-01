@@ -20,5 +20,5 @@ class KeychainAccount(models.Model):
                 "app_name": "shopinvader"
             }"""
 
-    def _adyen_validate_data(self, data): # TODO
+    def _adyen_validate_data(self, data):  # TODO
         return True
