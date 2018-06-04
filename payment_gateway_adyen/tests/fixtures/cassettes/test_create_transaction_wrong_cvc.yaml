@@ -1,9 +1,9 @@
 interactions:
 - request:
     body: !!python/unicode '{"additionalData": {"executeThreeD": "true", "card.encrypted.json":
-      "adyenan0_1_1$Aa/0Uz4lSnQ4J9t6wd+jXBwM/vDjohFyn9+p3iYXW5hIAfmLsIlQd1089sf8D9Cr/Uwfj7ZNOQ+wXiMJAtiOSrACGFHMmXjBcUCNn/zwy0VV/a7dLtNqKBwDVlAQdEFvyhwTy9GGwlKsfsRXYE6Ocflf6qwWj5Dwgg1bfqs0ljx5l8x/GWWLYTWUAAw3NGurW9a8HbY49ViB/B0rY4WgyfaM105wkGByaWG4Wcu9LBLHNOAM1POeRBeUr8ZJUqBDMGmHTUNpxMB+rfIinsjcfA1vFsHHs1iimmbpuL5t24o0T+aSHfbFhk6LV599ln84TuuyLa6xsjpoeCGtDfWrkQ==$rEqj494KF8WZWIyGt9+0P0qwsOi3O1/2d8EJsOQtLEtXcUZUXigJoRpB2+XcGcHiTfSjHQchA1gwmKCrYv4cirw9yh9AYse7p5wjZ9ll9MsJmyF/bHCvXeRLH5HjvnsmD4ZxMAg8Iw8hsbALsJ0zIIoig6QRbLTghrCOp+jAPbhqv55tDAJ8Zy3ASR41FpauPUg0iz4arBWs87d4ngaG0GCPiH+wLEyye51YsnLYOQsN"},
+      "adyenan0_1_1$E4JqGEUSjLqRDT636aBtXsqJgCNf2R6mIHY7qoj4+KvL4rSIXVPup7wk6zmjueisJl2JpCUz3hR1FH0+BCpyASADl5lG3GmJGWT3VYOZ0RX+3XpCPTBLSLub7keT8HiHWmDWjmcAAe4bXTSxHM5tgOt1guW6F0Ec7FMhLfy7TeFNpsFYnFQ4C6JscNUYrOXkBTnJIphk2dlRr+Q+tafyKvbsiQyNv4xALG9xxqnh3zmGl0OmDr2rttBNQubUmTXz5HxT/AdfWoCy8UAm5Ec0avsndQvEkWKYX/iFs8o5VIO86oPHrAuiwUHTu1X6PO4MarHMqA+HrsVI1IkgLURHfA==$6PU5R3p2qHBSQk3OJDgTe2cT1bVqgnPvM5mwjJljGxIjuXpTqx0BQ9k5TVxyAWsjk6MOj+v7chNo/XntUoGuJhKttTpT5+XoE0AqTIBWbQYvqHrHLetZG6jXMEd+UTBrhmI5vRkaJrhpoqCHGYgo9NCG6l6Wez1uW3aRodiHAJJC25PrczKKlw+8rcdQuU1Fnau/vxpzuJEYMw7U0QUQOGWphaS+uAsaqWIPMiqj9aLr"},
       "amount": {"currency": "USD", "value": 294750}, "merchantAccount": "AkretionCOM",
-      "reference": "SO002|deltapc@yourcompany.example.com|172"}'
+      "reference": "SO002|deltapc@yourcompany.example.com|328"}'
     headers:
       Accept: ['*/*']
       Accept-Encoding: ['gzip, deflate']
@@ -15,15 +15,15 @@ interactions:
     uri: https://pal-test.adyen.com/pal/servlet/Payment/v30/authorise
   response:
     body: {string: !!python/unicode '{"status":422,"errorCode":"103","message":"CVC
-        is not the right length","errorType":"validation","pspReference":"8515277160024366"}'}
+        is not the right length","errorType":"validation","pspReference":"8515281210904627"}'}
     headers:
       connection: [Keep-Alive]
       content-type: [application/json;charset=utf-8]
-      date: ['Wed, 30 May 2018 21:33:22 GMT']
+      date: ['Mon, 04 Jun 2018 14:04:50 GMT']
       keep-alive: ['timeout=15, max=100']
-      pspreference: ['8515277160024366']
+      pspreference: ['8515281210904627']
       server: [Apache]
-      set-cookie: [JSESSIONID=7072E4CD6104E59474374491BCC96E0A.test3e; Path=/pal;
+      set-cookie: [JSESSIONID=69F2902FCA9DE392D1433BC7326C29BD.test3e; Path=/pal;
           Secure; HttpOnly]
     status: {code: 422, message: Unprocessable Entity}
 version: 1

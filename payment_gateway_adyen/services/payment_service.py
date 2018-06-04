@@ -13,6 +13,7 @@ _logger = logging.getLogger(__name__)
 
 try:
     import Adyen
+    from Adyen import AdyenAPIValidationError
 except ImportError:
     _logger.debug('Cannot import Adyen')
 
@@ -45,10 +46,14 @@ class PaymentService(Component):
     def process_return(self, **params):
         payload = {}
         payload["browserInfo"] = {
-            "userAgent": "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:\
-            1.9) Gecko/2008052912 Firefox/3.0",
-            "acceptHeader": "text/html,application/xhtml+xml,\
-            application/xml;q=0.9,*/*;q=0.8"
+            "userAgent": params.get(
+                "userAgent",
+                "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:\
+                1.9) Gecko/2008052912 Firefox/3.0"),
+            "acceptHeader": params.get(
+                "acceptHeader",
+                "text/html,application/xhtml+xml,\
+                application/xml;q=0.9,*/*;q=0.8")
         }
         payload["md"] = params['MD']
         payload["paResponse"] = params['PaRes']
@@ -67,6 +72,8 @@ class PaymentService(Component):
         except ValueError as e:
             # NOTE catch orther errors?
             # do we want to cancel the transaction? Can we do it?
+            raise UserError(e.message)
+        except AdyenAPIValidationError as e:
             raise UserError(e.message)
 
         if transaction:
@@ -97,16 +104,18 @@ class PaymentService(Component):
                 "value": self._get_formatted_amount(),
                 "currency": transaction.currency_id.name},
             'reference': description,
-            'additionalData': {"executeThreeD": "true"}  # TODO optional?
+            'additionalData': {"executeThreeD": "true"}  # optional may be?
             }
-        if kwargs.get('card'):
-            # PCI clear card data
-            vals['card'] = kwargs['card']
-        elif kwargs.get('encrypted_card'):
+        if kwargs.get('encrypted_card'):
             vals['additionalData'] = {
                 'card.encrypted.json': kwargs['encrypted_card'],
                 'executeThreeD': 'true'
                 }
+#        elif kwargs.get('card'):
+#            # PCI clear card data
+#            vals['card'] = kwargs['card']
+        else:
+            raise UserError(_('Error: card information missing!'))
         return vals
 
     def _get_adyen_client(self):
@@ -126,6 +135,8 @@ class PaymentService(Component):
                 request=self._prepare_charge(source=source, **kwargs))
         except ValueError as e:  # TODO catch orther errors?
             raise UserError(e.message)
+        except AdyenAPIValidationError as e:
+            raise UserError(e.message)
 
     def _parse_creation_result(self, transaction, **kwargs):
         # TODO does it make sense to call super with the specific AdyenResult
@@ -139,12 +150,10 @@ class PaymentService(Component):
             'state': MAP_SOURCE_STATE[transaction['resultCode']],
             'data': json.dumps(transaction),
             })
-        if transaction.get('redirect', {}).get('url'):  # TODO
-            res['url'] = transaction['redirect']['url']
         # TODO risk analysis if possible with API
-        risk_level = transaction.get('outcome', {}).get('risk_level')
-        if risk_level:  # TODO
-            res['risk_level'] = risk_level
+#        risk_level = transaction.get('outcome', {}).get('risk_level')
+#        if risk_level:  # TODO
+#            res['risk_level'] = risk_level
         return res
 
     # Code for capturing the transaction

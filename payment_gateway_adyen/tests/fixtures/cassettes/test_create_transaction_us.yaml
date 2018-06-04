@@ -1,9 +1,9 @@
 interactions:
 - request:
     body: !!python/unicode '{"additionalData": {"executeThreeD": "true", "card.encrypted.json":
-      "adyenan0_1_1$bn1alLjFWmivCOhZPuKp7Uo0FywnRaxR66y+WYizZcFp6UX6uu2XHj1BMIv2D6KxtsAKfbiDr5DvnR3m/Wk4JPyQn6kZkGxU6MPJpu6PV1g8kQiBj8MomLXh9+o1F3HTnE5iYWBTpxkuJzR0QhNWnk7buPOqbpjuIdKX1GryyeVrAfT5CHxDym3UwXSQONQXU5jWdfWHknTr5fBrnJeWWe9XxT7jlkC0FXY++3aUdwI4JjsZOHVFA5+j6ctsS/kXg7LrwOJDbFnwUFA1qFx1RPmKM2P1eo/ts5k1v0soICYMYoyN8w2tb3tzazwdEwpIUp3b+SSgQR2oQDAEZB5Acg==$rQtRBXi/V99m5kRIuLPcB+8pSRZPIpQWSMXsvaksXQSI7eA1zBuAGZUO19PkFqmMV+a1VaOb9kZnl/trAeEB88YwYfoRY5L8Bz8/ahmUCI6zgpmnJqZHkjrGZiZ6ExkRFmyyccV64nY4KszoyY/n6X/hMqyRNclhcUI0nHrDra2b10+3870keNyaKQESOVGgk+4kunwR0D48agWZc8w/2dd70m1H0aBT0ePYIEofUw=="},
+      "adyenan0_1_1$IXQD2ILmLpqnuujakOKKZ/YowEFwiaa8YlvsiMgZPT3tWW2bd9yqULk4clrFJR0KZwp5bLPPO7EoQ6RdK5eNC6YhiABTAUOUFUAuHy6sfeMDxcAKgwOO3Jq5cJB6ZAV6GlA0RTGd0hiMDg79Mb2wPyCAnByAxt9rv4oAOP1vPjQo0jx9Br10P95N0lFRILMd7TFbSPKglh6r4TbzSuv971sFvG+GCCUxxMSVWgy2t/0DkGTiBWUsK50+aQXGByCEOSut8EPuFJkY7CXP/TignRHc2ntRckr9w08PCsoynJX5g22Pe1YMbtuCXlN8E0/i0ZovfWhaGynd7SLQO7X2Wg==$0yZ7zcE2oae2e0UvWvSNVGmrRQz2/jGAqDgOjappZgKqGgSj7Xp+kn552m+uPTfQlw/cdnBeCHUasugrFDq26ryBdeBY06ZlEylksB1nik+6pIYVZxeL1W5g4pD76iaywMtgv/EtJ2d1Sju2lGQtvpr8qTpPaZ4nDacZ13kKh4BtE/9Ig1ONYDMsycr4i5F+COiYhg9/KrZKbF3GUgd6ccKtfzLutfMxWfkaEdjWCQ=="},
       "amount": {"currency": "USD", "value": 294750}, "merchantAccount": "AkretionCOM",
-      "reference": "SO002|deltapc@yourcompany.example.com|170"}'
+      "reference": "SO002|deltapc@yourcompany.example.com|326"}'
     headers:
       Accept: ['*/*']
       Accept-Encoding: ['gzip, deflate']
@@ -14,20 +14,20 @@ interactions:
     method: POST
     uri: https://pal-test.adyen.com/pal/servlet/Payment/v30/authorise
   response:
-    body: {string: !!python/unicode '{"pspReference":"8825277159952275","resultCode":"Authorised","authCode":"48461"}'}
+    body: {string: !!python/unicode '{"pspReference":"8525281210844110","resultCode":"Authorised","authCode":"5225"}'}
     headers:
       connection: [Keep-Alive]
       content-type: [application/json;charset=utf-8]
-      date: ['Wed, 30 May 2018 21:33:15 GMT']
+      date: ['Mon, 04 Jun 2018 14:04:44 GMT']
       keep-alive: ['timeout=15, max=100']
-      pspreference: ['8825277159952275']
+      pspreference: ['8525281210844110']
       server: [Apache]
-      set-cookie: [JSESSIONID=8CAD875D78022518FD0DAB92B9517FCB.test103e; Path=/pal;
+      set-cookie: [JSESSIONID=1A51658306AFB37927B7A8105D0F723E.test3e; Path=/pal;
           Secure; HttpOnly]
     status: {code: 200, message: OK}
 - request:
     body: !!python/unicode '{"merchantAccount": "AkretionCOM", "modificationAmount":
-      {"currency": "USD", "value": 294750}, "originalReference": "8825277159952275"}'
+      {"currency": "USD", "value": 294750}, "originalReference": "8525281210844110"}'
     headers:
       Accept: ['*/*']
       Accept-Encoding: ['gzip, deflate']
@@ -38,15 +38,15 @@ interactions:
     method: POST
     uri: https://pal-test.adyen.com/pal/servlet/Payment/v30/capture
   response:
-    body: {string: !!python/unicode '{"pspReference":"8525277159963960","response":"[capture-received]"}'}
+    body: {string: !!python/unicode '{"pspReference":"8525281210854192","response":"[capture-received]"}'}
     headers:
       connection: [Keep-Alive]
       content-type: [application/json;charset=utf-8]
-      date: ['Wed, 30 May 2018 21:33:16 GMT']
+      date: ['Mon, 04 Jun 2018 14:04:45 GMT']
       keep-alive: ['timeout=15, max=100']
-      pspreference: ['8525277159963960']
+      pspreference: ['8525281210854192']
       server: [Apache]
-      set-cookie: [JSESSIONID=2B12C1B13D760286BB0F37D4F9BAF97C.test3e; Path=/pal;
+      set-cookie: [JSESSIONID=6E42594BB56AD78F00C06392A437001F.test3e; Path=/pal;
           Secure; HttpOnly]
     status: {code: 200, message: OK}
 version: 1
