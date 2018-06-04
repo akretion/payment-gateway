@@ -13,6 +13,7 @@ import json
 from lxml import etree
 from io import StringIO
 from os.path import dirname
+from Adyen import AdyenAPIAuthenticationError
 from adyen_cse_python.encrypter import ClientSideEncrypter
 
 from odoo.exceptions import Warning as UserError
@@ -131,6 +132,15 @@ class AdyenScenario(RecordedScenario):
                 "cvc": 'wrong',
                 "holderName": 'John Doe',
                 }, expected_state='failed')
+
+    def test_wrong_api_key(self):
+        keychain = self.env['keychain.account']
+        account = keychain.sudo().retrieve([
+            ('namespace', '=', 'adyen')
+            ])[0]
+        account.write({'clear_password': 'wrong_api_key'})
+        with self.assertRaises(AdyenAPIAuthenticationError):
+            self._test_card('5136333333333335')
 
 
 class AdyenCase(AdyenCommonCase, AdyenScenario):

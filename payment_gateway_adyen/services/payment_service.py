@@ -43,6 +43,17 @@ class PaymentService(Component):
     _usage = 'gateway.provider'
     _allowed_capture_method = ['immediately']
 
+    def _http_adyen_request(self, service, payload):
+        "re-catch Adyen errors to be more user friendly"
+        try:
+            return getattr(self._get_adyen_client(), service)(request=payload)
+        except ValueError as e:
+            # NOTE catch orther errors?
+            # do we want to cancel the transaction? Can we do it?
+            raise UserError(e.message)
+        except AdyenAPIValidationError as e:
+            raise UserError(e.message)
+
     def process_return(self, **params):
         payload = {}
         payload["browserInfo"] = {
@@ -57,25 +68,16 @@ class PaymentService(Component):
         }
         payload["md"] = params['MD']
         payload["paResponse"] = params['PaRes']
-        transaction = None
-        try:
-            result = self._get_adyen_client().authorise3d(request=payload)
-            vals = {
-                'state': MAP_SOURCE_STATE[result.message['resultCode']],
-                'data': json.dumps(result.message),
-                }
+        result = self._http_adyen_request('authorise3d', payload)
+        vals = {
+            'state': MAP_SOURCE_STATE[result.message['resultCode']],
+            'data': json.dumps(result.message),
+            }
 
-            transaction = self.env['gateway.transaction'].search([
-                ('external_id', '=', result.message['pspReference']),
-                ('payment_mode_id.provider', '=', 'adyen'),
-                ])
-        except ValueError as e:
-            # NOTE catch orther errors?
-            # do we want to cancel the transaction? Can we do it?
-            raise UserError(e.message)
-        except AdyenAPIValidationError as e:
-            raise UserError(e.message)
-
+        transaction = self.env['gateway.transaction'].search([
+            ('external_id', '=', result.message['pspReference']),
+            ('payment_mode_id.provider', '=', 'adyen'),
+            ])
         if transaction:
             transaction.write(vals)
         else:
@@ -130,13 +132,8 @@ class PaymentService(Component):
         return ady.payment
 
     def _create_transaction(self, source=None, **kwargs):
-        try:
-            return self._get_adyen_client().authorise(
-                request=self._prepare_charge(source=source, **kwargs))
-        except ValueError as e:  # TODO catch orther errors?
-            raise UserError(e.message)
-        except AdyenAPIValidationError as e:
-            raise UserError(e.message)
+        payload = self._prepare_charge(source=source, **kwargs)
+        return self._http_adyen_request('authorise', payload)
 
     def _parse_creation_result(self, transaction, **kwargs):
         # TODO does it make sense to call super with the specific AdyenResult
