@@ -1,0 +1,29 @@
+interactions:
+- request:
+    body: !!python/unicode '{"additionalData": {"executeThreeD": "true", "card.encrypted.json":
+      "adyenan0_1_1$a48w2DHtyORWphJnhtQOJ/FwtcbY4hYp9b9Wkl1OP8nBDwSwuPrkMbi3ZhRAGWQ6PpSKDDqJJqhiP+rJLZWlzwKKBtdb9CyAVQrODeQkvvlArKkqQ8GfIBhOdjYtzRsSW4pPFnaj66iDKQ8jn/fmNGBRAbJNUdUJchcUc5XtZTEIg2l6/Wdz/jkAIozTRE4nm0m25s5cEl7Ca+lPcsFrg3OVnwO0ER2lsapMAlRha5GArfZYRFAVHZZCTUwpuBdVu1IdTDFTESlqxwwk5Ii1xF9RKbtHQsR9xX6WkyR0s+j7w1yBdOBY3lEOKjMkk3h06n3kJGKTLhgPt4/wmCKLvQ==$OQzYcvPTBOSNwOXJf12LMUSFlWNXSUpejXTpU8Caya4uWiskntqRMIQVbbxbQaCVSFj+bB9A3pMXJ3ZJIuEz75Bsexm1DM4wN7zbd4irAE97zwshNDnHEdqNH5IUBBrAc7cJxot78XxWZx0eTiqA47XgHbwjADnMQoPvmgfuL2oROyMtctxxw4a8eJtEFHinR4tCJVEjqnOkK2rcwOESLvtXLEMst75SQQ=="},
+      "amount": {"currency": "USD", "value": 294750}, "merchantAccount": "AkretionCOM",
+      "reference": "SO002|deltapc@yourcompany.example.com|620"}'
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['798']
+      Content-Type: [application/json]
+      User-Agent: [!!python/unicode 'shopinvader adyen-python-api-library/1.2.0']
+    method: POST
+    uri: https://pal-test.adyen.com/pal/servlet/Payment/v30/authorise
+  response:
+    body: {string: !!python/unicode '{"status":422,"errorCode":"101","message":"Invalid
+        card number","errorType":"validation","pspReference":"8815281901669577"}'}
+    headers:
+      connection: [Keep-Alive]
+      content-type: [application/json;charset=utf-8]
+      date: ['Tue, 05 Jun 2018 09:16:06 GMT']
+      keep-alive: ['timeout=15, max=100']
+      pspreference: ['8815281901669577']
+      server: [Apache]
+      set-cookie: [JSESSIONID=A456CB406528E3C0B65EF7FCAADE267A.test104e; Path=/pal;
+          Secure; HttpOnly]
+    status: {code: 422, message: Unprocessable Entity}
+version: 1

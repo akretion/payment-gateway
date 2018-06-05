@@ -1,0 +1,29 @@
+interactions:
+- request:
+    body: !!python/unicode '{"additionalData": {"executeThreeD": "true", "card.encrypted.json":
+      "adyenan0_1_1$giiA33P2b3XEZsfKn8vp0pqHpJPVXy+KnxC4X8N40LN3xI5kPYWFVNyJ4VFeEI2mNLlnC+H6a4sygbb6IWh8JDiOSxYuY5chqxKtTjwkSuVNt3ESPDaKZJXrXg1H7aF5lO7BGJ6Oj3EQmZUdWfC03e3WRnwL+yPswcMmofWhA7K0uZWjPkUedEGhA30AUd88+vlh6SdZQGeOiOe4Ds3yOBSPn3BA0xGWg4U6/pfeWdcSJPtafapX0POCnpgUyLx+1xPAZIr049KpWJEUKs1wfCy09SJqT9hsF+eBUUv1KIwaq2WVhNLnhLs8mZ0MdtnbFDeA0FKIy55qG7rpzMNvZA==$ePV/g7lMAPFx9+p7uNxhJfRqntzqzaXCDir1cTg4Knalx1JcmwBbPydNaeemkwGIa1a2ivm0cl0Nu81pKU251rtLLYOCUPV1rmrqwM9CnqOLQ7XqXp5Oz07zs+sdwgyEOSZOG/srMeAShmVGpa/Vx+KZyC9Ql3R4VqK0pNJbK5Lozfg7L/ax9SBFAzMvVu+DKBtkUIJBuW8YhM7RU7UA0DyILFfSYU3+s7BMFMwEng=="},
+      "amount": {"currency": "USD", "value": 294750}, "merchantAccount": "AkretionCOM",
+      "reference": "SO002|deltapc@yourcompany.example.com|354"}'
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['806']
+      Content-Type: [application/json]
+      User-Agent: [!!python/unicode 'shopinvader adyen-python-api-library/1.2.0']
+    method: POST
+    uri: https://pal-test.adyen.com/pal/servlet/Payment/v30/authorise
+  response:
+    body: {string: !!python/unicode ''}
+    headers:
+      connection: [Keep-Alive]
+      content-length: ['0']
+      content-type: [text/plain; charset=UTF-8]
+      date: ['Mon, 04 Jun 2018 15:36:42 GMT']
+      keep-alive: ['timeout=15, max=100']
+      server: [Apache]
+      set-cookie: [JSESSIONID=659010BB81BB882AD0C41BB4CDAF8DD5.test3e; Path=/pal;
+          Secure; HttpOnly]
+      www-authenticate: [BASIC realm="Adyen PAL Service Authentication"]
+    status: {code: 401, message: Unauthorized}
+version: 1

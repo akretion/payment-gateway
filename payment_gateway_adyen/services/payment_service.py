@@ -7,13 +7,21 @@ from odoo.exceptions import Warning as UserError
 from odoo.tools.translate import _
 from odoo.tools.float_utils import float_round
 from odoo.addons.component.core import Component
+import re
 import json
 import logging
 _logger = logging.getLogger(__name__)
 
 try:
     import Adyen
-    from Adyen import AdyenAPIValidationError
+    from Adyen.exceptions import (AdyenAPIValidationError,
+                                  AdyenAPIResponseError,
+                                  AdyenAPIAuthenticationError,
+                                  AdyenAPIInvalidPermission,
+                                  AdyenAPICommunicationError,
+                                  AdyenAPIInvalidAmount,
+                                  AdyenAPIInvalidFormat)
+
 except ImportError:
     _logger.debug('Cannot import Adyen')
 
@@ -43,16 +51,72 @@ class PaymentService(Component):
     _usage = 'gateway.provider'
     _allowed_capture_method = ['immediately']
 
+    def _raise_error_message(self, code):
+        errors = {
+            # admin errors (can be detailed):
+            'authentication_failed':
+                _("Unable to authenticate with Adyen's Servers."
+                  " Please verify the credentials set with the Adyen base"
+                  " class. Please reach out to your Adyen Admin"
+                  " if the problem persists"),
+            'invalid_permission':
+                _("You provided the merchant account:'%s' that"
+                  " doesn't exist or you don't have access to it.\n"
+                  "Please verify the merchant account provided. \n"
+                  "Reach out to support@adyen.com"
+                  " if the issue persists"),
+
+            # user friendly errors for the shopper:
+            'communication_error':
+                _("Transaction failed."
+                  "Unexpected error while communicating with Adyen"),
+            'validation':
+                _("Transaction failed due to invalid values."),
+            'invalid_amount':
+                _("Transaction failed due to an invalid amount:"
+                  "Amount may be improperly formatted, too small or too big."),
+            '101': _("The card number is not a valid credit card number!"),
+            '105': _("The 3D Secure validation failed."),
+            '129': _("The expiration date is invalid."),
+            '140': _("The expiration date is invalid."),
+            '141': _("The expiration date is invalid."),
+            '103': _("The card's security code does not have"
+                     " the right length"),
+            '153': _("The card's security code is invalid.")
+            }
+        raise UserError(errors.get(code, ("Transaction failed. "
+                                          "Some unknown error happened"
+                                          "with the Adyen payment gateway.")))
+
     def _http_adyen_request(self, service, payload):
-        "re-catch Adyen errors to be more user friendly"
+        "re-catches Adyen errors to be more user friendly"
+        if service not in ('authorise', 'authorise3d'):
+            raise UserError(_('Invalid API service!'))
         try:
             return getattr(self._get_adyen_client(), service)(request=payload)
-        except ValueError as e:
-            # NOTE catch orther errors?
-            # do we want to cancel the transaction? Can we do it?
-            raise UserError(e.message)
-        except AdyenAPIValidationError as e:
-            raise UserError(e.message)
+        except AdyenAPIAuthenticationError as e:
+            self._raise_error_message('authentication_failed')
+        except AdyenAPIInvalidPermission as e:
+            self._raise_error_message('invalid_permission')
+        except AdyenAPICommunicationError as e:
+            self._raise_error_message('communication_error')
+        except AdyenAPIInvalidAmount as e:
+            self._raise_error_message('invalid_amount')
+        except AdyenAPIInvalidFormat as e:
+            self._raise_error_message('validation')
+        except (AdyenAPIResponseError, AdyenAPIValidationError) as e:
+            if e.error_code:
+                code = e.error_code
+            else:
+                match = re.search('errorCode: ([0-9][0-9][0-9][0-9]?)',
+                                  e.message)
+                if match:
+                    code = match.group(1).strip()
+                else:
+                    code = 'undef'
+            self._raise_error_message(code)
+        except Exception as e:
+            self._raise_error_message('undef')
 
     def process_return(self, **params):
         payload = {}
