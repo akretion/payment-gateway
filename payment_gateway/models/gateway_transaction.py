@@ -47,6 +47,7 @@ class GatewayTransaction(models.Model):
         selection="_selection_capture_payment",
         required=True)
     url = fields.Char()
+    meta = fields.Serialized()
     amount = fields.Float(dp=dp.get_precision('Account'))
     currency_id = fields.Many2one(
         'res.currency',

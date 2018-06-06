@@ -71,23 +71,31 @@ class AdyenCommonCase(HttpSavepointComponentCase):
                 "holderName": 'John Doe',
                 }
 
-    def _fill_3d_secure(self, source, card_number, success=True):
-        url = source['issuerUrl']
+    def _get_encrypted_card(self, card):
+        card = self._get_card(card)
+        return self.cse.generate_adyen_nonce(
+            card['holderName'],
+            card['number'],
+            card['cvc'],
+            card['expiryMonth'],
+            card['expiryYear'])
+
+    def _fill_3d_secure(self, transaction, card_number, success=True):
         webhook_url = 'http://yourserver.com/process_return'
         data = {
-            'PaReq': source['paRequest'],
-            'MD': source['md'],
-            'TermUrl': webhook_url,
+            'PaReq': transaction.meta['paRequest'],
+            'MD': transaction['md'],
+            'TermUrl': transaction['termUrl'],
             }
-        result = requests.post(url, data)
+        result = requests.post(transaction.url, data)
         session_id = result.headers['Set-Cookie'].split(
             'JSESSIONID=')[1].split(';')[0]
         validate_url = "https://test.adyen.com/hpp/3d/authenticate.shtml;\
             jsessionid=%s" % (session_id,)
         validation = requests.post(validate_url, data={
-            'PaReq': source['paRequest'],
-            'MD': source['md'],
-            'TermUrl': webhook_url,
+            'PaReq': transaction.meta['paRequest'],
+            'MD': transaction.meta['md'],
+            'TermUrl': transaction.meta['termUrl'],
             'username': 'user',
             'password': 'password',
             'cardNumber': card_number
@@ -116,11 +124,6 @@ class AdyenScenario(RecordedScenario):
 
     def test_create_transaction_france(self):
         self._test_card('4977949494949497')
-
-#    def test_create_transaction_risk_elevated(self):
-#        self._test_card(
-#            '4000000000009235',
-#            expected_risk_level='elevated')
 
     def test_create_transaction_wrong_cvc(self):
         with self.assertRaises(UserError):
@@ -165,7 +168,6 @@ class AdyenScenario(RecordedScenario):
         with self.assertRaises(UserError):
             self._test_card('5136333333333335')
 
-
 class AdyenCase(AdyenCommonCase, AdyenScenario):
 
     def __init__(self, *args, **kwargs):
@@ -173,13 +175,7 @@ class AdyenCase(AdyenCommonCase, AdyenScenario):
         self._decorate_test(dirname(__file__))
 
     def _create_transaction(self, card):
-        card = self._get_card(card)
-        encrypted_card = self.cse.generate_adyen_nonce(
-            card['holderName'],
-            card['number'],
-            card['cvc'],
-            card['expiryMonth'],
-            card['expiryYear'])
+        encrypted_card = self._get_encrypted_card(card)
         transaction = self.env['gateway.transaction'].generate(
             'adyen',
             self.sale,
@@ -191,16 +187,15 @@ class AdyenCase(AdyenCommonCase, AdyenScenario):
                         expected_risk_level='normal'):
         self.assertEqual(transaction.state, expected_state)
         self.assertEqual(self.sale.amount_total, transaction.amount)
-#        self.assertEqual(transaction.risk_level, expected_risk_level)
 
     def _test_3d(self, card, success=True):
         transaction, source = self._create_transaction(card)
         self.assertEqual(transaction.state, 'pending')
-        pa_res = self._fill_3d_secure(source, card, success=success)
+        pa_res = self._fill_3d_secure(transaction, card, success=success)
         params = {
             'MD': source['md'],
             'PaRes': pa_res
-        }
+            }
         if success:
             with transaction._get_provider('adyen') as provider:
                 provider.process_return(**params)

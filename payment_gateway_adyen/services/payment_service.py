@@ -137,7 +137,6 @@ class PaymentService(Component):
             'state': MAP_SOURCE_STATE[result.message['resultCode']],
             'data': json.dumps(result.message),
             }
-
         transaction = self.env['gateway.transaction'].search([
             ('external_id', '=', result.message['pspReference']),
             ('payment_mode_id.provider', '=', 'adyen'),
@@ -165,6 +164,7 @@ class PaymentService(Component):
             transaction.name,
             transaction.partner_id.email,
             str(transaction.id)])
+        # TODO FIX ME we need to pass th browser info here and not in 3D
         vals = {
             'amount': {
                 "value": self._get_formatted_amount(),
@@ -211,10 +211,15 @@ class PaymentService(Component):
             'state': MAP_SOURCE_STATE[transaction['resultCode']],
             'data': json.dumps(transaction),
             })
-        # TODO risk analysis if possible with API
-#        risk_level = transaction.get('outcome', {}).get('risk_level')
-#        if risk_level:  # TODO
-#            res['risk_level'] = risk_level
+        if transaction.get('resultCode') == 'RedirectShopper':
+            res.update({
+                'url': transaction['issuerUrl'],
+                'meta': {
+                    'paRequest': transaction['paRequest'],
+                    'MD': transaction['md'],
+                    'termUrl': transaction['termUrl'],
+                    }
+                })
         return res
 
     # Code for capturing the transaction

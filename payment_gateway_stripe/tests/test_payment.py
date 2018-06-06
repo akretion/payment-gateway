@@ -44,8 +44,8 @@ class StripeCommonCase(HttpSavepointComponentCase):
                 "cvc": '123'
             }, api_key=self.stripe_api)
 
-    def _fill_3d_secure(self, source, success=True):
-        res = requests.get(source['redirect']['url'])
+    def _fill_3d_secure(self, transaction, success=True):
+        res = requests.get(transaction.url)
         url = res._content.split('method="POST" action="')[1].split('">')[0]
         requests.post(url, {'PaRes': 'success' if success else 'failure'})
 
@@ -145,7 +145,7 @@ class StripeCase(StripeCommonCase, StripeScenario):
     def _test_3d(self, card, success=True, mode='return'):
         transaction, source = self._create_transaction(card)
         self.assertEqual(transaction.state, 'pending')
-        self._fill_3d_secure(source, success=success)
+        self._fill_3d_secure(transaction, success=success)
 
         if mode == 'webhook':
             self._simulate_webhook(transaction)
