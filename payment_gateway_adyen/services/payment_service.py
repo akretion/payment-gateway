@@ -120,16 +120,14 @@ class PaymentService(Component):
 
     def process_return(self, **params):
         payload = {}
-        payload["browserInfo"] = {
-            "userAgent": params.get(
-                "userAgent",
-                "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:\
+        payload["browserInfo"] = params.get('browserInfo', {
+            "userAgent":
+                ("Mozilla/5.0 (X11; U; Linux i686; en-US; rv:\
                 1.9) Gecko/2008052912 Firefox/3.0"),
-            "acceptHeader": params.get(
-                "acceptHeader",
-                "text/html,application/xhtml+xml,\
+            "acceptHeader":
+                ("text/html,application/xhtml+xml,\
                 application/xml;q=0.9,*/*;q=0.8")
-        }
+        })
         payload["md"] = params['MD']
         payload["paResponse"] = params['PaRes']
         result = self._http_adyen_request('authorise3d', payload)
@@ -170,6 +168,7 @@ class PaymentService(Component):
                 "value": self._get_formatted_amount(),
                 "currency": transaction.currency_id.name},
             'reference': description,
+            'browserInfo': kwargs.get('browserInfo'),
             'additionalData': {"executeThreeD": "true"}  # optional may be?
             }
         if kwargs.get('encrypted_card'):
