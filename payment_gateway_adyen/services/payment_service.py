@@ -177,11 +177,8 @@ class PaymentService(Component):
                 'card.encrypted.json': kwargs['encrypted_card'],
                 'executeThreeD': 'true'
                 }
-#        elif kwargs.get('card'):
-#            # PCI clear card data
-#            vals['card'] = kwargs['card']
         else:
-            raise UserError(_('Error: card information missing!'))
+            raise UserError(_('Error: encrypted_card information missing!'))
         return vals
 
     def _get_adyen_client(self):
