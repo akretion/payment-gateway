@@ -217,7 +217,7 @@ class PaymentService(Component):
                 'meta': {
                     'paRequest': transaction['paRequest'],
                     'MD': transaction['md'],
-                    'termUrl': transaction['termUrl'],
+                    'termUrl': transaction.get('issuerUrl'),
                     }
                 })
         return res

@@ -81,11 +81,10 @@ class AdyenCommonCase(HttpSavepointComponentCase):
             card['expiryYear'])
 
     def _fill_3d_secure(self, transaction, card_number, success=True):
-        webhook_url = 'http://yourserver.com/process_return'
         data = {
             'PaReq': transaction.meta['paRequest'],
-            'MD': transaction['md'],
-            'TermUrl': transaction['termUrl'],
+            'MD': transaction.meta['MD'],
+            'TermUrl': transaction.meta['termUrl'],
             }
         result = requests.post(transaction.url, data)
         session_id = result.headers['Set-Cookie'].split(
@@ -94,7 +93,7 @@ class AdyenCommonCase(HttpSavepointComponentCase):
             jsessionid=%s" % (session_id,)
         validation = requests.post(validate_url, data={
             'PaReq': transaction.meta['paRequest'],
-            'MD': transaction.meta['md'],
+            'MD': transaction.meta['MD'],
             'TermUrl': transaction.meta['termUrl'],
             'username': 'user',
             'password': 'password',
@@ -167,6 +166,7 @@ class AdyenScenario(RecordedScenario):
         account.write({'clear_password': 'wrong_api_key'})
         with self.assertRaises(UserError):
             self._test_card('5136333333333335')
+
 
 class AdyenCase(AdyenCommonCase, AdyenScenario):
 
