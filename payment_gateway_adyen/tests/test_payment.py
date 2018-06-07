@@ -80,21 +80,25 @@ class AdyenCommonCase(HttpSavepointComponentCase):
             card['expiryMonth'],
             card['expiryYear'])
 
-    def _fill_3d_secure(self, transaction, card_number, success=True):
-        data = {
-            'PaReq': transaction.meta['paRequest'],
+    def _get_data_for_3d_secure(self, transaction):
+        return transaction.url , {
+            'PaReq': transaction.meta['PaReq'],
             'MD': transaction.meta['MD'],
-            'TermUrl': transaction.meta['termUrl'],
+            'TermUrl': 'https://IwillBeBack.vd',
             }
-        result = requests.post(transaction.url, data)
+
+    def _fill_3d_secure(self, url, data, card_number, success=True):
+        if not success:
+            return 'failed validation'
+        result = requests.post(url, data)
         session_id = result.headers['Set-Cookie'].split(
             'JSESSIONID=')[1].split(';')[0]
         validate_url = "https://test.adyen.com/hpp/3d/authenticate.shtml;\
             jsessionid=%s" % (session_id,)
         validation = requests.post(validate_url, data={
-            'PaReq': transaction.meta['paRequest'],
-            'MD': transaction.meta['MD'],
-            'TermUrl': transaction.meta['termUrl'],
+            'PaReq': data['PaReq'],
+            'MD': data['MD'],
+            'TermUrl': data['TermUrl'],
             'username': 'user',
             'password': 'password',
             'cardNumber': card_number
@@ -191,21 +195,18 @@ class AdyenCase(AdyenCommonCase, AdyenScenario):
     def _test_3d(self, card, success=True):
         transaction, source = self._create_transaction(card)
         self.assertEqual(transaction.state, 'pending')
-        pa_res = self._fill_3d_secure(transaction, card, success=success)
+        url, data = self._get_data_for_3d_secure(transaction)
+        pa_res = self._fill_3d_secure(url, data, card, success=success)
         params = {
             'MD': source['md'],
             'PaRes': pa_res
             }
+        with transaction._get_provider('adyen') as provider:
+            provider.process_return(**params)
         if success:
-            with transaction._get_provider('adyen') as provider:
-                provider.process_return(**params)
             self._check_captured(transaction)
         else:
-            params['PaRes'] = 'failed validation'
-            with self.assertRaises(UserError):
-                with transaction._get_provider('adyen') as provider:
-                    provider.process_return(**params)
-            self.assertIn(transaction.state, ['pending', 'failed'])
+            self.assertEqual(transaction.state, 'failed')
 
     def _test_card(self, card, **kwargs):
         transaction, source = self._create_transaction(card)

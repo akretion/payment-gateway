@@ -7,6 +7,7 @@ from odoo.exceptions import Warning as UserError
 from odoo.tools.translate import _
 from odoo.tools.float_utils import float_round
 from odoo.addons.component.core import Component
+from datetime import datetime
 import re
 import json
 import logging
@@ -88,7 +89,7 @@ class PaymentService(Component):
                                           "Some unknown error happened"
                                           "with the Adyen payment gateway.")))
 
-    def _http_adyen_request(self, service, payload):
+    def _http_adyen_request(self, service, payload, catchall=True):
         "re-catches Adyen errors to be more user friendly"
         if service not in ('authorise', 'authorise3d'):
             raise UserError(_('Invalid API service!'))
@@ -116,7 +117,12 @@ class PaymentService(Component):
                     code = 'undef'
             self._raise_error_message(code)
         except Exception as e:
-            self._raise_error_message('undef')
+            if catchall:
+                _logger.error(
+                    'Trying to call adyen raise the following error %s', e)
+                self._raise_error_message('undef')
+            else:
+                raise
 
     def process_return(self, **params):
         payload = {}
@@ -130,17 +136,30 @@ class PaymentService(Component):
         })
         payload["md"] = params['MD']
         payload["paResponse"] = params['PaRes']
-        result = self._http_adyen_request('authorise3d', payload)
-        vals = {
-            'state': MAP_SOURCE_STATE[result.message['resultCode']],
-            'data': json.dumps(result.message),
-            }
-        transaction = self.env['gateway.transaction'].search([
-            ('external_id', '=', result.message['pspReference']),
-            ('payment_mode_id.provider', '=', 'adyen'),
-            ])
+        try:
+            result = self._http_adyen_request('authorise3d', payload)
+        except Exception as e:
+            vals = {
+                'state': 'failed',
+                'error': str(e),
+                'date_processing': datetime.now(),
+                }
+            transaction = self.env['gateway.transaction'].search([
+                ('meta', 'ilike', params['MD']),
+                ('payment_mode_id.provider', '=', 'adyen'),
+                ])
+	else:
+            vals = {
+                'state': MAP_SOURCE_STATE[result.message['resultCode']],
+                'data': json.dumps(result.message),
+                }
+            transaction = self.env['gateway.transaction'].search([
+                ('external_id', '=', result.message['pspReference']),
+                ('payment_mode_id.provider', '=', 'adyen'),
+                ])
         if transaction:
             transaction.write(vals)
+            return transaction
         else:
             raise UserError(
                 _('The transaction %s do not exist in Odoo') % result.message[
@@ -156,7 +175,7 @@ class PaymentService(Component):
         else:
             return int(float_round(amount * 100, 0))
 
-    def _prepare_charge(self, source=None, **kwargs):
+    def _prepare_charge(self, source=None, return_url=None, **kwargs):
         transaction = self.collection
         description = "|".join([
             transaction.name,
@@ -211,9 +230,8 @@ class PaymentService(Component):
             res.update({
                 'url': transaction['issuerUrl'],
                 'meta': {
-                    'paRequest': transaction['paRequest'],
+                    'PaReq': transaction['paRequest'],
                     'MD': transaction['md'],
-                    'termUrl': transaction.get('issuerUrl'),
                     }
                 })
         return res
