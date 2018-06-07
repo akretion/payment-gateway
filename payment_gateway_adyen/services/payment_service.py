@@ -119,7 +119,7 @@ class PaymentService(Component):
         except Exception as e:
             if catchall:
                 _logger.error(
-                    'Trying to call adyen raise the following error %s', e)
+                        'Adyen transaction error : %s', e)
                 self._raise_error_message('undef')
             else:
                 raise
