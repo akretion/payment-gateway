@@ -20,7 +20,7 @@ class StripeCommonCase(HttpSavepointComponentCase):
 
     def setUp(self, *args, **kwargs):
         super(StripeCommonCase, self).setUp(*args, **kwargs)
-        self.stripe_api = os.environ.get('STRIPE_API')
+        self.stripe_api = os.environ.get('STRIPE_API', 'offline')
         self.env['keychain.account'].create({
             'namespace': 'stripe',
             'name': 'Stripe',
