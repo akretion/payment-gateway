@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<openerp>
+<odoo>
     <data noupdate="1">
 
-<record id="payment_method_paypal" model="payment.method">
-    <field name="name">Paypal</field>
-    <field name="provider">payment.service.paypal</field>
-    <field name="capture_payment">immediately</field>
-</record>
+        <record id="account_payment_mode_paypal" model="account.payment.mode">
+            <field name="name">Paypal</field>
+            <field name="provider">paypal</field>
+            <field name="capture_payment">immediately</field>
+            <field name="bank_account_link">variable</field>
+            <field name="payment_method_id" ref="account.account_payment_method_manual_out"/>
+        </record>
 
     </data>
-</openerp>
+</odoo>

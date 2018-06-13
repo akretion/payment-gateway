@@ -3,9 +3,12 @@
 # @author Sébastien BEAU <sebastien.beau@akretion.com>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-from openerp import models
+from odoo.exceptions import Warning as UserError
+from odoo.tools.translate import _
+from odoo.tools.float_utils import float_round
+from odoo.addons.component.core import Component
+
 import json
-from openerp.exceptions import Warning as UserError
 import logging
 _logger = logging.getLogger(__name__)
 
@@ -39,24 +42,27 @@ def create_profile(paypal):
         _logger.error('%s', web_profile.error)
 
 
-class PaymentService(models.Model):
+class PaymentService(Component):
     _inherit = 'payment.service'
     _name = 'payment.service.paypal'
+    _usage = 'gateway.provider'
     _allowed_capture_method = ['immediately']
 
     def _get_connection(self):
         account = self._get_account()
         params = account.get_data()
         experience_profile = params.pop("experience_profile_id", None)
-        params['client_secret'] = account.get_password()
+        params['client_secret'] = account._get_password()
         # create_profile(paypal)
         return paypalrestsdk.Api(params), experience_profile
 
     def _prepare_transaction(
-            self, record, return_url=None, cancel_url=None, **kwargs):
-        description = "%s|%s" % (
-            record.name,
-            record.partner_id.email)
+            self, return_url=None, cancel_url=None, **kwargs):
+        transaction = self.collection
+        description = "|".join([
+            transaction.name,
+            transaction.partner_id.email])
+#            str(transaction.id)])   TODO add it? then how to fix tests?
         return {
             "intent": "sale",
             "payer": {"payment_method": "paypal"},
@@ -66,15 +72,15 @@ class PaymentService(models.Model):
                 },
             "transactions": [{
                 "amount": {
-                    "total": record.residual,
-                    "currency": record.currency_id.name,
+                    "total": transaction._get_amount_to_capture(),
+                    "currency": transaction.currency_id.name,
                     },
                 "description": description,
                 }],
             }
 
-    def create_provider_transaction(self, record, **kwargs):
-        data = self._prepare_transaction(record, **kwargs)
+    def _create_transaction(self, **kwargs):
+        data = self._prepare_transaction(**kwargs)
         # TODO paypal lib is not perfect, we should wrap it in a class
         paypal, experience_profile = self._get_connection()
         data["experience_profile_id"] = experience_profile
@@ -93,9 +99,9 @@ class PaymentService(models.Model):
                 return 'to_capture'
         return transaction.state
 
-    def _prepare_odoo_transaction(self, cart, transaction, **kwargs):
-        res = super(PaymentService, self).\
-            _prepare_odoo_transaction(cart, transaction, **kwargs)
+    def _parse_creation_result(self, transaction, **kwargs):
+        res = super(PaymentService, self)._parse_creation_result(
+            transaction, **kwargs)
         url = [l for l in transaction['links'] if l['method'] == 'REDIRECT'][0]
         res.update({
             'amount': transaction['transactions'][0]['amount']['total'],
