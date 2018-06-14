@@ -141,6 +141,7 @@ class PaymentService(Component):
             ])
         if transaction:
             transaction.write(vals)
+            return transaction
         else:
             raise UserError(
                 _('The transaction %s do not exist in Odoo') % result.message[
