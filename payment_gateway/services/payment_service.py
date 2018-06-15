@@ -76,8 +76,14 @@ class PaymentService(AbstractComponent):
         and return a json of the result of the creation"""
         raise NotImplemented
 
+    def _transaction_need_3d_secure(self):
+        """You can inherit this method to define if we should or not apply
+        the 3d secure on the transaction. Each gateway implementation must
+        depend of this method"""
+        return True
+
     def _parse_creation_result(self, transaction, **kwargs):
-        return {}
+        raise NotImplemented
 
     def generate(self, **kwargs):
         """Generate the transaction in the provider backend

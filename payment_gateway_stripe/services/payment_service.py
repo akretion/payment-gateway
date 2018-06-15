@@ -146,10 +146,7 @@ class PaymentService(Component):
             'api_key': self._api_key,
             }
 
-    def _need_three_d_secure(self, source_data):
-        return source_data['card']['three_d_secure'] != 'not_supported'
-
-    def _prepare_source(self, source=None, return_url=None, **kwargs):
+    def _prepare_3d_source(self, source=None, return_url=None, **kwargs):
         return {
             'type': 'three_d_secure',
             'amount': self._get_formatted_amount(),
@@ -161,11 +158,14 @@ class PaymentService(Component):
 
     def _create_transaction(self, source=None, **kwargs):
         source_data = stripe.Source.retrieve(source, api_key=self._api_key)
-        three_d_secure = self._need_three_d_secure(source_data)
+        if source_data['card']['three_d_secure'] == 'not_supported':
+            three_d_secure = False
+        else:
+            three_d_secure = self._transaction_need_3d_secure()
         try:
             if three_d_secure:
                 res = stripe.Source.create(
-                    **self._prepare_source(source=source, **kwargs))
+                    **self._prepare_3d_source(source=source, **kwargs))
                 if res['status'] == 'chargeable':
                     # 3D secure has not been activated or is not ready
                     # for this customer
@@ -179,14 +179,13 @@ class PaymentService(Component):
             raise UserError(self._get_error_message(e.code))
 
     def _parse_creation_result(self, transaction, **kwargs):
-        res = super(PaymentService, self).\
-            _parse_creation_result(transaction, **kwargs)
-        res.update({
+        res = {
             'amount': transaction['amount']/100.,
             'external_id': transaction['id'],
             'state': MAP_SOURCE_STATE[transaction['status']],
             'data': json.dumps(transaction),
-        })
+            'used_3d_secure': transaction.get('type') == 'three_d_secure',
+        }
         if transaction.get('redirect', {}).get('url'):
             res['url'] = transaction['redirect']['url']
         risk_level = transaction.get('outcome', {}).get('risk_level')

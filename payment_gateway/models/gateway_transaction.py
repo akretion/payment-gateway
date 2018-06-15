@@ -93,6 +93,8 @@ class GatewayTransaction(models.Model):
         ], default='unknown')
     redirect_cancel_url = fields.Char()
     redirect_success_url = fields.Char()
+    used_3d_secure = fields.Boolean(
+        help="Tic if this transaction have used 3d secure")
 
     @api.depends('origin_id')
     def _compute_origin(self):

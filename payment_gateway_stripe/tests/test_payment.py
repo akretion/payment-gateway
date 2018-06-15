@@ -156,6 +156,7 @@ class StripeCase(StripeCommonCase, StripeScenario):
             self._check_captured(transaction)
         else:
             self.assertEqual(transaction.state, 'failed')
+        self.assertEqual(transaction.used_3d_secure, True)
 
     def _create_transaction(self, card):
         source = self._get_source(card)
@@ -169,6 +170,7 @@ class StripeCase(StripeCommonCase, StripeScenario):
     def _test_card(self, card, **kwargs):
         transaction, source = self._create_transaction(card)
         self._check_captured(transaction, **kwargs)
+        self.assertEqual(transaction.used_3d_secure, False)
 
     def test_config(self):
         self.assertEqual(
