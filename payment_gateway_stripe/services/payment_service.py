@@ -40,7 +40,7 @@ class PaymentService(Component):
 
     def process_return(self, **params):
         transaction = self.env['gateway.transaction'].search([
-            ('external_id', '=', params['source']),
+            ('external_id', '=', params['token']),
             ('payment_mode_id.provider', '=', 'stripe'),
             ('state', '=', 'pending')])
         transaction.check_state()
@@ -77,13 +77,13 @@ class PaymentService(Component):
 
     def _validator_add_payment(self):
         return {
-            'source': {'type': 'string'},
+            'token': {'type': 'string'},
             'redirect_success_url': {'type': 'string'},
             'redirect_cancel_url': {'type': 'string'},
             }
 
     def _validator_check_payment(self):
-        return {'source': {'type': 'string'}}
+        return {'token': {'type': 'string'}}
 
     @property
     def _api_key(self):
@@ -127,7 +127,7 @@ class PaymentService(Component):
                 _("An error occurred while processing the card."),
         }[code]
 
-    def _prepare_charge(self, source=None, **kwargs):
+    def _prepare_charge(self, token=None, **kwargs):
         transaction = self.collection
         description = "|".join([
             transaction.name,
@@ -139,25 +139,25 @@ class PaymentService(Component):
         capture = transaction.capture_payment == 'immediately'
         return {
             'currency': transaction.currency_id.name,
-            'source': source,
+            'token': token,
             'description': description,
             'capture': capture,
             'amount': self._get_formatted_amount(),
             'api_key': self._api_key,
             }
 
-    def _prepare_3d_source(self, source=None, return_url=None, **kwargs):
+    def _prepare_3d_source(self, token=None, return_url=None, **kwargs):
         return {
             'type': 'three_d_secure',
             'amount': self._get_formatted_amount(),
             'currency': self.collection.currency_id.name,
-            'three_d_secure': {'card': source},
+            'three_d_secure': {'card': token},
             'redirect': {'return_url': return_url},
             'api_key': self._api_key,
         }
 
-    def _create_transaction(self, source=None, **kwargs):
-        source_data = stripe.Source.retrieve(source, api_key=self._api_key)
+    def _create_transaction(self, token=None, **kwargs):
+        source_data = stripe.Source.retrieve(token, api_key=self._api_key)
         if source_data['card']['three_d_secure'] == 'not_supported':
             three_d_secure = False
         else:
@@ -165,7 +165,7 @@ class PaymentService(Component):
         try:
             if three_d_secure:
                 res = stripe.Source.create(
-                    **self._prepare_3d_source(source=source, **kwargs))
+                    **self._prepare_3d_source(token=token, **kwargs))
                 if res['status'] == 'chargeable':
                     # 3D secure has not been activated or is not ready
                     # for this customer
@@ -174,7 +174,7 @@ class PaymentService(Component):
                     return res
             if not three_d_secure:
                 return stripe.Charge.create(
-                    **self._prepare_charge(source=source, **kwargs))
+                    **self._prepare_charge(token=token, **kwargs))
         except stripe.error.CardError as e:
             raise UserError(self._get_error_message(e.code))
 
