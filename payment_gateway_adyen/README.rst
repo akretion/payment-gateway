@@ -3,10 +3,10 @@
    :alt: License: AGPL-3
 
 ======================
-Payment Gateway Stripe
+Payment Gateway Adyen
 ======================
 
-This module add stripe payment support for odoo
+This module add adyen payment support for odoo
 
 Installation
 ============

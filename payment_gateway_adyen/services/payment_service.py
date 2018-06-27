@@ -4,6 +4,7 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from odoo.exceptions import Warning as UserError
+from odoo.tools import config
 from odoo.tools.translate import _
 from odoo.tools.float_utils import float_round
 from odoo.addons.component.core import Component
@@ -11,6 +12,7 @@ import re
 import json
 import logging
 _logger = logging.getLogger(__name__)
+
 
 try:
     import Adyen
@@ -118,19 +120,14 @@ class PaymentService(Component):
         except Exception as e:
             self._raise_error_message('undef')
 
-    def process_return(self, **params):
-        payload = {}
-        payload["browserInfo"] = params.get('browserInfo', {
-            "userAgent":
-                ("Mozilla/5.0 (X11; U; Linux i686; en-US; rv:\
-                1.9) Gecko/2008052912 Firefox/3.0"),
-            "acceptHeader":
-                ("text/html,application/xhtml+xml,\
-                application/xml;q=0.9,*/*;q=0.8")
-        })
-        payload["md"] = params['MD']
-        payload["paResponse"] = params['PaRes']
-        result = self._http_adyen_request('authorise3d', payload)
+    def process_return(self, browser_info=None, md=None, pares=None,
+                       shopper_ip=None, **params):
+        result = self._http_adyen_request('authorise3d', {
+            'md': md,
+            'paResponse': pares,
+            'browserInfo': browser_info,
+            'shopperIp': shopper_ip,
+            })
         vals = {
             'state': MAP_SOURCE_STATE[result.message['resultCode']],
             'data': json.dumps(result.message),
@@ -157,29 +154,60 @@ class PaymentService(Component):
         else:
             return int(float_round(amount * 100, 0))
 
-    def _prepare_charge(self, source=None, **kwargs):
+    def _get_delivery_address(self):
+        origin = self.collection.origin_id
+        if origin and origin._name == 'sale.order':
+            address = origin.partner_shipping_id
+            return {
+                'city': address.city,
+                'country': address.country_id.code,
+                'postalCode': address.zip,
+                'stateOrProvince': address.state_id.name,
+                'houseNumberOrName': '',
+                'street': ' '.join(
+                    filter(None, [address.street, address.street2])),
+                }
+        else:
+            return {}
+
+    def _prepare_charge(
+            self, token=None, accept_header=None, user_agent=None,
+            shopper_ip=None, **kwargs):
         transaction = self.collection
         description = "|".join([
             transaction.name,
             transaction.partner_id.email,
             str(transaction.id)])
-        # TODO FIX ME we need to pass th browser info here and not in 3D
         vals = {
             'amount': {
                 "value": self._get_formatted_amount(),
                 "currency": transaction.currency_id.name},
+            'browserInfo': {
+                'acceptHeader': accept_header,
+                'userAgent': user_agent,
+                },
+            'shopperIP': shopper_ip,
+            'shopperReference': transaction.partner_id.id,
             'reference': description,
-            'browserInfo': kwargs.get('browserInfo'),
-            'additionalData': {"executeThreeD": "true"}  # optional may be?
+            'additionalData': {
+                'card.encrypted.json': token,
+                },
+            'shopperEmail': transaction.partner_id.email,
+            'deliveryAddress': self._get_delivery_address(),
             }
-        if kwargs.get('encrypted_card'):
-            vals['additionalData'] = {
-                'card.encrypted.json': kwargs['encrypted_card'],
-                'executeThreeD': 'true'
-                }
+        if self._use_3ds():
+            if not (user_agent and accept_header):
+                raise UserError(_('Error: browser_info are required '
+                                  'for dynamic 3D secure'))
         else:
-            raise UserError(_('Error: encrypted_card information missing!'))
+            vals['additionalData']['executeThreeD'] =\
+                self._transaction_need_3d_secure()
         return vals
+
+    def _use_3ds(self):
+        account = self._get_account()
+        data = account.get_data()
+        return data.get('dynamic_3ds')
 
     def _get_adyen_client(self):
         account = self._get_account()
@@ -192,22 +220,22 @@ class PaymentService(Component):
         ady.payment.client.app_name = data['app_name']
         return ady.payment
 
-    def _create_transaction(self, source=None, **kwargs):
-        payload = self._prepare_charge(source=source, **kwargs)
+    def _create_transaction(
+            self, token=None, browser_info=None, **kwargs):
+        payload = self._prepare_charge(
+            token=token,
+            browser_info=browser_info,
+            **kwargs)
         return self._http_adyen_request('authorise', payload)
 
     def _parse_creation_result(self, transaction, **kwargs):
-        # TODO does it make sense to call super with the specific AdyenResult
-        # object?
-        res = super(PaymentService, self).\
-            _parse_creation_result(transaction, **kwargs)
         transaction = transaction.message
-        res.update({
+        res = {
             'amount': self.collection._get_amount_to_capture(),
             'external_id': transaction['pspReference'],
             'state': MAP_SOURCE_STATE[transaction['resultCode']],
             'data': json.dumps(transaction),
-            })
+            }
         if transaction.get('resultCode') == 'RedirectShopper':
             res.update({
                 'url': transaction['issuerUrl'],

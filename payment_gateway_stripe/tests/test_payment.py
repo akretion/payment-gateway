@@ -9,7 +9,7 @@ import requests
 import stripe
 from os.path import dirname
 
-from odoo.exceptions import Warning as UserError
+from odoo.exceptions import UserError
 from odoo.addons.payment_gateway.tests.common import (
     RecordedScenario,
     HttpSavepointComponentCase,

@@ -15,7 +15,7 @@ from io import StringIO
 from os.path import dirname
 from adyen_cse_python.encrypter import ClientSideEncrypter
 
-from odoo.exceptions import Warning as UserError
+from odoo.exceptions import UserError
 from odoo.addons.payment_gateway.tests.common import (
     RecordedScenario,
     HttpSavepointComponentCase)
@@ -31,6 +31,13 @@ FAKE_KEY = (
     "750BF5BBCB978D834E2BAAD69B45734E8A5011E8D6CAF6D22C2859391DFC84419A40256"
     "DBEC9B8E52FE1E0221EC5"
 )
+
+SHOPPER_IP = '42.42.42.42'
+ACCEPT_HEADER =\
+    'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+USER_AGENT = (
+    'Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9) '
+    'Gecko/2008052912 Firefox/3.0')
 
 
 class AdyenCommonCase(HttpSavepointComponentCase):
@@ -81,30 +88,33 @@ class AdyenCommonCase(HttpSavepointComponentCase):
             card['expiryYear'])
 
     def _fill_3d_secure(self, transaction, card_number, success=True):
-        data = {
-            'PaReq': transaction.meta['paRequest'],
-            'MD': transaction.meta['MD'],
-            'TermUrl': transaction.meta['termUrl'],
-            }
-        result = requests.post(transaction.url, data)
-        session_id = result.headers['Set-Cookie'].split(
-            'JSESSIONID=')[1].split(';')[0]
-        validate_url = "https://test.adyen.com/hpp/3d/authenticate.shtml;\
-            jsessionid=%s" % (session_id,)
-        validation = requests.post(validate_url, data={
-            'PaReq': transaction.meta['paRequest'],
-            'MD': transaction.meta['MD'],
-            'TermUrl': transaction.meta['termUrl'],
-            'username': 'user',
-            'password': 'password',
-            'cardNumber': card_number
-        })
-        parser = etree.HTMLParser()
-        tree = etree.parse(StringIO(validation.content.decode('utf-8')),
-                           parser)
-        e = tree.xpath("//input[@name='PaRes']")[0]
-        pa_res = e.values()[2]
-        return pa_res
+        if not success:
+            return 'failed validation'
+        else:
+            data = {
+                'PaReq': transaction.meta['paRequest'],
+                'MD': transaction.meta['MD'],
+                'TermUrl': transaction.meta['termUrl'],
+                }
+            result = requests.post(transaction.url, data)
+            session_id = result.headers['Set-Cookie'].split(
+                'JSESSIONID=')[1].split(';')[0]
+            validate_url = "https://test.adyen.com/hpp/3d/authenticate.shtml;\
+                jsessionid=%s" % (session_id,)
+            validation = requests.post(validate_url, data={
+                'PaReq': transaction.meta['paRequest'],
+                'MD': transaction.meta['MD'],
+                'TermUrl': transaction.meta['termUrl'],
+                'username': 'user',
+                'password': 'password',
+                'cardNumber': card_number
+            })
+            parser = etree.HTMLParser()
+            tree = etree.parse(StringIO(validation.content.decode('utf-8')),
+                               parser)
+            e = tree.xpath("//input[@name='PaRes']")[0]
+            pa_res = e.values()[2]
+            return pa_res
 
 
 class AdyenScenario(RecordedScenario):
@@ -115,7 +125,7 @@ class AdyenScenario(RecordedScenario):
     def test_create_transaction_3d_required_success(self):
         self._test_3d('5212345678901234', success=True)
 
-    def test_create_transaction_visa(self):
+    def test_create_transaction_mastecard(self):
         self._test_card('5136333333333335')
 
     def test_create_transaction_us(self):
@@ -175,12 +185,15 @@ class AdyenCase(AdyenCommonCase, AdyenScenario):
         self._decorate_test(dirname(__file__))
 
     def _create_transaction(self, card):
-        encrypted_card = self._get_encrypted_card(card)
+        token = self._get_encrypted_card(card)
         transaction = self.env['gateway.transaction'].generate(
             'adyen',
             self.sale,
-            encrypted_card=encrypted_card,
-            return_url='https://IwillBeBack.vd')
+            token=token,
+            return_url='https://IwillBeBack.vd',
+            accept_header=ACCEPT_HEADER,
+            user_agent=USER_AGENT,
+            shopper_ip=SHOPPER_IP)
         return transaction, json.loads(transaction.data)
 
     def _check_captured(self, transaction, expected_state='succeeded',
@@ -193,15 +206,17 @@ class AdyenCase(AdyenCommonCase, AdyenScenario):
         self.assertEqual(transaction.state, 'pending')
         pa_res = self._fill_3d_secure(transaction, card, success=success)
         params = {
-            'MD': source['md'],
-            'PaRes': pa_res
-            }
+            'md': source['md'],
+            'pares': pa_res,
+            'accept_header': ACCEPT_HEADER,
+            'user_agent': USER_AGENT,
+            'shopper_ip': SHOPPER_IP,
+        }
         if success:
             with transaction._get_provider('adyen') as provider:
                 provider.process_return(**params)
             self._check_captured(transaction)
         else:
-            params['PaRes'] = 'failed validation'
             with self.assertRaises(UserError):
                 with transaction._get_provider('adyen') as provider:
                     provider.process_return(**params)
