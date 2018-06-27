@@ -9,7 +9,7 @@ import requests
 import stripe
 from os.path import dirname
 
-from odoo.exceptions import Warning as UserError
+from odoo.exceptions import UserError
 from odoo.addons.payment_gateway.tests.common import (
     RecordedScenario,
     HttpSavepointComponentCase,
@@ -44,8 +44,8 @@ class StripeCommonCase(HttpSavepointComponentCase):
                 "cvc": '123'
             }, api_key=self.stripe_api)
 
-    def _fill_3d_secure(self, source, success=True):
-        res = requests.get(source['redirect']['url'])
+    def _fill_3d_secure(self, transaction, success=True):
+        res = requests.get(transaction.url)
         url = res._content.split('method="POST" action="')[1].split('">')[0]
         requests.post(url, {'PaRes': 'success' if success else 'failure'})
 
@@ -140,12 +140,12 @@ class StripeCase(StripeCommonCase, StripeScenario):
 
     def _simulate_return(self, transaction):
         with transaction._get_provider('stripe') as provider:
-            provider.process_return(source=transaction.external_id)
+            provider.process_return(token=transaction.external_id)
 
     def _test_3d(self, card, success=True, mode='return'):
         transaction, source = self._create_transaction(card)
         self.assertEqual(transaction.state, 'pending')
-        self._fill_3d_secure(source, success=success)
+        self._fill_3d_secure(transaction, success=success)
 
         if mode == 'webhook':
             self._simulate_webhook(transaction)
@@ -156,19 +156,21 @@ class StripeCase(StripeCommonCase, StripeScenario):
             self._check_captured(transaction)
         else:
             self.assertEqual(transaction.state, 'failed')
+        self.assertEqual(transaction.used_3d_secure, True)
 
     def _create_transaction(self, card):
         source = self._get_source(card)
         transaction = self.env['gateway.transaction'].generate(
             'stripe',
             self.sale,
-            source=source['id'],
+            token=source['id'],
             return_url='https://IwillBeBack.vd')
         return transaction, json.loads(transaction.data)
 
     def _test_card(self, card, **kwargs):
         transaction, source = self._create_transaction(card)
         self._check_captured(transaction, **kwargs)
+        self.assertEqual(transaction.used_3d_secure, False)
 
     def test_config(self):
         self.assertEqual(

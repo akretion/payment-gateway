@@ -47,6 +47,7 @@ class GatewayTransaction(models.Model):
         selection="_selection_capture_payment",
         required=True)
     url = fields.Char()
+    meta = fields.Serialized()
     amount = fields.Float(dp=dp.get_precision('Account'))
     currency_id = fields.Many2one(
         'res.currency',
@@ -92,6 +93,8 @@ class GatewayTransaction(models.Model):
         ], default='unknown')
     redirect_cancel_url = fields.Char()
     redirect_success_url = fields.Char()
+    used_3d_secure = fields.Boolean(
+        help="Tic if this transaction have used 3d secure")
 
     @api.depends('origin_id')
     def _compute_origin(self):

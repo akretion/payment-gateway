@@ -12,6 +12,7 @@
                 <field name="amount"/>
                 <field name="currency_id"/>
                 <field name="origin_id"/>
+                <field name="used_3d_secure"/>
                 <button
                     name="capture"
                     class="oe_highlight"
