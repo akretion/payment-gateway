@@ -4,7 +4,6 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from odoo.exceptions import Warning as UserError
-from odoo.tools import config
 from odoo.tools.translate import _
 from odoo.tools.float_utils import float_round
 from odoo.addons.component.core import Component
