@@ -100,16 +100,14 @@ class PaymentService(Component):
         return transaction.state
 
     def _parse_creation_result(self, transaction, **kwargs):
-        res = super(PaymentService, self)._parse_creation_result(
-            transaction, **kwargs)
         url = [l for l in transaction['links'] if l['method'] == 'REDIRECT'][0]
-        res.update({
+        res = {
             'amount': transaction['transactions'][0]['amount']['total'],
             'external_id': transaction['id'],
             'data': json.dumps(transaction),
             'url': url['href'],
             'state': 'pending',
-        })
+        }
         return res
 
     def capture(self, transaction, amount):

@@ -44,7 +44,7 @@ class PaypalCommonCase(HttpSavepointComponentCase):
                 },
             'transactions': [{
                 'amount': {
-                    'currency': u'USD',
+                    'currency': u'EUR',
                     'total': 2947.5,
                     },
                 'description':
