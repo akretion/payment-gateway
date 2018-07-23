@@ -73,7 +73,7 @@ class PaypalCase(PaypalCommonCase, RecordedScenario):
 
     def test_create_transaction(self):
         with paypal_mock(PaypalPaymentSuccess):
-            transaction = self.env['gateway.transaction'].generate(
+            self.env['gateway.transaction'].generate(
                 'paypal', self.sale, **REDIRECT_URL)
             self._check_payment_create_sale_order(REDIRECT_URL)
 
