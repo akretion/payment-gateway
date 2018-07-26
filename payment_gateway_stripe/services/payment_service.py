@@ -40,7 +40,7 @@ class PaymentService(Component):
 
     def process_return(self, **params):
         transaction = self.env['gateway.transaction'].search([
-            ('external_id', '=', params['token']),
+            ('external_id', '=', params['source']),
             ('payment_mode_id.provider', '=', 'stripe'),
             ('state', '=', 'pending')])
         transaction.check_state()
