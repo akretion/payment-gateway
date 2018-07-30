@@ -139,7 +139,7 @@ class PaymentService(Component):
         capture = transaction.capture_payment == 'immediately'
         return {
             'currency': transaction.currency_id.name,
-            'token': token,
+            'source': token,
             'description': description,
             'capture': capture,
             'amount': self._get_formatted_amount(),
