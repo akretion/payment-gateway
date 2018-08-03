@@ -54,19 +54,18 @@ class PaymentService(Component):
         # create_profile(paypal)
         return paypalrestsdk.Api(params), experience_profile
 
-    def _prepare_transaction(
-            self, return_url=None, cancel_url=None, **kwargs):
+    def _prepare_transaction(self, return_url, **kwargs):
         transaction = self.collection
         description = "|".join([
             transaction.name,
-            transaction.partner_id.email])
-#            str(transaction.id)])   TODO add it? then how to fix tests?
+            transaction.partner_id.email,
+            str(transaction.id)])
         return {
             "intent": "sale",
             "payer": {"payment_method": "paypal"},
             "redirect_urls": {
                 "return_url": return_url,
-                "cancel_url": cancel_url,
+                "cancel_url": transaction.redirect_cancel_url,
                 },
             "transactions": [{
                 "amount": {
@@ -88,27 +87,32 @@ class PaymentService(Component):
             raise UserError(payment.error)
         return payment.to_dict()
 
-    def get_transaction_state(self, transaction):
-        if transaction.state == 'pending':
-            paypal, experience_profile = self._get_connection()
-            payment = paypalrestsdk.Payment.find(
-                transaction.external_id, api=paypal)
-            if payment.to_dict()['payer'].get('payer_info'):
-                return 'to_capture'
-        return transaction.state
-
     def _parse_creation_result(self, transaction, **kwargs):
         url = [l for l in transaction['links'] if l['method'] == 'REDIRECT'][0]
-        res = {
+        return {
             'amount': transaction['transactions'][0]['amount']['total'],
             'external_id': transaction['id'],
             'data': json.dumps(transaction),
             'url': url['href'],
             'state': 'pending',
         }
-        return res
 
-    def capture(self, transaction, amount):
+    def process_return(self, **params):
+        # For now we always capture immediatly the paypal transaction
+        transaction = self.env['gateway.transaction'].search([
+            ('external_id', '=', params['paymentId']),
+            ('payment_mode_id.provider', '=', 'paypal'),
+            ('state', '=', 'pending')])
+        if transaction:
+            transaction.capture()
+            return transaction
+        else:
+            raise UserError(
+                _('The transaction %s do not exist in Odoo')
+                % params['paymentId'])
+
+    def capture(self):
+        transaction = self.collection
         paypal, experience_profile = self._get_connection()
         payment = paypalrestsdk.Payment.find(
             transaction.external_id, api=paypal)
