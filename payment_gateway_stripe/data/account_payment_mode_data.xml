@@ -7,7 +7,7 @@
             <field name="provider">stripe</field>
             <field name="capture_payment">immediately</field>
             <field name="bank_account_link">variable</field>
-            <field name="payment_method_id" ref="account.account_payment_method_manual_out"/>
+            <field name="payment_method_id" ref="account.account_payment_method_manual_in"/>
         </record>
 
     </data>
