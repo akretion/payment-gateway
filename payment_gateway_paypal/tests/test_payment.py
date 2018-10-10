@@ -45,7 +45,7 @@ class PaypalCommonCase(HttpSavepointComponentCase):
             'transactions': [{
                 'amount': {
                     'currency': u'USD',
-                    'total': 2947.5,
+                    'total': "2947.50",
                     },
                 'description':
                     u'SO002|deltapc@yourcompany.example.com'},

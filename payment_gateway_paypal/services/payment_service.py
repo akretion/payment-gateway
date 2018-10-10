@@ -4,6 +4,7 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from odoo.exceptions import Warning as UserError
+from odoo.tools import float_round, float_repr
 from odoo.addons.component.core import Component
 
 import json
@@ -54,12 +55,21 @@ class PaymentService(Component):
         # create_profile(paypal)
         return paypalrestsdk.Api(params), experience_profile
 
+    def _get_formatted_amount(self, amount):
+        """paypal API is expecting at most two (2) decimal places with a
+        period separator."""
+        if amount is None:
+            return 0
+        return float_repr(float_round(amount, 2), 2)
+
     def _prepare_transaction(self, return_url, **kwargs):
         transaction = self.collection
         description = "|".join([
             transaction.name,
             transaction.partner_id.email,
             str(transaction.id)])
+        amount = self._get_formatted_amount(
+            transaction._get_amount_to_capture())
         return {
             "intent": "sale",
             "payer": {"payment_method": "paypal"},
@@ -69,7 +79,7 @@ class PaymentService(Component):
                 },
             "transactions": [{
                 "amount": {
-                    "total": transaction._get_amount_to_capture(),
+                    "total": amount,
                     "currency": transaction.currency_id.name,
                     },
                 "description": description,
