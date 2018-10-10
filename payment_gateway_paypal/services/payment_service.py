@@ -67,7 +67,7 @@ class PaymentService(Component):
         description = "|".join([
             transaction.name,
             transaction.partner_id.email,
-            str(transaction.id)])
+            ('%s' % transaction.id)])
         amount = self._get_formatted_amount(
             transaction._get_amount_to_capture())
         return {
