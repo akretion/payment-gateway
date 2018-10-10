@@ -3,6 +3,7 @@
 # @author Sébastien BEAU <sebastien.beau@akretion.com>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
+from odoo import _
 from odoo.exceptions import Warning as UserError
 from odoo.tools import float_round, float_repr
 from odoo.addons.component.core import Component
@@ -17,30 +18,6 @@ except ImportError:
     _logger.debug('Can not `import paypalrestsdk` library')
 
 
-# TODO FIXME
-def create_profile(paypal):
-    web_profile = paypalrestsdk.WebProfile({
-        "name": 'Adaptoo 2',
-        "presentation": {
-            "brand_name": "Adaptoo Paypal",
-            "logo_image": ("http://www.adaptoo.com/skin/frontend/"
-                           "adaptoo/default/images/logo.gif"),
-            "locale_code": "FR"
-            },
-        "input_fields": {
-            "no_shipping": 1,
-            "address_override": 1
-            },
-        "flow_config": {
-            "user_action": "commit"
-            }
-        }, api=paypal)
-    if web_profile.create():
-        _logger.info("Web Profile[%s] created successfully", web_profile.id)
-    else:
-        _logger.error('%s', web_profile.error)
-
-
 class PaymentService(Component):
     _inherit = 'payment.service'
     _name = 'payment.service.paypal'
@@ -52,7 +29,6 @@ class PaymentService(Component):
         params = account.get_data()
         experience_profile = params.pop("experience_profile_id", None)
         params['client_secret'] = account._get_password()
-        # create_profile(paypal)
         return paypalrestsdk.Api(params), experience_profile
 
     def _get_formatted_amount(self, amount):
