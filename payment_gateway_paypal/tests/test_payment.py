@@ -35,8 +35,13 @@ class PaypalCommonCase(HttpSavepointComponentCase):
         self.sale.write({'payment_mode_id': self.account_payment_mode.id})
 
     def _check_payment_create_sale_order(self, redirect_url):
+        transaction = self.sale.transaction_ids
+        self.assertEqual(len(transaction), 1)
         paypalrestsdk.Payment.assert_called_with({
-            'redirect_urls': redirect_url,
+            'redirect_urls': {
+                'cancel_url': REDIRECT_URL['redirect_cancel_url'],
+                'return_url': REDIRECT_URL['return_url']
+            },
             'experience_profile_id': u"LX-39DK-DI4IH-EOD3-KDO0",
             'intent': 'sale',
             'payer': {
@@ -48,11 +53,10 @@ class PaypalCommonCase(HttpSavepointComponentCase):
                     'total': "2947.50",
                     },
                 'description':
-                    u'SO002|deltapc@yourcompany.example.com'},
+                    u'SO002|deltapc@yourcompany.example.com|%s' %
+                    transaction.id},
             ]}, api="123")
 
-        transaction = self.sale.transaction_ids
-        self.assertEqual(len(transaction), 1)
         self.assertEqual(transaction.name, self.sale.name)
         self.assertEqual(
             transaction.payment_mode_id, self.account_payment_mode)
