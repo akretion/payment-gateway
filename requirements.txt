@@ -5,3 +5,4 @@ cerberus
 Adyen
 requests>=1.2.3
 git+https://github.com/cheah/adyen-cse-python.git@master#egg=adyen-cse-python
+xlrd

@@ -3,3 +3,4 @@ server-tools https://github.com/OCA/server-tools.git 10.0
 bank-payment https://github.com/OCA/bank-payment.git 10.0
 connector https://github.com/OCA/connector.git 10.0
 queue https://github.com/OCA/queue.git 10.0
+bank-statement-reconcile
