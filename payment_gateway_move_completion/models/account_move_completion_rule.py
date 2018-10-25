@@ -40,8 +40,6 @@ class AccountMoveCompletionRule(models.Model):
                 _('Transaction "%s" was matched by more than '
                   'one transaction.') % line.transaction_ref)
         if len(transaction) == 1:
-            if transaction.sale_id:
-                res['partner_id'] = transaction.sale_id.partner_id.id
-            elif transaction.invoice_id:
-                res['partner_id'] = transaction.invoice_id.partner_id.id
+            if transaction.origin_id:
+                res['partner_id'] = transaction.origin_id.partner_id.id
         return res
