@@ -17,7 +17,7 @@ from adyen_cse_python.encrypter import ClientSideEncrypter
 
 from odoo.exceptions import UserError
 from odoo.addons.payment_gateway.tests.common import (
-    RecordedScenario,
+    PaymentScenarioType,
     HttpSavepointComponentCase)
 
 
@@ -117,7 +117,7 @@ class AdyenCommonCase(HttpSavepointComponentCase):
             return pa_res
 
 
-class AdyenScenario(RecordedScenario):
+class AdyenScenario(object):
 
     def test_create_transaction_3d_required_failed(self):
         self._test_3d('5212345678901234', success=False)
@@ -179,10 +179,8 @@ class AdyenScenario(RecordedScenario):
 
 
 class AdyenCase(AdyenCommonCase, AdyenScenario):
-
-    def __init__(self, *args, **kwargs):
-        super(AdyenCase, self).__init__(*args, **kwargs)
-        self._decorate_test(dirname(__file__))
+    __metaclass__ = PaymentScenarioType
+    _test_path = dirname(__file__)
 
     def _create_transaction(self, card):
         token = self._get_encrypted_card(card)

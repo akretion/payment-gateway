@@ -10,7 +10,7 @@ from .paypal_mock import (
     PaypalPaymentPending,
     REDIRECT_URL)
 from odoo.addons.payment_gateway.tests.common import (
-    RecordedScenario,
+    PaymentScenarioType,
     HttpSavepointComponentCase)
 import paypalrestsdk
 
@@ -69,11 +69,9 @@ class PaypalCommonCase(HttpSavepointComponentCase):
         self.assertEqual(transaction.state, 'pending')
 
 
-class PaypalCase(PaypalCommonCase, RecordedScenario):
-
-    def __init__(self, *args, **kwargs):
-        super(PaypalCase, self).__init__(*args, **kwargs)
-        self._decorate_test(dirname(__file__))
+class PaypalCase(PaypalCommonCase):
+    __metaclass__ = PaymentScenarioType
+    _test_path = dirname(__file__)
 
     def test_create_transaction(self):
         with paypal_mock(PaypalPaymentSuccess):

@@ -11,7 +11,7 @@ from os.path import dirname
 
 from odoo.exceptions import UserError
 from odoo.addons.payment_gateway.tests.common import (
-    RecordedScenario,
+    PaymentScenarioType,
     HttpSavepointComponentCase,
     JSON_WEBHOOK_PATH)
 
@@ -70,7 +70,7 @@ class StripeCommonCase(HttpSavepointComponentCase):
         self.assertEqual(transaction.risk_level, expected_risk_level)
 
 
-class StripeScenario(RecordedScenario):
+class StripeScenario(object):
 
     def test_create_transaction_3d_required_failed(self):
         self._test_3d('4000000000003063', success=False)
@@ -133,10 +133,8 @@ class StripeScenario(RecordedScenario):
 
 
 class StripeCase(StripeCommonCase, StripeScenario):
-
-    def __init__(self, *args, **kwargs):
-        super(StripeCase, self).__init__(*args, **kwargs)
-        self._decorate_test(dirname(__file__))
+    __metaclass__ = PaymentScenarioType
+    _test_path = dirname(__file__)
 
     def _simulate_return(self, transaction):
         with transaction._get_provider('stripe') as provider:
