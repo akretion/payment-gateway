@@ -12,11 +12,11 @@ from os.path import dirname
 from odoo.exceptions import UserError
 from odoo.addons.payment_gateway.tests.common import (
     PaymentScenarioType,
-    HttpSavepointComponentCase,
+    HttpComponentCase,
     JSON_WEBHOOK_PATH)
 
 
-class StripeCommonCase(HttpSavepointComponentCase):
+class StripeCommonCase(HttpComponentCase):
 
     def setUp(self, *args, **kwargs):
         super(StripeCommonCase, self).setUp(*args, **kwargs)

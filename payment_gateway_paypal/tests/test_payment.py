@@ -11,11 +11,11 @@ from .paypal_mock import (
     REDIRECT_URL)
 from odoo.addons.payment_gateway.tests.common import (
     PaymentScenarioType,
-    HttpSavepointComponentCase)
+    HttpComponentCase)
 import paypalrestsdk
 
 
-class PaypalCommonCase(HttpSavepointComponentCase):
+class PaypalCommonCase(HttpComponentCase):
 
     def setUp(self, *args, **kwargs):
         super(PaypalCommonCase, self).setUp(*args, **kwargs)

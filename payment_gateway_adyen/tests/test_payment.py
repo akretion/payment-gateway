@@ -18,7 +18,7 @@ from adyen_cse_python.encrypter import ClientSideEncrypter
 from odoo.exceptions import UserError
 from odoo.addons.payment_gateway.tests.common import (
     PaymentScenarioType,
-    HttpSavepointComponentCase)
+    HttpComponentCase)
 
 
 FAKE_KEY = (
@@ -40,7 +40,7 @@ USER_AGENT = (
     'Gecko/2008052912 Firefox/3.0')
 
 
-class AdyenCommonCase(HttpSavepointComponentCase):
+class AdyenCommonCase(HttpComponentCase):
 
     def setUp(self, *args, **kwargs):
         super(AdyenCommonCase, self).setUp(*args, **kwargs)

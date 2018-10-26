@@ -12,9 +12,10 @@ import os
 from vcr import VCR
 from os.path import join
 import logging
-from odoo.addons.component.tests.common import SavepointComponentCase
+from odoo.addons.component.tests.common import ComponentMixin
 from odoo.addons.queue_job.job import Job
-from openerp import api
+from odoo.tests.common import HttpCase
+from odoo import api
 
 logging.getLogger("vcr").setLevel(logging.WARNING)
 
@@ -54,16 +55,19 @@ class PaymentScenarioType(type):
 # This class should be used if you want to call the odoo webhook during the
 # test. Indeed you will stay in the same cursor for all the process
 # Do not forget to commit before calling a odoo controller
-class HttpSavepointComponentCase(SavepointComponentCase):
+class HttpComponentCase(HttpCase, ComponentMixin):
 
-    def setUp(self, *args, **kwargs):
-        super(HttpSavepointComponentCase, self).setUp(*args, **kwargs)
-        self.registry.enter_test_mode()
+    @classmethod
+    def setUpClass(cls):
+        super(HttpComponentCase, cls).setUpClass()
+        cls.setUpComponent()
+
+    def setUp(self):
+        # resolve an inheritance issue (common.TransactionCase does not call
+        # super)
+        HttpCase.setUp(self)
         self.env = api.Environment(self.registry.test_cr, 1, {})
-
-    def tearDown(self):
-        self.registry.leave_test_mode()
-        super(HttpSavepointComponentCase, self).tearDown()
+        ComponentMixin.setUp(self)
 
     def _init_job_counter(self):
         self.existing_job = self.env['queue.job'].search([])
