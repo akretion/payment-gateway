@@ -20,11 +20,9 @@ class GatewayTransaction(models.Model):
     @contextmanager
     @api.multi
     def _get_provider(self, provider_name=None):
+        provider_name = provider_name or self.payment_mode_id.provider
         if not provider_name:
-            if self:
-                provider_name = self.payment_mode_id.provider
-            else:
-                raise UserError(_('Provider name is missing'))
+            raise UserError(_('Provider name is missing'))
         work = WorkContext(model_name=self._name, collection=self)
         yield work.component_by_name('payment.service.%s' % provider_name)
 
@@ -96,18 +94,21 @@ class GatewayTransaction(models.Model):
     used_3d_secure = fields.Boolean(
         help="Tic if this transaction have used 3d secure")
 
+    @api.multi
     @api.depends('origin_id')
     def _compute_origin(self):
         for record in self:
             record.res_id = record.origin_id.id
             record.res_model = record.origin_id._name
 
+    @api.multi
     def _get_amount_to_capture(self):
-        origin = self.origin_id
-        if origin._name == 'account.invoice':
-            return origin.residual
-        elif origin._name == 'sale.order':
-            return origin.amount_total
+        """
+        Return the amount to capture depending on the target model
+        :return: float
+        """
+        self.ensure_one()
+        return self.origin_id._get_transaction_to_capture_amount()
 
     @api.multi
     def cancel(self):
@@ -119,12 +120,13 @@ class GatewayTransaction(models.Model):
 
     @api.multi
     def write(self, vals):
-        super(GatewayTransaction, self).write(vals)
-        if vals['state'] == 'to_capture':
-            for record in self:
-                if record.capture_payment == 'immediately':
-                    record.capture()
-        return True
+        result = super(GatewayTransaction, self).write(vals)
+        if vals.get('state') == 'to_capture':
+            immediate_records = self.filtered(
+                lambda r: r.capture_payment == 'immediately')
+            for record in immediate_records:
+                record.capture()
+        return result
 
     def _prepare_transaction(self, origin, **kwargs):
         mode = origin.payment_mode_id
@@ -141,8 +143,14 @@ class GatewayTransaction(models.Model):
 
     @api.model
     def generate(self, provider_name, origin, **kwargs):
-        """Generate the transaction in the provider backend
-        and create the transaction in odoo"""
+        """
+        Generate the transaction in the provider backend
+        and create the transaction in odoo
+        :param provider_name: str
+        :param origin: target recordset
+        :param kwargs: dict
+        :return: self recordset
+        """
         vals = self._prepare_transaction(origin, **kwargs)
         transaction = self.create(vals)
         with transaction._get_provider(provider_name) as provider:
@@ -151,28 +159,31 @@ class GatewayTransaction(models.Model):
 
     @api.multi
     def capture(self):
-        """Capture one transaction in the backend
-        Only one transaction can be captured to avoid rollback issue"""
+        """
+        Capture one transaction in the backend
+        Only one transaction can be captured to avoid rollback issue
+        :return: bool
+        """
         self.ensure_one()
+        vals = {}
         if self.state == 'succeeded':
             pass
         else:
-            vals = {}
             try:
                 with self._get_provider() as provider:
                     provider.capture()
                 vals = {
                     'state': 'succeeded',
                     'date_processing': datetime.now(),
-                    }
+                }
             except Exception, e:
                 vals = {
                     'state': 'failed',
                     'error': str(e),
                     'date_processing': datetime.now(),
-                    }
+                }
             self.write(vals)
-        return vals['state'] == 'succeeded'
+        return vals.get('state') == 'succeeded'
 
     @api.multi
     def check_state(self):
