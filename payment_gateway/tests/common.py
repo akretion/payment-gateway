@@ -7,13 +7,15 @@
 # disable warning on 'vcr' missing in manifest: this is only a dependency for
 # dev/tests
 
+import inspect
 import os
 from vcr import VCR
 from os.path import join
 import logging
-from odoo.addons.component.tests.common import SavepointComponentCase
+from odoo.addons.component.tests.common import ComponentMixin
 from odoo.addons.queue_job.job import Job
-from openerp import api
+from odoo.tests.common import HttpCase
+from odoo import api
 
 logging.getLogger("vcr").setLevel(logging.WARNING)
 
@@ -22,41 +24,50 @@ JSON_WEBHOOK_PATH = '/payment-gateway-json-webhook'
 HTTP_WEBHOOK_PATH = '/payment-gateway-http-webhook'
 
 
-class RecordedScenario(object):
+def _before_record(request):
+    if JSON_WEBHOOK_PATH in request.path \
+            or HTTP_WEBHOOK_PATH in request.path:
+        return
+    return request
 
-    def _before_record(self, request):
-        if JSON_WEBHOOK_PATH in request.path\
-                or HTTP_WEBHOOK_PATH in request.path:
-            return
-        return request
 
-    def _decorate_test(self, test_path):
-        recorder = VCR(
-            before_record_request=self._before_record,
-            record_mode=os.environ.get('VCR_MODE', 'none'),
-            cassette_library_dir=join(test_path, 'fixtures/cassettes'),
-            path_transformer=VCR.ensure_suffix('.yaml'),
-            filter_headers=['Authorization'],
-        )
-        for test_func in dir(self):
-            if test_func.startswith('test'):
-                setattr(self, test_func,
-                        recorder.use_cassette(getattr(self, test_func)))
+class PaymentScenarioType(type):
+
+    def __new__(cls, name, bases, members):
+        test_path = members['_test_path']
+
+        # decorate test method with the cassette
+        klass = type.__new__(cls, name, bases, members)
+        for name, val in inspect.getmembers(klass, inspect.ismethod):
+            if name.startswith('test'):
+                recorder = VCR(
+                    before_record_request=_before_record,
+                    record_mode=os.environ.get('VCR_MODE', 'none'),
+                    cassette_library_dir=join(test_path, 'fixtures/cassettes'),
+                    path_transformer=VCR.ensure_suffix('.yaml'),
+                    filter_headers=['Authorization'],
+                )
+                val = recorder.use_cassette(val)
+                setattr(klass, name, val)
+        return klass
 
 
 # This class should be used if you want to call the odoo webhook during the
 # test. Indeed you will stay in the same cursor for all the process
 # Do not forget to commit before calling a odoo controller
-class HttpSavepointComponentCase(SavepointComponentCase):
+class HttpComponentCase(HttpCase, ComponentMixin):
 
-    def setUp(self, *args, **kwargs):
-        super(HttpSavepointComponentCase, self).setUp(*args, **kwargs)
-        self.registry.enter_test_mode()
+    @classmethod
+    def setUpClass(cls):
+        super(HttpComponentCase, cls).setUpClass()
+        cls.setUpComponent()
+
+    def setUp(self):
+        # resolve an inheritance issue (common.TransactionCase does not call
+        # super)
+        HttpCase.setUp(self)
         self.env = api.Environment(self.registry.test_cr, 1, {})
-
-    def tearDown(self):
-        self.registry.leave_test_mode()
-        super(HttpSavepointComponentCase, self).tearDown()
+        ComponentMixin.setUp(self)
 
     def _init_job_counter(self):
         self.existing_job = self.env['queue.job'].search([])

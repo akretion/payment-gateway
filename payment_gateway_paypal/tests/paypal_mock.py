@@ -10,7 +10,8 @@ from datetime import datetime
 import copy
 
 REDIRECT_URL = {
-    'cancel_url': 'https://IamGoingToKickYourAssIfYouDoNotPaid.com',
+    'redirect_cancel_url': 'https://IamGoingToKickYourAssIfYouDoNotPaid.com',
+    'redirect_success_url': 'https://ThanksYou.com',
     'return_url': 'https://ThanksYou.com',
     }
 

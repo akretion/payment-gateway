@@ -13,7 +13,10 @@ class KeychainAccount(models.Model):
         selection_add=[('paypal', 'Paypal')])
 
     def _paypal_init_data(self):
-        return {}
+        return {
+            'client_id': None,
+            'mode': 'sandbox'
+        }
 
     def _paypal_validate_data(self, data):
         return True

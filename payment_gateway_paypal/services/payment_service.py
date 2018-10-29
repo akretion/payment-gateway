@@ -3,9 +3,12 @@
 # @author Sébastien BEAU <sebastien.beau@akretion.com>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-from openerp import models
+from odoo import _
+from odoo.exceptions import Warning as UserError
+from odoo.tools import float_round, float_repr
+from odoo.addons.component.core import Component
+
 import json
-from openerp.exceptions import Warning as UserError
 import logging
 _logger = logging.getLogger(__name__)
 
@@ -15,66 +18,52 @@ except ImportError:
     _logger.debug('Can not `import paypalrestsdk` library')
 
 
-# TODO FIXME
-def create_profile(paypal):
-    web_profile = paypalrestsdk.WebProfile({
-        "name": 'Adaptoo 2',
-        "presentation": {
-            "brand_name": "Adaptoo Paypal",
-            "logo_image": ("http://www.adaptoo.com/skin/frontend/"
-                           "adaptoo/default/images/logo.gif"),
-            "locale_code": "FR"
-            },
-        "input_fields": {
-            "no_shipping": 1,
-            "address_override": 1
-            },
-        "flow_config": {
-            "user_action": "commit"
-            }
-        }, api=paypal)
-    if web_profile.create():
-        _logger.info("Web Profile[%s] created successfully", web_profile.id)
-    else:
-        _logger.error('%s', web_profile.error)
-
-
-class PaymentService(models.Model):
+class PaymentService(Component):
     _inherit = 'payment.service'
     _name = 'payment.service.paypal'
+    _usage = 'gateway.provider'
     _allowed_capture_method = ['immediately']
 
     def _get_connection(self):
         account = self._get_account()
         params = account.get_data()
         experience_profile = params.pop("experience_profile_id", None)
-        params['client_secret'] = account.get_password()
-        # create_profile(paypal)
+        params['client_secret'] = account._get_password()
         return paypalrestsdk.Api(params), experience_profile
 
-    def _prepare_transaction(
-            self, record, return_url=None, cancel_url=None, **kwargs):
-        description = "%s|%s" % (
-            record.name,
-            record.partner_id.email)
+    def _get_formatted_amount(self, amount):
+        """paypal API is expecting at most two (2) decimal places with a
+        period separator."""
+        if amount is None:
+            return 0
+        return float_repr(float_round(amount, 2), 2)
+
+    def _prepare_transaction(self, return_url, **kwargs):
+        transaction = self.collection
+        description = "|".join([
+            transaction.name,
+            transaction.partner_id.email,
+            ('%s' % transaction.id)])
+        amount = self._get_formatted_amount(
+            transaction._get_amount_to_capture())
         return {
             "intent": "sale",
             "payer": {"payment_method": "paypal"},
             "redirect_urls": {
                 "return_url": return_url,
-                "cancel_url": cancel_url,
+                "cancel_url": transaction.redirect_cancel_url,
                 },
             "transactions": [{
                 "amount": {
-                    "total": record.residual,
-                    "currency": record.currency_id.name,
+                    "total": amount,
+                    "currency": transaction.currency_id.name,
                     },
                 "description": description,
                 }],
             }
 
-    def create_provider_transaction(self, record, **kwargs):
-        data = self._prepare_transaction(record, **kwargs)
+    def _create_transaction(self, **kwargs):
+        data = self._prepare_transaction(**kwargs)
         # TODO paypal lib is not perfect, we should wrap it in a class
         paypal, experience_profile = self._get_connection()
         data["experience_profile_id"] = experience_profile
@@ -84,29 +73,32 @@ class PaymentService(models.Model):
             raise UserError(payment.error)
         return payment.to_dict()
 
-    def get_transaction_state(self, transaction):
-        if transaction.state == 'pending':
-            paypal, experience_profile = self._get_connection()
-            payment = paypalrestsdk.Payment.find(
-                transaction.external_id, api=paypal)
-            if payment.to_dict()['payer'].get('payer_info'):
-                return 'to_capture'
-        return transaction.state
-
-    def _prepare_odoo_transaction(self, cart, transaction, **kwargs):
-        res = super(PaymentService, self).\
-            _prepare_odoo_transaction(cart, transaction, **kwargs)
+    def _parse_creation_result(self, transaction, **kwargs):
         url = [l for l in transaction['links'] if l['method'] == 'REDIRECT'][0]
-        res.update({
+        return {
             'amount': transaction['transactions'][0]['amount']['total'],
             'external_id': transaction['id'],
             'data': json.dumps(transaction),
             'url': url['href'],
             'state': 'pending',
-        })
-        return res
+        }
 
-    def capture(self, transaction, amount):
+    def process_return(self, **params):
+        # For now we always capture immediatly the paypal transaction
+        transaction = self.env['gateway.transaction'].search([
+            ('external_id', '=', params['paymentId']),
+            ('payment_mode_id.provider', '=', 'paypal'),
+            ('state', '=', 'pending')])
+        if transaction:
+            transaction.capture()
+            return transaction
+        else:
+            raise UserError(
+                _('The transaction %s do not exist in Odoo')
+                % params['paymentId'])
+
+    def capture(self):
+        transaction = self.collection
         paypal, experience_profile = self._get_connection()
         payment = paypalrestsdk.Payment.find(
             transaction.external_id, api=paypal)
