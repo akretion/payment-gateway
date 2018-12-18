@@ -40,7 +40,7 @@ class GatewayTransaction(models.Model):
     payment_mode_id = fields.Many2one(
         'account.payment.mode',
         'Gateway')
-    external_id = fields.Char()
+    external_id = fields.Char(index=True)
     capture_payment = fields.Selection(
         selection="_selection_capture_payment",
         required=True)
