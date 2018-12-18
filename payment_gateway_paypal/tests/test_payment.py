@@ -13,6 +13,7 @@ from odoo.addons.payment_gateway.tests.common import (
     PaymentScenarioType,
     HttpComponentCase)
 import paypalrestsdk
+from odoo.exceptions import  UserError
 
 
 class PaypalCommonCase(HttpComponentCase):
@@ -34,13 +35,32 @@ class PaypalCommonCase(HttpComponentCase):
             'payment_gateway_paypal.account_payment_mode_paypal')
         self.sale.write({'payment_mode_id': self.account_payment_mode.id})
 
-    def _check_payment_create_sale_order(self, redirect_url):
-        transaction = self.sale.transaction_ids
-        self.assertEqual(len(transaction), 1)
+
+class PaypalScenario(object):
+
+    def _create_transaction(self):
+        # Should be implemented on your test case
+        # This method should create and return a transsaction
+        raise NotImplemented
+
+    def _simultate_return(self):
+        # Should be implemented on your real test case
+        # this method should simulate the return from the paypal
+        # website on your website and so the processing of the
+        # transaction
+        raise NotImplemented
+
+    def _expected_cancel_url(self):
+        return REDIRECT_URL['redirect_cancel_url']
+
+    def _expected_return_url(self):
+        return REDIRECT_URL['return_url']
+
+    def _check_payment_create_sale_order(self, transaction):
         paypalrestsdk.Payment.assert_called_with({
             'redirect_urls': {
-                'cancel_url': REDIRECT_URL['redirect_cancel_url'],
-                'return_url': REDIRECT_URL['return_url']
+                'cancel_url': self._expected_cancel_url(),
+                'return_url': self._expected_return_url(),
             },
             'experience_profile_id': u"LX-39DK-DI4IH-EOD3-KDO0",
             'intent': 'sale',
@@ -65,30 +85,51 @@ class PaypalCommonCase(HttpComponentCase):
             paypalrestsdk.Payment.transaction['id'])
         self.assertEqual(transaction.capture_payment, 'immediately')
         self.assertEqual(transaction.amount, self.sale.amount_total)
-#        self.assertEqual(transaction.sale_id, self.sale)  TODO
+        self.assertEqual(transaction.origin_id, self.sale)
         self.assertEqual(transaction.state, 'pending')
 
+    def _check_successfull_return(self, transaction, result):
+        self.assertEqual(transaction.state, 'succeeded')
 
-class PaypalCase(PaypalCommonCase):
-    __metaclass__ = PaymentScenarioType
-    _test_path = dirname(__file__)
+    def _check_failing_return(self, transaction, result):
+        self.assertEqual(transaction.state, 'failed')
 
     def test_create_transaction(self):
         with paypal_mock(PaypalPaymentSuccess):
-            self.env['gateway.transaction'].generate(
-                'paypal', self.sale, **REDIRECT_URL)
-            self._check_payment_create_sale_order(REDIRECT_URL)
+            transaction = self._create_transaction(**REDIRECT_URL)
+            self._check_payment_create_sale_order(transaction)
 
     def test_execute_transaction(self):
         with paypal_mock(PaypalPaymentSuccess):
-            transaction = self.env['gateway.transaction'].generate(
-                'paypal', self.sale, **REDIRECT_URL)
-            transaction.capture()
+            transaction = self._create_transaction(**REDIRECT_URL)
+            result = self._simulate_return(transaction.external_id)
+            self._check_successfull_return(transaction, result)
 
     def test_failing_execute_transaction(self):
         with paypal_mock(PaypalPaymentPending):
-            transaction = self.env['gateway.transaction'].generate(
-                'paypal', self.sale, **REDIRECT_URL)
-            transaction.capture()
+            transaction = self._create_transaction(**REDIRECT_URL)
+            result = self._simulate_return(transaction.external_id)
+            self._check_failing_return(transaction, result)
             self.assertEqual(transaction.state, 'failed')
             self.assertNotEqual(transaction.error, '')
+
+    def test_wrong_transaction(self):
+        with paypal_mock(PaypalPaymentSuccess):
+            transaction = self._create_transaction(**REDIRECT_URL)
+            with self.assertRaises(UserError):
+                self._simulate_return('wrong_transaction_id')
+
+
+class PaypalCase(PaypalCommonCase, PaypalScenario):
+
+    def _create_transaction(self, **REDIRECT_URL):
+        self.env['gateway.transaction'].generate(
+            'paypal', self.sale, **REDIRECT_URL)
+        transaction = self.sale.transaction_ids
+        self.assertEqual(len(transaction), 1)
+        return transaction
+
+    def _simulate_return(self, transaction_id):
+        with self.env['gateway.transaction']._get_provider('paypal')\
+                as provider:
+            return provider.process_return(paymentId=transaction_id)
