@@ -69,13 +69,22 @@ class PaypalPaymentSuccess(Mock):
         return self
 
     def execute(self, params):
+        self.transaction.update({
+            'state': 'approved',
+            })
         return True
 
 
-class PaypalPaymentPending(PaypalPaymentSuccess):
+class PaypalPaymentNoPayer(PaypalPaymentSuccess):
 
     def find(self, transaction_id, api=None):
         return self
+
+
+class PaypalPaymentWrongState(PaypalPaymentSuccess):
+
+    def execute(self, params):
+        return True
 
 
 @contextmanager

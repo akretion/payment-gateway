@@ -164,6 +164,9 @@ class GatewayTransaction(models.Model):
         Only one transaction can be captured to avoid rollback issue
         :return: bool
         """
+        # TODO we should review the way to do the try/except
+        # the main point to review is that we write here in the transaction
+        # and also in the service. Having two write is useless and complexe
         self.ensure_one()
         vals = {}
         if self.state == 'succeeded':
@@ -172,10 +175,7 @@ class GatewayTransaction(models.Model):
             try:
                 with self._get_provider() as provider:
                     provider.capture()
-                vals = {
-                    'state': 'succeeded',
-                    'date_processing': datetime.now(),
-                }
+                vals = {'date_processing': datetime.now()}
             except Exception, e:
                 vals = {
                     'state': 'failed',

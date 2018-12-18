@@ -106,11 +106,24 @@ class PaymentService(Component):
             .get('payer_info', {}).get('payer_id')
         if payer_id:
             if payment.execute({'payer_id': payer_id}):
-                transaction.write({'state': 'succeeded'})
+                result = payment.to_dict()
+                # Even if the execute have succeed, we need to check the state
+                if result['state'] == 'approved':
+                    vals = {
+                        'state': 'succeeded',
+                        'data': result,
+                        }
+                else:
+                    vals = {
+                        'state': 'failed',
+                        'error': _('Wrong state in result'),
+                        'data': result,
+                        }
             else:
-                transaction.write({
+                vals = {
                     'state': 'failed',
                     'error': payment.error,
-                    })
+                    }
         else:
-            transaction.write({'state': 'abandonned'})
+            vals = {'state': 'abandonned'}
+        transaction.write(vals)

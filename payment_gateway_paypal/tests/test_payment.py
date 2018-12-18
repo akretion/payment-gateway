@@ -3,17 +3,15 @@
 # @author Sébastien BEAU <sebastien.beau@akretion.com>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-from os.path import dirname
 from .paypal_mock import (
     paypal_mock,
     PaypalPaymentSuccess,
-    PaypalPaymentPending,
+    PaypalPaymentNoPayer,
+    PaypalPaymentWrongState,
     REDIRECT_URL)
-from odoo.addons.payment_gateway.tests.common import (
-    PaymentScenarioType,
-    HttpComponentCase)
+from odoo.addons.payment_gateway.tests.common import HttpComponentCase
 import paypalrestsdk
-from odoo.exceptions import  UserError
+from odoo.exceptions import UserError
 
 
 class PaypalCommonCase(HttpComponentCase):
@@ -93,6 +91,7 @@ class PaypalScenario(object):
 
     def _check_failing_return(self, transaction, result):
         self.assertEqual(transaction.state, 'failed')
+        self.assertNotEqual(transaction.error, '')
 
     def test_create_transaction(self):
         with paypal_mock(PaypalPaymentSuccess):
@@ -105,17 +104,22 @@ class PaypalScenario(object):
             result = self._simulate_return(transaction.external_id)
             self._check_successfull_return(transaction, result)
 
-    def test_failing_execute_transaction(self):
-        with paypal_mock(PaypalPaymentPending):
+    def test_execute_transaction_wrong_state(self):
+        with paypal_mock(PaypalPaymentWrongState):
             transaction = self._create_transaction(**REDIRECT_URL)
             result = self._simulate_return(transaction.external_id)
             self._check_failing_return(transaction, result)
-            self.assertEqual(transaction.state, 'failed')
+
+    def test_execute_transaction_no_payer(self):
+        with paypal_mock(PaypalPaymentNoPayer):
+            transaction = self._create_transaction(**REDIRECT_URL)
+            result = self._simulate_return(transaction.external_id)
+            self._check_failing_return(transaction, result)
             self.assertNotEqual(transaction.error, '')
 
     def test_wrong_transaction(self):
         with paypal_mock(PaypalPaymentSuccess):
-            transaction = self._create_transaction(**REDIRECT_URL)
+            self._create_transaction(**REDIRECT_URL)
             with self.assertRaises(UserError):
                 self._simulate_return('wrong_transaction_id')
 
