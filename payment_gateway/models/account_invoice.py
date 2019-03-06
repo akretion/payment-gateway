@@ -20,3 +20,6 @@ class AccountInvoice(models.Model):
         """
         self.ensure_one()
         return self.residual
+
+    def _get_transaction_name_based_on_origin(self):
+        return self.number
