@@ -117,6 +117,7 @@ class PaymentService(Component):
                     code = 'undef'
             self._raise_error_message(code)
         except Exception as e:
+            _logger.info('Adyen Error %s' % e)
             self._raise_error_message('undef')
 
     def process_return(self, browser_info=None, md=None, pares=None,
@@ -191,9 +192,11 @@ class PaymentService(Component):
             'additionalData': {
                 'card.encrypted.json': token,
                 },
-            'shopperEmail': transaction.partner_id.email,
-            'deliveryAddress': self._get_delivery_address(),
+            'shopperEmail': transaction.partner_id.email
             }
+        delivery_vals = self._get_delivery_address()
+        if delivery_vals:
+            vals.update({'deliveryAddress': self._get_delivery_address()})
         if self._use_3ds():
             if not (user_agent and accept_header):
                 raise UserError(_('Error: browser_info are required '
