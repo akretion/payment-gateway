@@ -117,6 +117,7 @@ class PaymentService(Component):
                     code = 'undef'
             self._raise_error_message(code)
         except Exception as e:
+            _logger.info("Adyen error: %s" % e)
             self._raise_error_message('undef')
 
     def process_return(self, browser_info=None, md=None, pares=None,
