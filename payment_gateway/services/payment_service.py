@@ -6,6 +6,7 @@
 from odoo.addons.component.core import AbstractComponent
 from odoo.exceptions import UserError
 from odoo import _
+from odoo.osv import expression
 import logging
 _logger = logging.getLogger(__name__)
 
@@ -65,11 +66,16 @@ class PaymentService(AbstractComponent):
         return func(**secure_params)
 
     def _get_account(self):
+        gateway = self.collection
+        domain = []
+        provider_account = gateway.payment_mode_id.provider_account
+        if provider_account:
+            domain = expression.AND(
+                [domain, [('id', '=', provider_account.id)]])
         keychain = self.env['keychain.account']
         namespace = (self._name).replace('payment.service.', '')
-        return keychain.sudo().retrieve([
-            ('namespace', '=', namespace)
-            ])[0]
+        domain = expression.AND([domain, [('namespace', '=', namespace)]])
+        return keychain.sudo().retrieve(domain)[0]
 
     def _create_transaction(self, **kwargs):
         """Create the transaction on the backend of the service provider
