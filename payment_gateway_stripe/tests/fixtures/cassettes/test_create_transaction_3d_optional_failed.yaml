@@ -3135,40 +3135,6 @@ interactions:
       stripe-version: ['2016-07-06']
     status: {code: 200, message: OK}
 - request:
-    body: !!python/unicode '{"livemode": false, "pending_webhooks": 1, "created":
-      1525084933, "type": "source.failed", "object": "event", "request": null, "data":
-      {"object": {"status": "failed", "redirect": {"status": "failed", "url": "https://hooks.stripe.com/redirect/authenticate/src_1CMZSPE60z0O0voXKKdCuoHV?client_secret=src_client_secret_Cm7hDZZChD4v5LMQmqEj8UZJ",
-      "return_url": "https://IwillBeBack.vd", "failure_reason": null}, "object": "source",
-      "created": 1525084929, "usage": "single_use", "livemode": false, "flow": "redirect",
-      "id": "src_1CMZSPE60z0O0voXKKdCuoHV", "currency": "usd", "amount": 294750, "client_secret":
-      "src_client_secret_Cm7hDZZChD4v5LMQmqEj8UZJ", "owner": {"verified_name": null,
-      "name": null, "verified_phone": null, "phone": null, "verified_address": null,
-      "address": null, "email": null, "verified_email": null}, "three_d_secure": {"customer":
-      null, "authenticated": false, "card": "src_1CMZSNE60z0O0voXJPi6mEdy"}, "type":
-      "three_d_secure", "statement_descriptor": null, "metadata": {}}}, "id": "evt_1CMZSTE60z0O0voXd9krwvTh",
-      "api_version": "2016-07-06"}'
-    headers:
-      Accept: ['*/*']
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Length: ['1062']
-      Content-Type: [application/json]
-      User-Agent: [python-requests/2.18.4]
-    method: POST
-    uri: http://shopinvader-voodoo-ten.vd/payment-gateway-json-webhook/stripe/update
-  response:
-    body: {string: !!python/unicode '{"jsonrpc": "2.0", "id": "evt_1CMZSTE60z0O0voXd9krwvTh",
-        "result": true}'}
-    headers:
-      connection: [keep-alive]
-      content-length: ['72']
-      content-type: [application/json]
-      date: ['Mon, 30 Apr 2018 10:42:44 GMT']
-      server: [nginx/1.11.10]
-      set-cookie: ['session_id=f9c1c59db4aeea4e24f785bcb00ea4eda063f258; Expires=Sun,
-          29-Jul-2018 10:42:44 GMT; Max-Age=7776000; Path=/']
-    status: {code: 200, message: OK}
-- request:
     body: !!python/unicode 'type=card&card%5Bnumber%5D=4000000000003055&card%5Bexp_year%5D=2040&card%5Bcvc%5D=123&card%5Bexp_month%5D=12'
     headers:
       Accept: ['*/*']
@@ -3748,5 +3714,716 @@ interactions:
       server: [nginx]
       strict-transport-security: [max-age=31556926; includeSubDomains; preload]
       stripe-version: ['2016-07-06']
+    status: {code: 200, message: OK}
+- request:
+    body: !!python/unicode 'type=card&card%5Bnumber%5D=4000000000003055&card%5Bexp_year%5D=2040&card%5Bcvc%5D=123&card%5Bexp_month%5D=12'
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['108']
+      Content-Type: [application/x-www-form-urlencoded]
+      User-Agent: [Stripe/v1 PythonBindings/2.0.3]
+      X-Stripe-Client-User-Agent: ['{"lang": "python", "publisher": "stripe", "httplib":
+          "requests", "uname": "Linux e8b4aceb05ca 4.15.0-45-generic #48-Ubuntu SMP
+          Tue Jan 29 16:28:13 UTC 2019 x86_64 ", "lang_version": "2.7.9", "platform":
+          "Linux-4.15.0-45-generic-x86_64-with-debian-8.5", "bindings_version": "2.0.3"}']
+    method: POST
+    uri: https://api.stripe.com/v1/sources
+  response:
+    body: {string: !!python/unicode "{\n  \"error\": {\n    \"code\": \"validation_error\"\
+        ,\n    \"message\": \"You must verify a phone number on your Stripe account\
+        \ before you can send raw credit card numbers to the Stripe API. You can avoid\
+        \ this requirement by using Stripe.js, the Stripe mobile bindings, or Stripe\
+        \ Checkout. For more information, see https://dashboard.stripe.com/phone-verification.\"\
+        ,\n    \"type\": \"invalid_request_error\"\n  }\n}\n"}
+    headers:
+      access-control-allow-credentials: ['true']
+      access-control-allow-methods: ['GET, POST, HEAD, OPTIONS, DELETE']
+      access-control-allow-origin: ['*']
+      access-control-expose-headers: ['Request-Id, Stripe-Manage-Version, X-Stripe-External-Auth-Required,
+          X-Stripe-Privileged-Session-Required']
+      access-control-max-age: ['300']
+      cache-control: ['no-cache, no-store']
+      connection: [keep-alive]
+      content-length: ['398']
+      content-type: [application/json]
+      date: ['Mon, 18 Mar 2019 14:40:51 GMT']
+      request-id: [req_VmsqolYf5UWvYi]
+      server: [nginx]
+      strict-transport-security: [max-age=31556926; includeSubDomains; preload]
+      stripe-version: ['2017-12-14']
+    status: {code: 400, message: Bad Request}
+- request:
+    body: !!python/unicode 'type=card&card%5Bnumber%5D=4000000000003055&card%5Bexp_year%5D=2040&card%5Bcvc%5D=123&card%5Bexp_month%5D=12'
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['108']
+      Content-Type: [application/x-www-form-urlencoded]
+      User-Agent: [Stripe/v1 PythonBindings/2.0.3]
+      X-Stripe-Client-User-Agent: ['{"lang": "python", "publisher": "stripe", "httplib":
+          "requests", "uname": "Linux e8b4aceb05ca 4.15.0-45-generic #48-Ubuntu SMP
+          Tue Jan 29 16:28:13 UTC 2019 x86_64 ", "lang_version": "2.7.9", "platform":
+          "Linux-4.15.0-45-generic-x86_64-with-debian-8.5", "bindings_version": "2.0.3"}']
+    method: POST
+    uri: https://api.stripe.com/v1/sources
+  response:
+    body: {string: !!python/unicode "{\n  \"error\": {\n    \"code\": \"validation_error\"\
+        ,\n    \"message\": \"You must verify a phone number on your Stripe account\
+        \ before you can send raw credit card numbers to the Stripe API. You can avoid\
+        \ this requirement by using Stripe.js, the Stripe mobile bindings, or Stripe\
+        \ Checkout. For more information, see https://dashboard.stripe.com/phone-verification.\"\
+        ,\n    \"type\": \"invalid_request_error\"\n  }\n}\n"}
+    headers:
+      access-control-allow-credentials: ['true']
+      access-control-allow-methods: ['GET, POST, HEAD, OPTIONS, DELETE']
+      access-control-allow-origin: ['*']
+      access-control-expose-headers: ['Request-Id, Stripe-Manage-Version, X-Stripe-External-Auth-Required,
+          X-Stripe-Privileged-Session-Required']
+      access-control-max-age: ['300']
+      cache-control: ['no-cache, no-store']
+      connection: [keep-alive]
+      content-length: ['398']
+      content-type: [application/json]
+      date: ['Mon, 18 Mar 2019 14:44:06 GMT']
+      request-id: [req_lOuaAsQjQZFWq2]
+      server: [nginx]
+      strict-transport-security: [max-age=31556926; includeSubDomains; preload]
+      stripe-version: ['2017-12-14']
+    status: {code: 400, message: Bad Request}
+- request:
+    body: !!python/unicode 'type=card&card%5Bnumber%5D=4000000000003055&card%5Bexp_year%5D=2040&card%5Bcvc%5D=123&card%5Bexp_month%5D=12'
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['108']
+      Content-Type: [application/x-www-form-urlencoded]
+      User-Agent: [Stripe/v1 PythonBindings/2.0.3]
+      X-Stripe-Client-User-Agent: ['{"lang": "python", "publisher": "stripe", "httplib":
+          "requests", "uname": "Linux e8b4aceb05ca 4.15.0-45-generic #48-Ubuntu SMP
+          Tue Jan 29 16:28:13 UTC 2019 x86_64 ", "lang_version": "2.7.9", "platform":
+          "Linux-4.15.0-45-generic-x86_64-with-debian-8.5", "bindings_version": "2.0.3"}']
+    method: POST
+    uri: https://api.stripe.com/v1/sources
+  response:
+    body: {string: !!python/unicode "{\n  \"id\": \"src_1EFMqKL5bxql5W5WW2lhsZ2W\"\
+        ,\n  \"object\": \"source\",\n  \"amount\": null,\n  \"card\": {\n    \"exp_year\"\
+        : 2040,\n    \"exp_month\": 12,\n    \"last4\": \"3055\",\n    \"country\"\
+        : \"US\",\n    \"brand\": \"Visa\",\n    \"cvc_check\": \"unchecked\",\n \
+        \   \"funding\": \"credit\",\n    \"fingerprint\": \"8aIr10VRn38JSIZE\",\n\
+        \    \"three_d_secure\": \"optional\",\n    \"name\": null,\n    \"address_line1_check\"\
+        : null,\n    \"address_zip_check\": null,\n    \"tokenization_method\": null,\n\
+        \    \"dynamic_last4\": null\n  },\n  \"client_secret\": \"src_client_secret_EioTs9ZLlmNJbqutGlUmMQCS\"\
+        ,\n  \"created\": 1552920816,\n  \"currency\": null,\n  \"flow\": \"none\"\
+        ,\n  \"livemode\": false,\n  \"metadata\": {\n  },\n  \"owner\": {\n    \"\
+        address\": null,\n    \"email\": null,\n    \"name\": null,\n    \"phone\"\
+        : null,\n    \"verified_address\": null,\n    \"verified_email\": null,\n\
+        \    \"verified_name\": null,\n    \"verified_phone\": null\n  },\n  \"statement_descriptor\"\
+        : null,\n  \"status\": \"chargeable\",\n  \"type\": \"card\",\n  \"usage\"\
+        : \"reusable\"\n}\n"}
+    headers:
+      access-control-allow-credentials: ['true']
+      access-control-allow-methods: ['GET, POST, HEAD, OPTIONS, DELETE']
+      access-control-allow-origin: ['*']
+      access-control-expose-headers: ['Request-Id, Stripe-Manage-Version, X-Stripe-External-Auth-Required,
+          X-Stripe-Privileged-Session-Required']
+      access-control-max-age: ['300']
+      cache-control: ['no-cache, no-store']
+      connection: [keep-alive]
+      content-length: ['951']
+      content-type: [application/json]
+      date: ['Mon, 18 Mar 2019 14:53:36 GMT']
+      request-id: [req_xvXW5KePrqwc68]
+      server: [nginx]
+      strict-transport-security: [max-age=31556926; includeSubDomains; preload]
+      stripe-version: ['2017-12-14']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [Stripe/v1 PythonBindings/2.0.3]
+      X-Stripe-Client-User-Agent: ['{"lang": "python", "publisher": "stripe", "httplib":
+          "requests", "uname": "Linux e8b4aceb05ca 4.15.0-45-generic #48-Ubuntu SMP
+          Tue Jan 29 16:28:13 UTC 2019 x86_64 ", "lang_version": "2.7.9", "platform":
+          "Linux-4.15.0-45-generic-x86_64-with-debian-8.5", "bindings_version": "2.0.3"}']
+    method: GET
+    uri: https://api.stripe.com/v1/sources/src_1EFMqKL5bxql5W5WW2lhsZ2W
+  response:
+    body: {string: !!python/unicode "{\n  \"id\": \"src_1EFMqKL5bxql5W5WW2lhsZ2W\"\
+        ,\n  \"object\": \"source\",\n  \"amount\": null,\n  \"card\": {\n    \"exp_year\"\
+        : 2040,\n    \"exp_month\": 12,\n    \"last4\": \"3055\",\n    \"country\"\
+        : \"US\",\n    \"brand\": \"Visa\",\n    \"cvc_check\": \"unchecked\",\n \
+        \   \"funding\": \"credit\",\n    \"fingerprint\": \"8aIr10VRn38JSIZE\",\n\
+        \    \"three_d_secure\": \"optional\",\n    \"name\": null,\n    \"address_line1_check\"\
+        : null,\n    \"address_zip_check\": null,\n    \"tokenization_method\": null,\n\
+        \    \"dynamic_last4\": null\n  },\n  \"client_secret\": \"src_client_secret_EioTs9ZLlmNJbqutGlUmMQCS\"\
+        ,\n  \"created\": 1552920816,\n  \"currency\": null,\n  \"flow\": \"none\"\
+        ,\n  \"livemode\": false,\n  \"metadata\": {\n  },\n  \"owner\": {\n    \"\
+        address\": null,\n    \"email\": null,\n    \"name\": null,\n    \"phone\"\
+        : null,\n    \"verified_address\": null,\n    \"verified_email\": null,\n\
+        \    \"verified_name\": null,\n    \"verified_phone\": null\n  },\n  \"statement_descriptor\"\
+        : null,\n  \"status\": \"chargeable\",\n  \"type\": \"card\",\n  \"usage\"\
+        : \"reusable\"\n}\n"}
+    headers:
+      access-control-allow-credentials: ['true']
+      access-control-allow-methods: ['GET, POST, HEAD, OPTIONS, DELETE']
+      access-control-allow-origin: ['*']
+      access-control-expose-headers: ['Request-Id, Stripe-Manage-Version, X-Stripe-External-Auth-Required,
+          X-Stripe-Privileged-Session-Required']
+      access-control-max-age: ['300']
+      cache-control: ['no-cache, no-store']
+      connection: [keep-alive]
+      content-length: ['951']
+      content-type: [application/json]
+      date: ['Mon, 18 Mar 2019 14:53:37 GMT']
+      request-id: [req_cM6VbnpVwGh4F2]
+      server: [nginx]
+      strict-transport-security: [max-age=31556926; includeSubDomains; preload]
+      stripe-version: ['2017-12-14']
+    status: {code: 200, message: OK}
+- request:
+    body: !!python/unicode 'redirect%5Breturn_url%5D=https%3A%2F%2FIwillBeBack.vd&currency=USD&amount=294750&type=three_d_secure&three_d_secure%5Bcard%5D=src_1EFMqKL5bxql5W5WW2lhsZ2W'
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['154']
+      Content-Type: [application/x-www-form-urlencoded]
+      User-Agent: [Stripe/v1 PythonBindings/2.0.3]
+      X-Stripe-Client-User-Agent: ['{"lang": "python", "publisher": "stripe", "httplib":
+          "requests", "uname": "Linux e8b4aceb05ca 4.15.0-45-generic #48-Ubuntu SMP
+          Tue Jan 29 16:28:13 UTC 2019 x86_64 ", "lang_version": "2.7.9", "platform":
+          "Linux-4.15.0-45-generic-x86_64-with-debian-8.5", "bindings_version": "2.0.3"}']
+    method: POST
+    uri: https://api.stripe.com/v1/sources
+  response:
+    body: {string: !!python/unicode "{\n  \"id\": \"src_1EFMqML5bxql5W5W3jcWGQp1\"\
+        ,\n  \"object\": \"source\",\n  \"amount\": 294750,\n  \"client_secret\":\
+        \ \"src_client_secret_EioT60QWEvssgcx3eL3xiRTG\",\n  \"created\": 1552920818,\n\
+        \  \"currency\": \"usd\",\n  \"flow\": \"redirect\",\n  \"livemode\": false,\n\
+        \  \"metadata\": {\n  },\n  \"owner\": {\n    \"address\": {\n      \"city\"\
+        : null,\n      \"country\": null,\n      \"line1\": null,\n      \"line2\"\
+        : null,\n      \"postal_code\": null,\n      \"state\": null\n    },\n   \
+        \ \"email\": null,\n    \"name\": null,\n    \"phone\": null,\n    \"verified_address\"\
+        : null,\n    \"verified_email\": null,\n    \"verified_name\": null,\n   \
+        \ \"verified_phone\": null\n  },\n  \"redirect\": {\n    \"failure_reason\"\
+        : null,\n    \"return_url\": \"https://IwillBeBack.vd\",\n    \"status\":\
+        \ \"pending\",\n    \"url\": \"https://hooks.stripe.com/redirect/authenticate/src_1EFMqML5bxql5W5W3jcWGQp1?client_secret=src_client_secret_EioT60QWEvssgcx3eL3xiRTG\"\
+        \n  },\n  \"statement_descriptor\": null,\n  \"status\": \"pending\",\n  \"\
+        three_d_secure\": {\n    \"card\": \"src_1EFMqKL5bxql5W5WW2lhsZ2W\",\n   \
+        \ \"exp_month\": 12,\n    \"exp_year\": 2040,\n    \"last4\": \"3055\",\n\
+        \    \"country\": \"US\",\n    \"brand\": \"Visa\",\n    \"cvc_check\": \"\
+        unchecked\",\n    \"funding\": \"credit\",\n    \"fingerprint\": \"8aIr10VRn38JSIZE\"\
+        ,\n    \"three_d_secure\": \"optional\",\n    \"customer\": null,\n    \"\
+        authenticated\": false,\n    \"name\": null,\n    \"address_line1_check\"\
+        : null,\n    \"address_zip_check\": null,\n    \"tokenization_method\": null,\n\
+        \    \"dynamic_last4\": null\n  },\n  \"type\": \"three_d_secure\",\n  \"\
+        usage\": \"single_use\"\n}\n"}
+    headers:
+      access-control-allow-credentials: ['true']
+      access-control-allow-methods: ['GET, POST, HEAD, OPTIONS, DELETE']
+      access-control-allow-origin: ['*']
+      access-control-expose-headers: ['Request-Id, Stripe-Manage-Version, X-Stripe-External-Auth-Required,
+          X-Stripe-Privileged-Session-Required']
+      access-control-max-age: ['300']
+      cache-control: ['no-cache, no-store']
+      connection: [keep-alive]
+      content-length: ['1470']
+      content-type: [application/json]
+      date: ['Mon, 18 Mar 2019 14:53:38 GMT']
+      request-id: [req_qyDZtBIlkzukKM]
+      server: [nginx]
+      strict-transport-security: [max-age=31556926; includeSubDomains; preload]
+      stripe-version: ['2017-12-14']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.21.0]
+    method: GET
+    uri: https://hooks.stripe.com/redirect/authenticate/src_1EFMqML5bxql5W5W3jcWGQp1?client_secret=src_client_secret_EioT60QWEvssgcx3eL3xiRTG
+  response:
+    body: {string: !!python/unicode ''}
+    headers:
+      connection: [keep-alive]
+      content-length: ['0']
+      content-type: [text/html;charset=utf-8]
+      date: ['Mon, 18 Mar 2019 14:53:39 GMT']
+      location: ['https://hooks.stripe.com/three_d_secure/authenticate?amount=294750&client_secret=src_client_secret_EioT60QWEvssgcx3eL3xiRTG&currency=usd&livemode=false&return_url=https%3A%2F%2Fhooks.stripe.com%2Fredirect%2Fcomplete%2Fsrc_1EFMqML5bxql5W5W3jcWGQp1%3Fclient_secret%3Dsrc_client_secret_EioT60QWEvssgcx3eL3xiRTG&source=src_1EFMqML5bxql5W5W3jcWGQp1&usage=single_use']
+      server: [nginx]
+      strict-transport-security: [max-age=31556926; includeSubDomains; preload]
+      x-frame-options: [SAMEORIGIN]
+    status: {code: 302, message: Moved Temporarily}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.21.0]
+    method: GET
+    uri: https://hooks.stripe.com/three_d_secure/authenticate?amount=294750&client_secret=src_client_secret_EioT60QWEvssgcx3eL3xiRTG&currency=usd&livemode=false&return_url=https%3A%2F%2Fhooks.stripe.com%2Fredirect%2Fcomplete%2Fsrc_1EFMqML5bxql5W5W3jcWGQp1%3Fclient_secret%3Dsrc_client_secret_EioT60QWEvssgcx3eL3xiRTG&source=src_1EFMqML5bxql5W5W3jcWGQp1&usage=single_use
+  response:
+    body: {string: !!python/unicode ''}
+    headers:
+      connection: [keep-alive]
+      content-length: ['0']
+      content-type: [text/html;charset=utf-8]
+      date: ['Mon, 18 Mar 2019 14:53:39 GMT']
+      location: ['https://stripe.com/sources/test_source?amount=294750&currency=usd&livemode=false&pass_through=&return_url=https%3A%2F%2Fhooks.stripe.com%2F3d_secure%2Fcomplete%2Ftdsrc_1EFMqML5bxql5W5WPimv3NQo&source=src_1EFMqML5bxql5W5W3jcWGQp1&type=three_d_secure&usage=single_use']
+      server: [nginx]
+      strict-transport-security: [max-age=31556926; includeSubDomains; preload]
+      x-frame-options: [SAMEORIGIN]
+    status: {code: 302, message: Moved Temporarily}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.21.0]
+    method: GET
+    uri: https://stripe.com/sources/test_source?amount=294750&currency=usd&livemode=false&pass_through=&return_url=https%3A%2F%2Fhooks.stripe.com%2F3d_secure%2Fcomplete%2Ftdsrc_1EFMqML5bxql5W5WPimv3NQo&source=src_1EFMqML5bxql5W5W3jcWGQp1&type=three_d_secure&usage=single_use
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA+xc6XLbxpb+n6dAOFUju0YAsS+OpIkWa5S5cuKxfTWTm0q5QBAkYYMELwBStlx+
+        lzxLnmy+rxsgwQUydS05/uHEwtrL6dNn+c7pBg++P/vl9NWvz58qo3KcHn13wJOShpPhYSeedBRF
+        OfruO0U5GMVhX1wpijgcjOMyVKJRmBdxediZlQPV7xw1Xk3CcXzYGWbZMI3VIiljdR7nySCJwjLJ
+        0HCUTcp4gqoD/fI07//k3tjnmX+T9u3i4nSYOS+Tvz+1n/7664u/h+7fruL/s55d+x2lu9nFuJiH
+        adIPy1jTjUa79qnneb59fH7mGnbgnx/rnms/Newzw7WMM8daNLYcjqR5nsTX0ywvG21dJ/1ydNiP
+        50kUq+JmX0kmSZmEqVpEYRofGlsGn2e9rCwazUyyZNKP3+0rk2yQpWl2jUqSkU1uodJtdVg7zKNR
+        Mo9RXXK8TMo0PnpZ5sk0Vqbh+zE4q5RxUeJmGB905fuqsJg52WE/LiLUWZuRXyZpMlm2M82zKC6K
+        ZDJUBlmOcZdxPolLpTfDM7yIC02puk4KJVSKGWZbyQYLQo6f/1Qo5SgENdl1nBeY+/E4zqNYtLds
+        hnXCNFWK5AZtcnBydKDmrZLH6WGnGGFeolmpJBCfjjLK48FhpzsIMS/ZRMNhwZFlnXA6hQSW2Swa
+        qSymTvMYBEyzIu4vmkjGw+56wa7h6+/wp00nw3p2l82uULBD9Y2xJGNMzesijzpK+X4KXREPuuys
+        GtioLKfFk263EPOqgeguO5pb3VE2jrtFFkH+KuqkZspOhEA3GJBywqAft7RbZDPMR9GlzLyWN/+Z
+        ZkKy+1U9aRN4VyvhZ3chCVoam3truKY9hvZRSKoucHfvXQzyZhe8u/cuEtiD5Sh4d+9dvAmbXfAO
+        XWyVpiicZBNY8fRu0rRQTGF9YFKmcV6+P+xkwyfCODUsXpsZW7GwKy3MclCzcChb1GaLeLe39pUb
+        xaW7WuGBsB63c+F241H7dOkZyuukhNl4EoU5rOSCt8VsPA7z9xXztle5IyVVT00r2/BQNR1EEA06
+        fpQ2cWUSVwn/l6RqtYmvXBCkc5QOvHIhdGEVwuq+Kegikz68JtBA/l7FJA4SeLIP//7PWVb+EE/C
+        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
+        AAAA//8DAJiWjK8kLwEA
+    headers:
+      connection: [keep-alive]
+      content-encoding: [gzip]
+      content-security-policy-report-only: ['report-uri /csp-report?p=sources%2Ftest_source;
+          block-all-mixed-content; connect-src ''self'' https://www.facebook.com/tr/
+          https://stats.g.doubleclick.net/j/collect https://www.google-analytics.com
+          https://errors.stripe.com; frame-src ''self'' https://connect.facebook.net/
+          https://js.stripe.com; media-src ''self'' https://d37ugbyn3rpeym.cloudfront.net;
+          script-src ''self'' ''nonce-ppgiNR8bfwDFlKkf/rvapA=='' https://connect.facebook.net/en_US/fbevents.js
+          https://connect.facebook.net/signals/config/ https://ga.clearbit.com/v1/ga.js
+          https://www.google-analytics.com/analytics.js https://www.googletagmanager.com/gtm.js
+          ''sha256-imsFFurH1ga4dD0qKUrFgho9H3IWz4uSv9zqGPhDauo='' ''sha256-hOAiTeVRh1G6sL37DRPcchapAacG4IsPVHh/NWUtqzY=''
+          ''sha256-xCVAFjvclbG6Z0PLN11uLptfgK7kytY1ciHdDJwZhrQ='' ''sha256-0cbzpPToyinPtZRkh8nit24VtCOx9DV0QrXA0aSbexs=''
+          ''unsafe-eval'' https://js.stripe.com ''report-sample''; img-src ''self''
+          data: https://www.facebook.com/tr/ https://stats.g.doubleclick.net/r/collect
+          https://www.google.com/ads/ga-audiences https://www.google-analytics.com/r/collect
+          https://www.google-analytics.com/collect https://dc.ads.linkedin.com/collect/
+          https://www.linkedin.com/px/ https://px.ads.linkedin.com https://q.stripe.com
+          https://b.stripecdn.com/site-srv/assets; style-src ''self'' ''unsafe-inline''
+          https://fast.fonts.net/t/1.css; font-src ''self'' data:; form-action ''self''
+          https://hooks.stripe.com https://connect.facebook.net/log/fbevents_telemetry/']
+      content-type: [text/html;charset=utf-8]
+      date: ['Mon, 18 Mar 2019 14:53:40 GMT']
+      server: [nginx]
+      set-cookie: [cid=97280538-0bfe-48c9-a604-ddd27d5f741d; domain=stripe.com; path=/;
+          secure, '__stripe_orig_props=%7B%22referrer%22%3A%22%22%2C%22landing%22%3A%22https%3A%2F%2Fstripe.com%2Fsources%2Ftest_source%3Famount%3D294750%5Cu0026currency%3Dusd%5Cu0026livemode%3Dfalse%5Cu0026pass_through%3D%5Cu0026return_url%3Dhttps%253A%252F%252Fhooks.stripe.com%252F3d_secure%252Fcomplete%252Ftdsrc_1EFMqML5bxql5W5WPimv3NQo%5Cu0026source%3Dsrc_1EFMqML5bxql5W5W3jcWGQp1%5Cu0026type%3Dthree_d_secure%5Cu0026usage%3Dsingle_use%22%7D;
+          domain=stripe.com; path=/; expires=Tue, 17 Mar 2020 14:53:40 -0000; secure;
+          HttpOnly']
+      strict-transport-security: [max-age=31556926; includeSubDomains; preload]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding, X-Requested-With]
+      x-content-type-options: [nosniff]
+      x-frame-options: [ALLOWALL]
+      x-location: ['https://stripe.com/sources/test_source?amount=294750&currency=usd&livemode=false&pass_through=&return_url=https%3A%2F%2Fhooks.stripe.com%2F3d_secure%2Fcomplete%2Ftdsrc_1EFMqML5bxql5W5WPimv3NQo&source=src_1EFMqML5bxql5W5W3jcWGQp1&type=three_d_secure&usage=single_use']
+    status: {code: 200, message: OK}
+- request:
+    body: !!python/unicode 'PaRes=failure'
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['13']
+      Content-Type: [application/x-www-form-urlencoded]
+      User-Agent: [python-requests/2.21.0]
+    method: POST
+    uri: https://hooks.stripe.com/3d_secure/complete/tdsrc_1EFMqML5bxql5W5WPimv3NQo
+  response:
+    body: {string: !!python/unicode ''}
+    headers:
+      connection: [keep-alive]
+      content-length: ['0']
+      content-type: [text/html;charset=utf-8]
+      date: ['Mon, 18 Mar 2019 14:53:41 GMT']
+      location: ['https://hooks.stripe.com/redirect/complete/src_1EFMqML5bxql5W5W3jcWGQp1?client_secret=src_client_secret_EioT60QWEvssgcx3eL3xiRTG&error_message=The%20cardholder%20failed%203D%20Secure%20authentication.&status=failure']
+      server: [nginx]
+      strict-transport-security: [max-age=31556926; includeSubDomains; preload]
+      x-frame-options: [SAMEORIGIN]
+    status: {code: 303, message: See Other}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.21.0]
+    method: GET
+    uri: https://hooks.stripe.com/redirect/complete/src_1EFMqML5bxql5W5W3jcWGQp1?client_secret=src_client_secret_EioT60QWEvssgcx3eL3xiRTG&error_message=The%20cardholder%20failed%203D%20Secure%20authentication.&status=failure
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA3xVTW/bOBC9768gVGBPNsVvil0ri02QFgWcQ4sAAXoJFGlss5ElV2Js59/vULJj
+        OxusYcDim/GbxzdDarYK6/rqD0JmKyiq+ICPawgFaYo15MnWw27TdiEhZdsEaEKe7HwVVnkFW1/C
+        dFhMiG988EU97cuihpwnB6LaN8+kgzpP+vBaQ78CQKbwukHmAPuQln2fkFUHizxJ+/alK6GnERsU
+        pUdJs6e2ej1QVn5LfJUnUU7hG+gOtTC/ODCtQtj0n9P0287X9TVcF+Uz3VZ/l7VH/Y89lB2EvO/K
+        xwvk8da394Z9f7jd9v2y3EuYy73/cf/1z2K9+av2W1i3FeSLou5hgEa9AxG//XL3+26un/a/a/2g
+        H+Sv8uHr9w1PBqnRhTeVqPO4haeXENrmLIKxfrsko8EJF5s9mgN+uULXx1WkK7qu3SUkdua63ecJ
+        I4xwgV/EoOt922A2xdr7dd30eRLtQDd2ux3dSdp2y1QwxlKsdEj5vI8KP0rkzrl0iF6oRJ3Bhxqu
+        BinTaQ2LMJ3uVj7ALB0jwyAdP7MKFv3VLB1+LiPLwSFG1fS+e2nKIkCVkD507TOOSNM2cFyNk4Y7
+        S8gC23oMxudp94JDl8AWmraq3isdK/xX6ZHn05fh8/5vmyKsCEq7E9QIqYxVamKoZSbTmSFzQzVT
+        QuJywhlmOGWYIzeGZsxYwaSNsJNacG5JRK3BZD7hnCplhGISUeWMNJy5iFrDMqNNpOCZcIIrpBCU
+        WWsypYmmJpNOWSlG1DEtJKLSWoZseqTIMsE4mTMqBIpGeRlq1ljOGafIDUM65bSVmRIYUMxpxzmZ
+        Is5Y5oTJDOMYEExLpZUkliIoMiY1TJmZoLp3uZpa3LlW2pILck21Ywo5ET5p0VRJqxkaQeZn0jFF
+        ok3O4T5vzjYaa9m4UeFctOvNlyEQfVFR/pmPkclxiVXE2IuD64xqjZWdFXpoxrFFlBll0TSD6Kmf
+        aCoa4Lgic0EzbtBeO9GUuYyjpZrMsV3cSSfsBXyDsMG/McfPs7nAldKaa+w1nlJcOWyZYxlqxKWh
+        cbqwVRmJBLhbg7ynUTsrdjZ/H0/lh+jP8Rb6Z7g28BTGyX53CtPl/wKzeFmcZ/yA8NI1JLTkDrpy
+        VTTh7VTjKffbY+4sLQ7X9gmd9WXnN4HgvXm69NMOKt9BGR7Ldr2pIQD9hW8BLDwkR5JZOr4F8LUw
+        vLL+BQAA//8DAO1R6zi6BgAA
+    headers:
+      connection: [keep-alive]
+      content-encoding: [gzip]
+      content-security-policy: ['default-src ''none''; script-src ''self'' https://*.stripe.com;
+          style-src ''self''; child-src *; frame-src *']
+      content-type: [text/html;charset=utf-8]
+      date: ['Mon, 18 Mar 2019 14:53:42 GMT']
+      server: [nginx]
+      strict-transport-security: [max-age=31556926; includeSubDomains; preload]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [Stripe/v1 PythonBindings/2.0.3]
+      X-Stripe-Client-User-Agent: ['{"lang": "python", "publisher": "stripe", "httplib":
+          "requests", "uname": "Linux e8b4aceb05ca 4.15.0-45-generic #48-Ubuntu SMP
+          Tue Jan 29 16:28:13 UTC 2019 x86_64 ", "lang_version": "2.7.9", "platform":
+          "Linux-4.15.0-45-generic-x86_64-with-debian-8.5", "bindings_version": "2.0.3"}']
+    method: GET
+    uri: https://api.stripe.com/v1/sources/src_1EFMqML5bxql5W5W3jcWGQp1
+  response:
+    body: {string: !!python/unicode "{\n  \"id\": \"src_1EFMqML5bxql5W5W3jcWGQp1\"\
+        ,\n  \"object\": \"source\",\n  \"amount\": 294750,\n  \"client_secret\":\
+        \ \"src_client_secret_EioT60QWEvssgcx3eL3xiRTG\",\n  \"created\": 1552920818,\n\
+        \  \"currency\": \"usd\",\n  \"flow\": \"redirect\",\n  \"livemode\": false,\n\
+        \  \"metadata\": {\n  },\n  \"owner\": {\n    \"address\": {\n      \"city\"\
+        : null,\n      \"country\": null,\n      \"line1\": null,\n      \"line2\"\
+        : null,\n      \"postal_code\": null,\n      \"state\": null\n    },\n   \
+        \ \"email\": null,\n    \"name\": null,\n    \"phone\": null,\n    \"verified_address\"\
+        : null,\n    \"verified_email\": null,\n    \"verified_name\": null,\n   \
+        \ \"verified_phone\": null\n  },\n  \"redirect\": {\n    \"failure_reason\"\
+        : null,\n    \"return_url\": \"https://IwillBeBack.vd\",\n    \"status\":\
+        \ \"failed\",\n    \"url\": \"https://hooks.stripe.com/redirect/authenticate/src_1EFMqML5bxql5W5W3jcWGQp1?client_secret=src_client_secret_EioT60QWEvssgcx3eL3xiRTG\"\
+        \n  },\n  \"statement_descriptor\": null,\n  \"status\": \"failed\",\n  \"\
+        three_d_secure\": {\n    \"card\": \"src_1EFMqKL5bxql5W5WW2lhsZ2W\",\n   \
+        \ \"exp_month\": 12,\n    \"exp_year\": 2040,\n    \"last4\": \"3055\",\n\
+        \    \"country\": \"US\",\n    \"brand\": \"Visa\",\n    \"cvc_check\": \"\
+        unchecked\",\n    \"funding\": \"credit\",\n    \"fingerprint\": \"8aIr10VRn38JSIZE\"\
+        ,\n    \"three_d_secure\": \"optional\",\n    \"authenticated\": false,\n\
+        \    \"customer\": null,\n    \"name\": null,\n    \"address_line1_check\"\
+        : null,\n    \"address_zip_check\": null,\n    \"tokenization_method\": null,\n\
+        \    \"dynamic_last4\": null\n  },\n  \"type\": \"three_d_secure\",\n  \"\
+        usage\": \"single_use\"\n}\n"}
+    headers:
+      access-control-allow-credentials: ['true']
+      access-control-allow-methods: ['GET, POST, HEAD, OPTIONS, DELETE']
+      access-control-allow-origin: ['*']
+      access-control-expose-headers: ['Request-Id, Stripe-Manage-Version, X-Stripe-External-Auth-Required,
+          X-Stripe-Privileged-Session-Required']
+      access-control-max-age: ['300']
+      cache-control: ['no-cache, no-store']
+      connection: [keep-alive]
+      content-length: ['1468']
+      content-type: [application/json]
+      date: ['Mon, 18 Mar 2019 14:53:43 GMT']
+      request-id: [req_J5Li4hSYSZdpyg]
+      server: [nginx]
+      strict-transport-security: [max-age=31556926; includeSubDomains; preload]
+      stripe-version: ['2017-12-14']
     status: {code: 200, message: OK}
 version: 1
