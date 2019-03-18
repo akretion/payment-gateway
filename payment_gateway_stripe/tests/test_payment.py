@@ -53,8 +53,6 @@ class StripeCommonCase(HttpComponentCase):
         self._init_job_counter()
         # We only mock the data that we are interested in
         event = {'data': {'object': {'id': transaction.external_id}}}
-        # Commit transaction (fake commit on test cursor)
-        self.env.cr.commit()
         hook_url = self.base_url + JSON_WEBHOOK_PATH + '/stripe/process_event'
         r = requests.post(hook_url, json=event)
         self.assertEqual(r.status_code, 200)

@@ -23,6 +23,16 @@ Usage
 
 TODO
 
+Runing Test
+===========
+Test are recorded with VCR, so on travis test are running offline without real
+account. If you want to run the test without VCR mock you need to configure the
+following enviroment variable
+ADYEN_API=
+ADYEN_ACCOUNT=
+ADYEN_USER=
+VCR_MODE=all
+
 Bug Tracker
 ===========
 

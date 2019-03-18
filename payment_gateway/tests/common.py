@@ -52,9 +52,6 @@ class PaymentScenarioType(type):
         return klass
 
 
-# This class should be used if you want to call the odoo webhook during the
-# test. Indeed you will stay in the same cursor for all the process
-# Do not forget to commit before calling a odoo controller
 class HttpComponentCase(HttpCase, ComponentMixin):
 
     @classmethod
