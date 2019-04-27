@@ -10,6 +10,7 @@
                     name="capture_payment"
                     attrs="{'invisible': [('provider', '=', False)],
                             'required': [('provider', '!=', False)]}"/>
+                <field name="provider_account"/>
             </field>
         </field>
     </record>

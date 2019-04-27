@@ -11,6 +11,10 @@ class AccountPaymentMode(models.Model):
     _inherit = 'account.payment.mode'
 
     provider = fields.Selection(selection='_selection_provider')
+    provider_account = fields.Many2one(
+        comodel_name='keychain.account',
+        domain=[('namespace', '!=', False)]
+    )
     capture_payment = fields.Selection(selection='_selection_capture_payment')
 
     def _selection_capture_payment(self):
