@@ -131,7 +131,7 @@ class GatewayTransaction(models.Model):
     def _prepare_transaction(self, origin, **kwargs):
         mode = origin.payment_mode_id
         return {
-            'name': origin.name,
+            'name': origin._get_transaction_name_based_on_origin(),
             'payment_mode_id': mode.id,
             'capture_payment': mode.capture_payment,
             'redirect_cancel_url': kwargs.get('redirect_cancel_url'),

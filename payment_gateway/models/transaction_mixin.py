@@ -50,3 +50,6 @@ class TransactionMixin(models.AbstractModel):
             # Load the more recent transaction (to order on the transaction
             # models set the first as the most recent)
             record.current_transaction_id = first(record.transaction_ids)
+
+    def _get_transaction_name_based_on_origin(self):
+        return self.name
