@@ -25,7 +25,9 @@ class TransactionMixin(models.AbstractModel):
     current_transaction_id = fields.Many2one(
         'gateway.transaction',
         'Current Transaction',
-        compute='_compute_current_transaction')
+        compute='_compute_current_transaction',
+        store=True,
+    )
 
     @api.multi
     def _get_transaction_to_capture_amount(self):
@@ -47,9 +49,9 @@ class TransactionMixin(models.AbstractModel):
     @api.depends('transaction_ids')
     def _compute_current_transaction(self):
         for record in self:
-            # Load the more recent transaction (to order on the transaction
-            # models set the first as the most recent)
-            record.current_transaction_id = first(record.transaction_ids)
+            # Load the more recent transaction
+            record.current_transaction_id = first(
+                record.transaction_ids.sorted('id', reverse=True))
 
     def _get_transaction_name_based_on_origin(self):
-        return self.name
+        return self.name or ('%s with id %s' % (self._name, self.id))
