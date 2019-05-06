@@ -59,6 +59,7 @@ class HttpComponentCase(HttpCase, ComponentMixin):
         super(HttpComponentCase, cls).setUpClass()
         cls.setUpComponent()
 
+    # pylint: disable=W8106
     def setUp(self):
         # resolve an inheritance issue (common.TransactionCase does not call
         # super)

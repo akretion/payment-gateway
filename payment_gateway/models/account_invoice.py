@@ -22,4 +22,8 @@ class AccountInvoice(models.Model):
         return self.residual
 
     def _get_transaction_name_based_on_origin(self):
-        return self.number
+        transaction_name = self.number
+        if not transaction_name:
+            transaction_name = super(
+                AccountInvoice, self)._get_transaction_name_based_on_origin()
+        return transaction_name

@@ -55,8 +55,16 @@ class GatewayTransaction(models.Model):
             ('sale.order', 'Sale Order'),
             ('account.invoice', 'Account Invoice'),
             ])
-    res_model = fields.Char(compute='_compute_origin', store=True)
-    res_id = fields.Integer(compute='_compute_origin', store=True)
+    res_model = fields.Char(
+        compute='_compute_origin',
+        store=True,
+        index=True,
+    )
+    res_id = fields.Integer(
+        compute='_compute_origin',
+        store=True,
+        index=True,
+    )
     partner_id = fields.Many2one(
         'res.partner',
         'Partner')
@@ -153,6 +161,8 @@ class GatewayTransaction(models.Model):
         """
         vals = self._prepare_transaction(origin, **kwargs)
         transaction = self.create(vals)
+        if transaction.origin_id:
+            transaction.origin_id._compute_current_transaction()
         with transaction._get_provider(provider_name) as provider:
             provider.generate(**kwargs)
         return transaction

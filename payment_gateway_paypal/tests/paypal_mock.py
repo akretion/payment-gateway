@@ -27,6 +27,7 @@ class PaypalPaymentSuccess(Mock):
     def __getitem__(self, key):
         return self.transaction[key]
 
+    # pylint: disable=W8106
     def create(self):
         self.transaction = copy.deepcopy(self.data)
         self.transaction.update({
