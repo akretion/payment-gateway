@@ -54,7 +54,7 @@ class PaymentService(AbstractComponent):
         _logger.error("BadRequest %s", v.errors)
         raise UserError(_('Invalid Form'))
 
-    def dispatch(self, method_name, params):
+    def _dispatch(self, method_name, params):
         if method_name not in self._webhook_method:
             raise UserError(_('Method not allowed for service %s'), self._name)
 
@@ -91,15 +91,15 @@ class PaymentService(AbstractComponent):
     def _parse_creation_result(self, transaction, **kwargs):
         raise NotImplemented
 
-    def generate(self, **kwargs):
+    def _generate(self, **kwargs):
         """Generate the transaction in the provider backend
         and update the odoo gateway.transaction"""
         transaction = self._create_transaction(**kwargs)
         vals = self._parse_creation_result(transaction, **kwargs)
         return self.collection.write(vals)
 
-    def get_state(self):
+    def _get_state(self):
         raise NotImplemented
 
-    def capture(self, amount):
+    def _capture(self):
         raise NotImplemented
