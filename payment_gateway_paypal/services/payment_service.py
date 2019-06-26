@@ -83,7 +83,7 @@ class PaymentService(Component):
             'state': 'pending',
         }
 
-    def process_return(self, **params):
+    def _process_return(self, **params):
         # For now we always capture immediatly the paypal transaction
         transaction = self.env['gateway.transaction'].search([
             ('external_id', '=', params['paymentId']),
@@ -97,7 +97,7 @@ class PaymentService(Component):
                 _('The transaction %s do not exist in Odoo')
                 % params['paymentId'])
 
-    def capture(self):
+    def _capture(self):
         transaction = self.collection
         paypal, experience_profile = self._get_connection()
         payment = paypalrestsdk.Payment.find(

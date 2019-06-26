@@ -38,7 +38,7 @@ class PaymentService(Component):
     _allowed_capture_method = ['immediately']
     _webhook_method = ['process_event']
 
-    def process_return(self, **params):
+    def _process_return(self, **params):
         transaction = self.env['gateway.transaction'].search([
             ('external_id', '=', params['source']),
             ('payment_mode_id.provider', '=', 'stripe'),
@@ -195,7 +195,7 @@ class PaymentService(Component):
 
     # code for getting the state of the current transaction
 
-    def get_state(self):
+    def _get_state(self):
         source = stripe.Source.retrieve(
             self.collection.external_id, api_key=self._api_key)
         return MAP_SOURCE_STATE[source['status']]
@@ -222,7 +222,7 @@ class PaymentService(Component):
             'api_key': self._api_key,
             }
 
-    def capture(self):
+    def _capture(self):
         if self.collection.external_id.startswith('src_'):
             # Transaction is a source convert it to a charge
             payload = self._prepare_capture_payload()

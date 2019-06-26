@@ -136,4 +136,4 @@ class PaypalCase(PaypalCommonCase, PaypalScenario):
     def _simulate_return(self, transaction_id):
         with self.env['gateway.transaction']._get_provider('paypal')\
                 as provider:
-            return provider.process_return(paymentId=transaction_id)
+            return provider._process_return(paymentId=transaction_id)

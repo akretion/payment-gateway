@@ -136,7 +136,7 @@ class StripeCase(StripeCommonCase, StripeScenario):
 
     def _simulate_return(self, transaction):
         with transaction._get_provider('stripe') as provider:
-            provider.process_return(source=transaction.external_id)
+            provider._process_return(source=transaction.external_id)
 
     def _test_3d(self, card, success=True, mode='return'):
         transaction, source = self._create_transaction(card)
