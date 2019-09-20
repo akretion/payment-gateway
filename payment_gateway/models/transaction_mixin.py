@@ -16,42 +16,42 @@ class TransactionMixin(models.AbstractModel):
     _name = 'transaction.mixin'
     _description = "Gateway transaction abstract model"
 
-    transaction_ids = fields.One2many(
-        'gateway.transaction',
-        'res_id',
-        'Transaction',
-        domain=lambda self: [('res_model', '=', self._name)],
-    )
-    current_transaction_id = fields.Many2one(
-        'gateway.transaction',
-        'Current Transaction',
-        compute='_compute_current_transaction',
-        store=True,
-    )
-
-    @api.multi
-    def _get_transaction_to_capture_amount(self):
-        """
-        Get the amount to capture of the transaction
-        :return: float
-        """
-        return NotImplementedError
-
-    @api.multi
-    def capture_transaction(self):
-        for record in self:
-            for transaction in record.transaction_ids:
-                if transaction.state == 'to_capture':
-                    amount = record._get_transaction_to_capture_amount()
-                    transaction.capture(amount)
-
-    @api.multi
-    @api.depends('transaction_ids')
-    def _compute_current_transaction(self):
-        for record in self:
-            # Load the more recent transaction
-            record.current_transaction_id = first(
-                record.transaction_ids.sorted('id', reverse=True))
-
-    def _get_transaction_name_based_on_origin(self):
-        return self.name or ('%s with id %s' % (self._name, self.id))
+#    transaction_ids = fields.One2many(
+#        'gateway.transaction',
+#        'res_id',
+#        'Transaction',
+#        domain=lambda self: [('res_model', '=', self._name)],
+#    )
+#    current_transaction_id = fields.Many2one(
+#        'gateway.transaction',
+#        'Current Transaction',
+#        compute='_compute_current_transaction',
+#        store=True,
+#    )
+#
+#    @api.multi
+#    def _get_transaction_to_capture_amount(self):
+#        """
+#        Get the amount to capture of the transaction
+#        :return: float
+#        """
+#        return NotImplementedError
+#
+#    @api.multi
+#    def capture_transaction(self):
+#        for record in self:
+#            for transaction in record.transaction_ids:
+#                if transaction.state == 'to_capture':
+#                    amount = record._get_transaction_to_capture_amount()
+#                    transaction.capture(amount)
+#
+#    @api.multi
+#    @api.depends('transaction_ids')
+#    def _compute_current_transaction(self):
+#        for record in self:
+#            # Load the more recent transaction
+#            record.current_transaction_id = first(
+#                record.transaction_ids.sorted('id', reverse=True))
+#
+#    def _get_transaction_name_based_on_origin(self):
+#        return self.name or ('%s with id %s' % (self._name, self.id))
