@@ -115,10 +115,16 @@ class PaymentService(models.Model):
             .get('payer_info', {}).get('payer_id')
         if payer_id:
             if payment.execute({'payer_id': payer_id}):
-                transaction.write({
-                    'state': 'succeeded',
-                    'data': json.dumps(payment.to_dict())
-                    })
+                if payment.to_dict().get("state") == "approved":
+                    transaction.write({
+                        'state': 'succeeded',
+                        'data': json.dumps(payment.to_dict())
+                        })
+                else:
+                    transaction.write({
+                        'state': 'failed',
+                        'data': json.dumps(payment.to_dict())
+                        })
             else:
                 transaction.write({
                     'state': 'failed',
