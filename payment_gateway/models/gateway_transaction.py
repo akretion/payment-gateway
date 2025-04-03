@@ -164,7 +164,7 @@ class GatewayTransaction(models.Model):
         if transaction.origin_id:
             transaction.origin_id._compute_current_transaction()
         with transaction._get_provider(provider_name) as provider:
-            provider.generate(**kwargs)
+            provider._generate(**kwargs)
         return transaction
 
     @api.multi
@@ -178,31 +178,28 @@ class GatewayTransaction(models.Model):
         # the main point to review is that we write here in the transaction
         # and also in the service. Having two write is useless and complexe
         self.ensure_one()
-        vals = {}
+        vals = {'date_processing': datetime.now()}
         if self.state == 'succeeded':
             pass
         else:
             try:
                 with self._get_provider() as provider:
-                    provider.capture()
-                vals = {'date_processing': datetime.now()}
+                    provider._capture()
             except Exception, e:
                 vals = {
                     'state': 'failed',
                     'error': str(e),
-                    'date_processing': datetime.now(),
                 }
             self.write(vals)
-        return vals.get('state') == 'succeeded'
+        return self.state == 'succeeded'
 
     @api.multi
     def check_state(self):
-        for record in self:
-            if record.state == 'pending':
-                with record._get_provider() as provider:
-                    record.write({'state': provider.get_state()})
+        for record in self.filtered(lambda r: r.state == 'pending'):
+            with record._get_provider() as provider:
+                record.write({'state': provider._get_state()})
 
     @job(default_channel='root.gateway.webhook')
     def process_webhook(self, provider_name, method_name, params):
         with self._get_provider(provider_name) as provider:
-            return provider.dispatch(method_name, params)
+            return provider._dispatch(method_name, params)

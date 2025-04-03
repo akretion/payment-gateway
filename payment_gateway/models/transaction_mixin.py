@@ -39,11 +39,10 @@ class TransactionMixin(models.AbstractModel):
 
     @api.multi
     def capture_transaction(self):
-        for record in self:
-            for transaction in record.transaction_ids:
-                if transaction.state == 'to_capture':
-                    amount = record._get_transaction_to_capture_amount()
-                    transaction.capture(amount)
+        transactions = self.mapped("transaction_ids").filtered(
+            lambda r: r.state == 'to_capture')
+        for transaction in transactions:
+            transaction.capture()
 
     @api.multi
     @api.depends('transaction_ids')

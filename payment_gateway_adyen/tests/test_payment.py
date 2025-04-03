@@ -212,12 +212,12 @@ class AdyenCase(AdyenCommonCase, AdyenScenario):
         }
         if success:
             with transaction._get_provider('adyen') as provider:
-                provider.process_return(**params)
+                provider._process_return(**params)
             self._check_captured(transaction)
         else:
             with self.assertRaises(UserError):
                 with transaction._get_provider('adyen') as provider:
-                    provider.process_return(**params)
+                    provider._process_return(**params)
             self.assertIn(transaction.state, ['pending', 'failed'])
 
     def _test_card(self, card, **kwargs):

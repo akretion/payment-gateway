@@ -120,8 +120,8 @@ class PaymentService(Component):
             _logger.info('Adyen Error %s' % e)
             self._raise_error_message('undef')
 
-    def process_return(self, browser_info=None, md=None, pares=None,
-                       shopper_ip=None, **params):
+    def _process_return(self, browser_info=None, md=None, pares=None,
+                        shopper_ip=None, **params):
         result = self._http_adyen_request('authorise3d', {
             'md': md,
             'paResponse': pares,
@@ -268,7 +268,7 @@ class PaymentService(Component):
                 }
             }
 
-    def capture(self):
+    def _capture(self):
         if self.collection.external_id.isdigit():
             payload = self._prepare_capture_payload()
             charge = self._get_adyen_client().capture(request=payload)
